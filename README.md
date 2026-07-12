@@ -1,4 +1,4 @@
-# Sistema Paneles Solares - Maven
+# EnergicApps
 
 Proyecto Java migrado a Maven con estructura estándar:
 
@@ -7,7 +7,7 @@ Proyecto Java migrado a Maven con estructura estándar:
 
 ## Importar
 
-1. Abre `SistemaPanelesSolaresMaven` como proyecto Maven en tu IDE.
+1. Abre el proyecto como proyecto Maven en tu IDE.
 2. Ejecuta `mvn compile` o `mvn package`.
 3. Ejecuta `mvn exec:java` si configuras el plugin `exec` o ejecuta la clase `sistemapanelessolares.app.main`.
 
