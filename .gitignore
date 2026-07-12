@@ -1,0 +1,8 @@
+/build/
+/nbproject/
+<<<<<<< HEAD
+=======
+/target/
+.env
+*.env.local
+>>>>>>> b3c70ba4046e8a0c4f9fa5182848caab0af120db
