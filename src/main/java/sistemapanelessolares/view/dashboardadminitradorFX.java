@@ -69,10 +69,11 @@ public class dashboardadminitradorFX {
         tabPane.setStyle("-fx-background-color: " + C_BG + "; -fx-tab-min-height: 40px;");
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
-        Tab tabPaneles  = new Tab("⚡  Catálogo de Paneles", crearPanelPaneles());
-        Tab tabUsuarios = new Tab("👥  Gestión de Usuarios",  crearPanelUsuarios());
+        Tab tabPaneles = new Tab("⚡  Catálogo de Paneles", crearPanelPaneles());
+        Tab tabClientes = new Tab("👥  Clientes", crearPanelUsuarios());
+        Tab tabCitas = new PestanaCitasAdminFX(solarServicio).crearPestana();
 
-        tabPane.getTabs().addAll(tabPaneles, tabUsuarios);
+        tabPane.getTabs().addAll(tabPaneles, tabClientes, tabCitas);
         root.setCenter(tabPane);
 
         Scene scene = new Scene(root, 1400, 800);
@@ -282,9 +283,9 @@ public class dashboardadminitradorFX {
         VBox layout = new VBox(16);
         layout.setPadding(new Insets(20));
 
-        Label titulo = new Label("Gestión de Usuarios");
+        Label titulo = new Label("Gestión de Clientes");
         titulo.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: " + C_TEXT + ";");
-        Label sub = new Label("Visualiza y administra el estado de las cuentas de usuario");
+        Label sub = new Label("Visualiza y administra el estado de los clientes asociados a la empresa");
         sub.setStyle("-fx-font-size: 13px; -fx-text-fill: " + C_TEXT_S + ";");
 
         // Stats rápidas

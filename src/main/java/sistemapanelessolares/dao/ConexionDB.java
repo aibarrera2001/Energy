@@ -2,29 +2,37 @@ package sistemapanelessolares.dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 
 public class ConexionDB {
 
-    private static final String URL  = "jdbc:postgresql://aws-1-us-west-2.pooler.supabase.com:5432/postgres?sslmode=require";
-    private static final String USER = "postgres.bucmamoocnznaiocvpaz";
-    private static final String PASS = "EnergiApp#2026_DB";
+    public static Connection conectar() {
+        try {
+            Class.forName("org.postgresql.Driver");
 
-   public static Connection conectar() {
-    try {
-        Class.forName("org.postgresql.Driver");
-        Connection conn = DriverManager.getConnection(URL, USER, PASS);
-        System.out.println("Conexion exitosa a Supabase");
-        return conn;
-    } catch (Exception e) {
-        System.out.println("Error de conexion: " + e.getMessage());
-        e.printStackTrace(); 
-        return null;
-    }
-}
-    public static void main(String[] args) {
-        Connection conn = conectar();
-        if (conn != null) {
-            System.out.println("Base de datos lista.");
+            String url = System.getenv().getOrDefault("DB_URL", "jdbc:postgresql://localhost:5432/solar_caribe");
+            String user = System.getenv().getOrDefault("DB_USER", "postgres");
+            String password = System.getenv().getOrDefault("DB_PASSWORD", "root");
+
+            return DriverManager.getConnection(url, user, password);
+        } catch (ClassNotFoundException e) {
+            System.err.println("No se encontro el driver de PostgreSQL en el classpath.");
+            return null;
+        } catch (SQLException e) {
+            System.err.println("No se pudo conectar a la base de datos: " + e.getMessage());
+            return null;
         }
+    }
+
+    public static String getStatus() {
+        String url = System.getenv().getOrDefault("DB_URL", "jdbc:postgresql://localhost:5432/solar_caribe");
+        String user = System.getenv().getOrDefault("DB_USER", "postgres");
+        String password = System.getenv().getOrDefault("DB_PASSWORD", "root");
+
+        if (System.getenv("DB_URL") == null || System.getenv("DB_USER") == null || System.getenv("DB_PASSWORD") == null) {
+            return "Base de datos configurada con los valores por defecto: " + url + " | usuario: " + user + " | password: root";
+        }
+
+        return "Base de datos preparada para: " + url + " | usuario: " + user;
     }
 }

@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EnergiApp | Registro Usuario</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .registration-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+      }
+
+      .registration-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px 30px;
+        text-align: center;
+      }
+
+      .registration-header h1 {
+        font-size: 28px;
+        margin-bottom: 10px;
+      }
+
+      .registration-header p {
+        font-size: 14px;
+        opacity: 0.9;
+      }
+
+      .registration-form {
+        padding: 40px;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+
+      .form-row.full {
+        grid-template-columns: 1fr;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .form-group label {
+        font-size: 13px;
+        font-weight: 500;
+        color: #555;
+        margin-bottom: 8px;
+      }
+
+      .form-group input {
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        transition: all 0.3s;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .form-group.required label::after {
+        content: ' *';
+        color: #e74c3c;
+      }
+
+      .help-text {
+        font-size: 12px;
+        color: #999;
+        margin-top: 4px;
+      }
+
+      .password-requirements {
+        background: #f5f5f5;
+        border-left: 4px solid #667eea;
+        padding: 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 20px;
+      }
+
+      .requirement {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 4px 0;
+      }
+
+      .requirement.met {
+        color: #27ae60;
+      }
+
+      .requirement.unmet {
+        color: #e74c3c;
+      }
+
+      .check-icon {
+        font-weight: bold;
+      }
+
+      .info-box {
+        background: #e8f4f8;
+        border-left: 4px solid #667eea;
+        padding: 12px;
+        border-radius: 4px;
+        font-size: 13px;
+        color: #555;
+        margin-bottom: 20px;
+      }
+
+      .form-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 30px;
+      }
+
+      .btn-submit {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 14px 30px;
+        border-radius: 6px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+      }
+
+      .btn-cancel {
+        background: #f0f0f0;
+        color: #333;
+        border: none;
+        padding: 14px 30px;
+        border-radius: 6px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .btn-cancel:hover {
+        background: #e0e0e0;
+      }
+
+      .login-link {
+        text-align: center;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+      }
+
+      .login-link a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+      }
+
+      .login-link a:hover {
+        text-decoration: underline;
+      }
+
+      .error-message {
+        background: #ffebee;
+        color: #c62828;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        display: none;
+      }
+
+      .error-message.show {
+        display: block;
+      }
+
+      .success-message {
+        background: #e8f5e9;
+        color: #2e7d32;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        display: none;
+      }
+
+      .success-message.show {
+        display: block;
+      }
+
+      @media (max-width: 600px) {
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+          grid-template-columns: 1fr;
+        }
+
+        .registration-form {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="registration-container">
+      <div class="registration-header">
+        <h1>⚡ Crear Cuenta</h1>
+        <p>Únete a EnergiApp y comienza a ahorrar</p>
+      </div>
+
+      <form class="registration-form" id="registroForm">
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <div class="info-box">
+          💡 Crea tu cuenta para acceder a análisis de energía solar personalizados y calcular tus ahorros.
+        </div>
+
+        <!-- Datos Personales -->
+        <div class="form-row">
+          <div class="form-group required">
+            <label for="nombre">Nombre</label>
+            <input type="text" id="nombre" name="nombre" placeholder="Juan" required />
+          </div>
+          <div class="form-group required">
+            <label for="apellido">Apellido</label>
+            <input type="text" id="apellido" name="apellido" placeholder="Pérez" required />
+          </div>
+        </div>
+
+        <div class="form-row full">
+          <div class="form-group required">
+            <label for="correo">Correo Electrónico</label>
+            <input type="email" id="correo" name="correo" placeholder="tu@email.com" required />
+            <small class="help-text">Usa este correo para iniciar sesión</small>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group required">
+            <label for="ciudad">Ciudad</label>
+            <input type="text" id="ciudad" name="ciudad" placeholder="Valledupar" required />
+          </div>
+          <div class="form-group">
+            <label for="telefono">Teléfono (opcional)</label>
+            <input type="tel" id="telefono" name="telefono" placeholder="+57 300 1234567" />
+          </div>
+        </div>
+
+        <!-- Contraseña -->
+        <div class="form-row full">
+          <div class="form-group required">
+            <label for="contrasena">Contraseña</label>
+            <input 
+              type="password" 
+              id="contrasena" 
+              name="contrasena" 
+              placeholder="••••••••" 
+              required 
+              onkeyup="verificarContrasena()"
+            />
+          </div>
+        </div>
+
+        <div class="password-requirements">
+          <strong>Requisitos de contraseña:</strong>
+          <div class="requirement unmet" id="req-length">
+            <span class="check-icon">○</span> Mínimo 8 caracteres
+          </div>
+          <div class="requirement unmet" id="req-upper">
+            <span class="check-icon">○</span> Una letra mayúscula (A-Z)
+          </div>
+          <div class="requirement unmet" id="req-lower">
+            <span class="check-icon">○</span> Una letra minúscula (a-z)
+          </div>
+          <div class="requirement unmet" id="req-number">
+            <span class="check-icon">○</span> Un número (0-9)
+          </div>
+        </div>
+
+        <div class="form-row full">
+          <div class="form-group required">
+            <label for="contrasenaConf">Confirmar Contraseña</label>
+            <input 
+              type="password" 
+              id="contrasenaConf" 
+              name="contrasenaConf" 
+              placeholder="••••••••" 
+              required 
+            />
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" onclick="window.location.href='usuario-login.html'">
+            Volver
+          </button>
+          <button type="submit" class="btn-submit">Crear Cuenta</button>
+        </div>
+
+        <div class="login-link">
+          ¿Ya tienes cuenta? <a href="usuario-login.html">Inicia sesión aquí</a>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      function verificarContrasena() {
+        const contrasena = document.getElementById('contrasena').value;
+
+        const minimo8 = contrasena.length >= 8;
+        const tieneMayuscula = /[A-Z]/.test(contrasena);
+        const tieneMinuscula = /[a-z]/.test(contrasena);
+        const tieneNumero = /[0-9]/.test(contrasena);
+
+        actualizarRequisito('req-length', minimo8);
+        actualizarRequisito('req-upper', tieneMayuscula);
+        actualizarRequisito('req-lower', tieneMinuscula);
+        actualizarRequisito('req-number', tieneNumero);
+      }
+
+      function actualizarRequisito(id, cumplido) {
+        const elemento = document.getElementById(id);
+        if (cumplido) {
+          elemento.classList.remove('unmet');
+          elemento.classList.add('met');
+          elemento.querySelector('.check-icon').textContent = '✓';
+        } else {
+          elemento.classList.remove('met');
+          elemento.classList.add('unmet');
+          elemento.querySelector('.check-icon').textContent = '○';
+        }
+      }
+
+      document.getElementById('registroForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const nombre = document.getElementById('nombre').value.trim();
+        const apellido = document.getElementById('apellido').value.trim();
+        const correo = document.getElementById('correo').value.trim();
+        const ciudad = document.getElementById('ciudad').value.trim();
+        const telefono = document.getElementById('telefono').value.trim();
+        const contrasena = document.getElementById('contrasena').value;
+        const contrasenaConf = document.getElementById('contrasenaConf').value;
+        const errorDiv = document.getElementById('errorMessage');
+        const successDiv = document.getElementById('successMessage');
+
+        // Validaciones
+        if (!nombre || !apellido || !correo || !ciudad || !contrasena) {
+          mostrarError('Por favor completa todos los campos obligatorios');
+          return;
+        }
+
+        if (contrasena !== contrasenaConf) {
+          mostrarError('Las contraseñas no coinciden');
+          return;
+        }
+
+        if (contrasena.length < 8) {
+          mostrarError('La contraseña debe tener al menos 8 caracteres');
+          return;
+        }
+
+        if (!contrasena.match(/[A-Z]/)) {
+          mostrarError('La contraseña debe contener una mayúscula');
+          return;
+        }
+
+        if (!contrasena.match(/[a-z]/)) {
+          mostrarError('La contraseña debe contener una minúscula');
+          return;
+        }
+
+        if (!contrasena.match(/[0-9]/)) {
+          mostrarError('La contraseña debe contener un número');
+          return;
+        }
+
+        // Crear objeto con datos del registro
+        const datosRegistro = {
+          nombre: nombre,
+          apellido: apellido,
+          correo: correo,
+          ciudad: ciudad,
+          telefono: telefono,
+          contrasena: contrasena
+        };
+
+        // Enviar al servidor
+        fetch('/api/usuarios/registrar', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(datosRegistro)
+        })
+        .then(response => {
+          if (!response.ok) {
+            return response.json().then(data => Promise.reject(data));
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.exito) {
+            mostrarError('');
+            successDiv.textContent = '✓ Cuenta creada exitosamente. Serás redirigido...';
+            successDiv.classList.add('show');
+            
+            setTimeout(() => {
+              window.location.href = 'usuario-login.html';
+            }, 1500);
+          } else {
+            mostrarError(data.mensaje || 'Error al registrar');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          mostrarError(error.mensaje || 'Error de conexión con el servidor');
+        });
+      });
+
+      function mostrarError(mensaje) {
+        const errorDiv = document.getElementById('errorMessage');
+        const successDiv = document.getElementById('successMessage');
+        if (mensaje) {
+          errorDiv.textContent = mensaje;
+          errorDiv.classList.add('show');
+          successDiv.classList.remove('show');
+        } else {
+          errorDiv.classList.remove('show');
+        }
+      }
+    </script>
+  </body>
+</html>

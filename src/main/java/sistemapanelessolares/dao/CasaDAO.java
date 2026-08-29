@@ -2,7 +2,7 @@ package sistemapanelessolares.dao;
 
 import sistemapanelessolares.dominio.Apartamento;
 import sistemapanelessolares.dominio.Casa;
-import sistemapanelessolares.dominio.CasaUnifamiliar;
+import sistemapanelessolares.dominio.*;
 import sistemapanelessolares.dominio.Edificio;
 import java.sql.*;
 import java.util.ArrayList;

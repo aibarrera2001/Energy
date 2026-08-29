@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EnergiApp | Admin Reportes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="dashboard-body">
+    <div class="dashboard-shell">
+      <aside class="sidebar admin-sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-mark">⚡</div>
+          <div>
+            <h3>EnergiApp</h3>
+            <small>Administrador</small>
+          </div>
+        </div>
+
+        <nav class="nav-menu">
+          <a href="admin-dashboard.html">🏠 Dashboard</a>
+          <a href="admin-usuarios.html">👥 Usuarios</a>
+          <a href="admin-paneles.html">🔋 Paneles</a>
+          <a href="admin-citas.html">📅 Citas</a>
+          <a href="admin-mantenimiento.html">🛠️ Mantenimiento</a>
+          <a class="active" href="admin-reportes.html">📊 Reportes</a>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="badge">Reportes</span>
+          <strong>$89K</strong>
+          <small>Ingresos total</small>
+        </div>
+      </aside>
+
+      <main class="dashboard-main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Estadísticas</p>
+            <h2>Reportes</h2>
+          </div>
+          <div class="actions">
+            <button class="ghost-btn">Descargar</button>
+            <a href="index.html" class="primary-btn small-btn">Salir</a>
+          </div>
+        </header>
+
+        <section class="stats-grid">
+          <article class="stat-card accent">
+            <span>Ingresos</span>
+            <strong>$89K</strong>
+            <small>Este trimestre</small>
+          </article>
+          <article class="stat-card">
+            <span>Ahorrado</span>
+            <strong>$46K</strong>
+            <small>Clientes</small>
+          </article>
+          <article class="stat-card">
+            <span>Consumo</span>
+            <strong>14.8 MWh</strong>
+            <small>Total</small>
+          </article>
+          <article class="stat-card">
+            <span>ROI</span>
+            <strong>4.8 años</strong>
+            <small>Retorno</small>
+          </article>
+        </section>
+
+        <section class="panel table-panel">
+          <div class="panel-head">
+            <h3>Resumen ejecutivo</h3>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Indicador</th>
+                <th>Valor</th>
+                <th>Meta</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Generación total</td>
+                <td>14.8 MWh</td>
+                <td>15.0 MWh</td>
+              </tr>
+              <tr>
+                <td>Eficiencia</td>
+                <td>91.2%</td>
+                <td>92%</td>
+              </tr>
+              <tr>
+                <td>Clientes activos</td>
+                <td>1.248</td>
+                <td>1.300</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

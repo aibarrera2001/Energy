@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EnergiApp | Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="dashboard-body">
+    <div class="dashboard-shell">
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-mark">⚡</div>
+          <div>
+            <h3>EnergiApp</h3>
+            <small>Solar management</small>
+          </div>
+        </div>
+
+        <nav class="nav-menu">
+          <a class="active" href="#">🏠 Dashboard</a>
+          <a href="#">👤 Usuarios</a>
+          <a href="#">🏡 Propiedades</a>
+          <a href="#">📊 Reportes</a>
+          <a href="#">⚙️ Configuración</a>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="badge">Energía</span>
+          <strong>18.4 kWh</strong>
+          <small>Generación hoy</small>
+        </div>
+      </aside>
+
+      <main class="dashboard-main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Panel general</p>
+            <h2>Resumen del sistema</h2>
+          </div>
+          <div class="actions">
+            <button class="ghost-btn">Exportar</button>
+            <a href="index.html" class="primary-btn small-btn">Salir</a>
+          </div>
+        </header>
+
+        <section class="stats-grid">
+          <article class="stat-card accent">
+            <span>Paneles activos</span>
+            <strong>148</strong>
+            <small>+12% vs mes anterior</small>
+          </article>
+          <article class="stat-card">
+            <span>Consumo</span>
+            <strong>92.8 kWh</strong>
+            <small>Promedio diario</small>
+          </article>
+          <article class="stat-card">
+            <span>Ingresos</span>
+            <strong>$2.480</strong>
+            <small>Est. este mes</small>
+          </article>
+          <article class="stat-card">
+            <span>Eficiencia</span>
+            <strong>87.5%</strong>
+            <small>Rendimiento</small>
+          </article>
+        </section>
+
+        <section class="content-grid">
+          <div class="panel large-panel">
+            <div class="panel-head">
+              <h3>Producción energética</h3>
+              <span>Últimos 7 días</span>
+            </div>
+            <div class="chart-bars">
+              <div><span style="height: 55%"></span></div>
+              <div><span style="height: 65%"></span></div>
+              <div><span style="height: 78%"></span></div>
+              <div><span style="height: 70%"></span></div>
+              <div><span style="height: 92%"></span></div>
+              <div><span style="height: 88%"></span></div>
+              <div><span style="height: 100%"></span></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Estado del sistema</h3>
+            </div>
+            <ul class="status-list">
+              <li><span class="dot ok"></span> Inversor principal online</li>
+              <li><span class="dot ok"></span> Batería cargada al 80%</li>
+              <li><span class="dot warn"></span> Mantenimiento programado</li>
+              <li><span class="dot ok"></span> Conexión segura</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="panel table-panel">
+          <div class="panel-head">
+            <h3>Últimas viviendas</h3>
+            <a href="#">Ver todas</a>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Ubicación</th>
+                <th>Generación</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>María Pérez</td>
+                <td>Valledupar</td>
+                <td>4.8 kWh</td>
+                <td><span class="tag ok">Activo</span></td>
+              </tr>
+              <tr>
+                <td>Andrés López</td>
+                <td>La Jagua</td>
+                <td>3.9 kWh</td>
+                <td><span class="tag ok">Activo</span></td>
+              </tr>
+              <tr>
+                <td>Fernanda Ruiz</td>
+                <td>Aguachica</td>
+                <td>2.7 kWh</td>
+                <td><span class="tag warn">Revisión</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

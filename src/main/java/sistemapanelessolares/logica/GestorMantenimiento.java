@@ -53,8 +53,9 @@ public class GestorMantenimiento {
         mantenimientoDAO.actualizar(m);
 
         Mantenimiento siguiente = new Mantenimiento(
-                m.getUsuario(), m.getCasa(), "PREVENTIVO",
+                m.getNombreCliente(), m.getCasa(), "PREVENTIVO",
                 m.getFechaProximoMantenimiento(), "Mantenimiento preventivo periódico");
+        siguiente.setEmpresaId(m.getEmpresaId());
         mantenimientoDAO.guardar(siguiente);
 
         return m;

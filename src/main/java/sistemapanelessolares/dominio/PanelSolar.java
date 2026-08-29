@@ -3,6 +3,7 @@ package sistemapanelessolares.dominio;
 public class PanelSolar {
 
     private int id;
+    private int empresaId;
     private String nombre;
     private String tipo;              // Monocristalino, Policristalino, Thin-Film, etc.
     private double potenciaWatts;    // Potencia pico en vatios (Wp)
@@ -84,6 +85,9 @@ public class PanelSolar {
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
+
+    public int getEmpresaId() { return empresaId; }
+    public void setEmpresaId(int empresaId) { this.empresaId = empresaId; }
 
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }

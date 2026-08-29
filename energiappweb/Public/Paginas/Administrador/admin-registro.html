@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EnergiApp | Registro de Empresa</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="target\Paginas\HojasStyles\Administrador\Style\registroAdminStyle.css" />
+  </head>
+  <body>
+    <div class="registration-container">
+      <div class="registration-header">
+        <h1>⚡ Registro de Empresa</h1>
+        <p>Costa Caribeña - EnergiApp</p>
+      </div>
+
+      <form class="registration-form" id="registroForm">
+        <!-- DATOS BÁSICOS DE LA EMPRESA -->
+        <div class="form-section">
+          <div class="section-title">Datos Básicos de la Empresa</div>
+          <span class="region-badge">Región: Costa Caribeña</span>
+
+          <div class="form-row">
+            <div class="form-group required">
+              <label for="nombre">Nombre de la empresa</label>
+              <input type="text" id="nombre" name="nombre" placeholder="Solar Caribe SAS" required />
+            </div>
+            <div class="form-group required">
+              <label for="nit">NIT</label>
+              <input type="text" id="nit" name="nit" placeholder="900123456-1" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group required">
+              <label for="ciudad">Ciudad</label>
+              <input type="text" id="ciudad" name="ciudad" placeholder="Valledupar" required />
+            </div>
+            <div class="form-group required">
+              <label for="direccion">Dirección</label>
+              <input type="text" id="direccion" name="direccion" placeholder="Cra 7 #12-34" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group required">
+              <label for="telefono">Teléfono de contacto</label>
+              <input type="tel" id="telefono" name="telefono" placeholder="+57 3001234567" required />
+            </div>
+            <div class="form-group required">
+              <label for="email">Email de la empresa</label>
+              <input type="email" id="email" name="email" placeholder="contacto@empresa.com" required />
+            </div>
+          </div>
+        </div>
+
+        <!-- INVENTARIO DE PANELES -->
+        <div class="form-section">
+          <div class="section-title">Inventario de Paneles Solares</div>
+          <div class="info-box">
+            📋 Agregue los modelos de paneles que su empresa maneja. Especifique cantidad, tipo y precio.
+          </div>
+
+          <div id="panelesList">
+            <div class="panel-item">
+              <input type="text" placeholder="Nombre del modelo" class="panel-nombre" />
+              <input type="number" placeholder="Cantidad" class="panel-cantidad" min="1" />
+              <input type="number" placeholder="Precio ($)" class="panel-precio" step="0.01" min="0" />
+              <button type="button" class="btn-remove" onclick="removerPanel(this)">Eliminar</button>
+            </div>
+          </div>
+
+          <button type="button" class="btn-add-panel" onclick="agregarPanel()">+ Agregar Panel</button>
+        </div>
+
+        <!-- DESCRIPCIONES Y DIFERENCIADORES -->
+        <div class="form-section">
+          <div class="section-title">Propuesta de Valor</div>
+
+          <div class="form-row full">
+            <div class="form-group required">
+              <label for="aportes">¿Qué aporta su empresa?</label>
+              <textarea id="aportes" name="aportes" placeholder="Describa los servicios y soluciones que ofrece su empresa..." required></textarea>
+            </div>
+          </div>
+
+          <div class="form-row full">
+            <div class="form-group required">
+              <label for="diferenciadores">¿En qué destaca? (Genere confianza en clientes)</label>
+              <textarea id="diferenciadores" name="diferenciadores" placeholder="Experiencia, certificaciones, garantías, equipo técnico, etc..." required></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- ADMINISTRADOR Y CREDENCIALES -->
+        <div class="form-section">
+          <div class="section-title">Administrador de la Empresa</div>
+          <div class="info-box">
+            🔐 Estos datos serán usados para que el administrador inicie sesión en la plataforma.
+          </div>
+
+          <div class="form-row full">
+            <div class="form-group required">
+              <label for="correoAdmin">Email del administrador</label>
+              <input type="email" id="correoAdmin" name="correoAdmin" placeholder="admin@energiapp.com" pattern=".*@energiapp\.com$" required />
+              <small style="color: #999; margin-top: 4px;">Debe terminar en @energiapp.com</small>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group required">
+              <label for="nombreAdmin">Nombre del administrador</label>
+              <input type="text" id="nombreAdmin" name="nombreAdmin" placeholder="Ana Martínez" required />
+            </div>
+            <div class="form-group required">
+              <label for="telefonoAdmin">Teléfono del administrador</label>
+              <input type="tel" id="telefonoAdmin" name="telefonoAdmin" placeholder="+57 3007654321" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group required">
+              <label for="contrasena">Contraseña</label>
+              <input type="password" id="contrasena" name="contrasena" placeholder="••••••••" minlength="8" required />
+              <small style="color: #999; margin-top: 4px;">Mínimo 8 caracteres</small>
+            </div>
+            <div class="form-group required">
+              <label for="contrasenaConf">Confirmar contraseña</label>
+              <input type="password" id="contrasenaConf" name="contrasenaConf" placeholder="••••••••" minlength="8" required />
+            </div>
+          </div>
+        </div>
+
+        <!-- ACCIONES -->
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" onclick="window.location.href='admin-login.html'">
+            Cancelar
+          </button>
+          <button type="submit" class="btn-submit">Registrar Empresa</button>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      function agregarPanel() {
+        const panelesList = document.getElementById('panelesList');
+        const newPanel = document.createElement('div');
+        newPanel.className = 'panel-item';
+        newPanel.innerHTML = `
+          <input type="text" placeholder="Nombre del modelo" class="panel-nombre" />
+          <input type="number" placeholder="Cantidad" class="panel-cantidad" min="1" />
+          <input type="number" placeholder="Precio ($)" class="panel-precio" step="0.01" min="0" />
+          <button type="button" class="btn-remove" onclick="removerPanel(this)">Eliminar</button>
+        `;
+        panelesList.appendChild(newPanel);
+      }
+
+      function removerPanel(button) {
+        button.parentElement.remove();
+      }
+
+      document.getElementById('registroForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Validar que las contraseñas coincidan
+        if (document.getElementById('contrasena').value !== document.getElementById('contrasenaConf').value) {
+          alert('Las contraseñas no coinciden');
+          return;
+        }
+
+        // Validar email admin
+        const correoAdmin = document.getElementById('correoAdmin').value;
+        if (!correoAdmin.endsWith('@energiapp.com')) {
+          alert('El correo del administrador debe terminar en @energiapp.com');
+          return;
+        }
+
+        // Recolectar paneles
+        const paneles = [];
+        document.querySelectorAll('.panel-item').forEach(item => {
+          const nombre = item.querySelector('.panel-nombre').value;
+          const cantidad = item.querySelector('.panel-cantidad').value;
+          const precio = item.querySelector('.panel-precio').value;
+
+          if (nombre && cantidad && precio) {
+            paneles.push({
+              nombre: nombre,
+              cantidad: parseInt(cantidad),
+              precio: parseFloat(precio)
+            });
+          }
+        });
+
+        // Crear objeto con todos los datos
+        const datosRegistro = {
+          nombre: document.getElementById('nombre').value,
+          nit: document.getElementById('nit').value,
+          ciudad: document.getElementById('ciudad').value,
+          direccion: document.getElementById('direccion').value,
+          telefono: document.getElementById('telefono').value,
+          email: document.getElementById('email').value,
+          paneles: paneles,
+          aportes: document.getElementById('aportes').value,
+          diferenciadores: document.getElementById('diferenciadores').value,
+          correoAdmin: document.getElementById('correoAdmin').value,
+          nombreAdmin: document.getElementById('nombreAdmin').value,
+          telefonoAdmin: document.getElementById('telefonoAdmin').value,
+          contrasena: document.getElementById('contrasena').value,
+          region: 'COSTA_CARIBEÑA'
+        };
+
+        // Aquí se enviarían los datos al servidor
+        console.log('Datos a registrar:', datosRegistro);
+        alert('Empresa registrada exitosamente. (Esto es un formulario demo - se necesita backend)');
+        // window.location.href = 'admin-login.html';
+      });
+    </script>
+  </body>
+</html>

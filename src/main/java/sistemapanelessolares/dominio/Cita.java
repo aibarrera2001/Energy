@@ -5,29 +5,28 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 /**
- * Representa una cita/visita técnica agendada por un usuario:
- * instalación de paneles, mantenimiento, inspección o cotización en sitio.
+ * Cita operativa de la empresa para atención a clientes y propiedades.
  */
 public class Cita {
 
     private int idCita;
-    private Usuario usuario;
+    private int empresaId;
+    private String nombreCliente;
     private Casa casa;
-    private PanelSolar panelSolar;       // Puede ser null si aún no hay panel elegido (ej. inspección)
+    private PanelSolar panelSolar;
     private LocalDate fecha;
     private LocalTime hora;
-    private String tipoServicio;         // "INSTALACION" | "MANTENIMIENTO" | "INSPECCION" | "COTIZACION"
-    private String estado;               // "PENDIENTE" | "CONFIRMADA" | "CANCELADA" | "COMPLETADA" | "REPROGRAMADA"
+    private String tipoServicio;
+    private String estado;
     private String direccionVisita;
     private String notas;
     private String tecnicoAsignado;
     private String motivoCancelacion;
     private final LocalDateTime fechaCreacion;
 
-    // CONSTRUCTOR 1 (Sin ID): para agendar una nueva cita
-    public Cita(Usuario usuario, Casa casa, PanelSolar panelSolar, LocalDate fecha,
+    public Cita(String nombreCliente, Casa casa, PanelSolar panelSolar, LocalDate fecha,
                 LocalTime hora, String tipoServicio, String notas) {
-        this.usuario = usuario;
+        this.nombreCliente = nombreCliente;
         this.casa = casa;
         this.panelSolar = panelSolar;
         this.fecha = fecha;
@@ -39,12 +38,11 @@ public class Cita {
         this.fechaCreacion = LocalDateTime.now();
     }
 
-    // CONSTRUCTOR 2 (Con ID): para reconstruir la cita desde la base de datos
-    public Cita(int idCita, Usuario usuario, Casa casa, PanelSolar panelSolar, LocalDate fecha,
+    public Cita(int idCita, String nombreCliente, Casa casa, PanelSolar panelSolar, LocalDate fecha,
                 LocalTime hora, String tipoServicio, String estado, String direccionVisita,
                 String notas, String tecnicoAsignado, LocalDateTime fechaCreacion) {
         this.idCita = idCita;
-        this.usuario = usuario;
+        this.nombreCliente = nombreCliente;
         this.casa = casa;
         this.panelSolar = panelSolar;
         this.fecha = fecha;
@@ -56,10 +54,6 @@ public class Cita {
         this.tecnicoAsignado = tecnicoAsignado;
         this.fechaCreacion = (fechaCreacion != null) ? fechaCreacion : LocalDateTime.now();
     }
-
-    // ----------------------------------------------------------------
-    //  Acciones sobre el ciclo de vida de la cita
-    // ----------------------------------------------------------------
 
     public void confirmar(String tecnicoAsignado) {
         this.estado = "CONFIRMADA";
@@ -81,15 +75,14 @@ public class Cita {
         this.estado = "REPROGRAMADA";
     }
 
-    // ----------------------------------------------------------------
-    //  Getters y Setters
-    // ----------------------------------------------------------------
-
     public int getIdCita() { return idCita; }
     public void setIdCita(int idCita) { this.idCita = idCita; }
 
-    public Usuario getUsuario() { return usuario; }
-    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
+    public int getEmpresaId() { return empresaId; }
+    public void setEmpresaId(int empresaId) { this.empresaId = empresaId; }
+
+    public String getNombreCliente() { return nombreCliente; }
+    public void setNombreCliente(String nombreCliente) { this.nombreCliente = nombreCliente; }
 
     public Casa getCasa() { return casa; }
     public void setCasa(Casa casa) { this.casa = casa; }
@@ -127,7 +120,7 @@ public class Cita {
     public String toString() {
         return "Cita{" +
                 "id=" + idCita +
-                ", usuario='" + (usuario != null ? usuario.getNombre() : "N/A") + '\'' +
+                ", cliente='" + nombreCliente + '\'' +
                 ", tipoServicio='" + tipoServicio + '\'' +
                 ", fecha=" + fecha +
                 ", hora=" + hora +

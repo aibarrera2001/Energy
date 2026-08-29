@@ -6,7 +6,6 @@ import java.util.List;
 import sistemapanelessolares.dao.PanelSolarDAO;
 import sistemapanelessolares.dominio.Casa;
 import sistemapanelessolares.dominio.PanelSolar;
-import sistemapanelessolares.dominio.Usuario;
 import sistemapanelessolares.excepciones.RecursoNoEncontradoException;
 import sistemapanelessolares.excepciones.ValidacionNegocioException;
 
@@ -20,25 +19,21 @@ import sistemapanelessolares.excepciones.ValidacionNegocioException;
 public class SolarService {
 
     private final GestorPaneles gestorPaneles;
-    private final autentificacion autenticacion;
-    private final ChatController chatController;
     private final GestorCitas gestorCitas;
     private final GestorMantenimiento gestorMantenimiento;
+    private final CasaService casaService;
 
     // ── Constructor sin BD ────────────────────────────────────────────
     public SolarService() {
         this.gestorPaneles = new GestorPaneles();
         cargarPanelesSemilla(this.gestorPaneles);
-        this.autenticacion = new autentificacion();
-        this.chatController = new ChatController(this);
         this.gestorCitas = new GestorCitas();
         this.gestorMantenimiento = new GestorMantenimiento();
+        this.casaService = new CasaService();
     }
 
     // ── Constructor con BD ────────────────────────────────────────────
     public SolarService(Connection conexionDB) {
-        this.autenticacion = new autentificacion();
-
         GestorPaneles gp = new GestorPaneles();
         try {
             PanelSolarDAO repo = new PanelSolarDAO();
@@ -51,10 +46,10 @@ public class SolarService {
         } catch (Exception e) {
             cargarPanelesSemilla(gp);
         }
-        this.gestorPaneles  = gp;
-        this.chatController = new ChatController(this);
+        this.gestorPaneles = gp;
         this.gestorCitas = new GestorCitas();
         this.gestorMantenimiento = new GestorMantenimiento();
+        this.casaService = new CasaService();
     }
 
     // ── Catálogo ──────────────────────────────────────────────────────
@@ -77,67 +72,56 @@ public class SolarService {
     // ── Resúmenes solares ─────────────────────────────────────────────
 
     /**
-     * @throws ValidacionNegocioException si el usuario no tiene panel seleccionado
-     * @throws RecursoNoEncontradoException si el índice de casa no existe
+     * @throws ValidacionNegocioException si no hay panel seleccionado
+     * @throws RecursoNoEncontradoException si la casa no existe
      */
-    public String generarResumenSolar(Usuario usuario, int indiceCasa) {
-        if (usuario.getPanelSeleccionado() == null) {
-            throw new ValidacionNegocioException("El usuario no tiene un panel seleccionado.");
+    public String generarResumenSolar(Casa casa, PanelSolar panelSeleccionado) {
+        if (panelSeleccionado == null) {
+            throw new ValidacionNegocioException("No se ha seleccionado un panel solar.");
         }
-        if (usuario.getCasas().isEmpty() || indiceCasa >= usuario.getCasas().size()) {
-            throw new RecursoNoEncontradoException("No existe una casa en el índice " + indiceCasa + ".");
+        if (casa == null) {
+            throw new RecursoNoEncontradoException("No existe una casa para generar el resumen.");
         }
-        Casa casa = usuario.getCasas().get(indiceCasa);
-        double costoInst = usuario.getPanelSeleccionado().getCostoInstalacion();
-        return new CalculadoraPanels(casa, usuario.getPanelSeleccionado(), costoInst).generarResumen();
+        double costoInst = panelSeleccionado.getCostoInstalacion();
+        return new CalculadoraPanels(casa, panelSeleccionado, costoInst).generarResumen();
     }
 
     /**
-     * @throws ValidacionNegocioException si el usuario no tiene panel seleccionado o no tiene casas
+     * @throws ValidacionNegocioException si no hay panel seleccionado o no hay casas
      */
-    public String generarResumenTodasLasCasas(Usuario usuario) {
-        if (usuario.getPanelSeleccionado() == null) {
-            throw new ValidacionNegocioException("El usuario no tiene un panel seleccionado.");
+    public String generarResumenTodasLasCasas(List<Casa> casas, PanelSolar panelSeleccionado) {
+        if (panelSeleccionado == null) {
+            throw new ValidacionNegocioException("No se ha seleccionado un panel solar.");
         }
-        if (usuario.getCasas().isEmpty()) {
-            throw new ValidacionNegocioException("El usuario no tiene casas registradas.");
+        if (casas == null || casas.isEmpty()) {
+            throw new ValidacionNegocioException("No hay casas registradas para resumir.");
         }
-        double costoInst = usuario.getPanelSeleccionado().getCostoInstalacion();
+        double costoInst = panelSeleccionado.getCostoInstalacion();
         StringBuilder sb = new StringBuilder();
-        sb.append("=== Resumenes de ").append(usuario.getNombre())
-          .append(" ").append(usuario.getApellido()).append(" ===\n\n");
-        for (int i = 0; i < usuario.getCasas().size(); i++) {
+        sb.append("=== Resumenes del sistema solar ===\n\n");
+        for (int i = 0; i < casas.size(); i++) {
             sb.append(">>> Casa ").append(i + 1).append(":\n");
             sb.append(new CalculadoraPanels(
-                    usuario.getCasas().get(i),
-                    usuario.getPanelSeleccionado(), costoInst).generarResumen()).append("\n\n");
+                    casas.get(i),
+                    panelSeleccionado, costoInst).generarResumen()).append("\n\n");
         }
         return sb.toString();
     }
 
-    public String generarResumenTodasLasCasas(Usuario usuario, double costoAdicional) {
-        return generarResumenTodasLasCasas(usuario);
+    public String generarResumenTodasLasCasas(List<Casa> casas, PanelSolar panelSeleccionado, double costoAdicional) {
+        return generarResumenTodasLasCasas(casas, panelSeleccionado);
     }
 
-    public double getConsumoTotalMensualKWh(Usuario usuario) {
+    public double getConsumoTotalMensualKWh(List<Casa> casas) {
+        if (casas == null) return 0;
         double total = 0;
-        for (Casa casa : usuario.getCasas()) total += casa.getConsumoDiarioKWh() * 30;
+        for (Casa casa : casas) total += casa.getConsumoDiarioKWh() * 30;
         return total;
     }
 
-    // ── Chat ──────────────────────────────────────────────────────────
-    public String consultarChat(String mensaje) {
-        return chatController.procesarMensaje(mensaje);
-    }
-
-    public String procesarMensajeChat(int idUsuario, String mensaje) {
-        return chatController.procesarMensaje(mensaje);
-    }
-
     // ── Getters ───────────────────────────────────────────────────────
-    public GestorPaneles   getGestorPaneles()  { return gestorPaneles; }
-    public autentificacion getAutenticacion()  { return autenticacion; }
-    public ChatController  getChatController() { return chatController; }
-    public GestorCitas         getGestorCitas()         { return gestorCitas; }
+    public GestorPaneles getGestorPaneles() { return gestorPaneles; }
+    public GestorCitas getGestorCitas() { return gestorCitas; }
     public GestorMantenimiento getGestorMantenimiento() { return gestorMantenimiento; }
+    public CasaService getCasaService() { return casaService; }
 }

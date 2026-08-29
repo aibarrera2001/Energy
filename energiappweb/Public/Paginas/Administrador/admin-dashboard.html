@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EnergiApp | Admin Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="dashboard-body">
+    <div class="dashboard-shell">
+      <aside class="sidebar admin-sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-mark">⚡</div>
+          <div>
+            <h3>EnergiApp</h3>
+            <small>Administrador</small>
+          </div>
+        </div>
+
+        <nav class="nav-menu">
+          <a class="active" href="admin-dashboard.html">🏠 Dashboard</a>
+          <a href="admin-usuarios.html">👥 Usuarios</a>
+          <a href="admin-paneles.html">🔋 Paneles</a>
+          <a href="admin-citas.html">📅 Citas</a>
+          <a href="admin-mantenimiento.html">🛠️ Mantenimiento</a>
+          <a href="admin-reportes.html">📊 Reportes</a>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="badge">Sistema</span>
+          <strong>96%</strong>
+          <small>Operación estable</small>
+        </div>
+      </aside>
+
+      <main class="dashboard-main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Panel administrativo</p>
+            <h2>Resumen general</h2>
+          </div>
+          <div class="actions">
+            <button class="ghost-btn">Exportar</button>
+            <a href="index.html" class="primary-btn small-btn">Salir</a>
+          </div>
+        </header>
+
+        <section class="stats-grid">
+          <article class="stat-card accent">
+            <span>Usuarios</span>
+            <strong>1.248</strong>
+            <small>+8% este mes</small>
+          </article>
+          <article class="stat-card">
+            <span>Casas</span>
+            <strong>528</strong>
+            <small>Activas</small>
+          </article>
+          <article class="stat-card">
+            <span>Incidencias</span>
+            <strong>24</strong>
+            <small>12 críticas</small>
+          </article>
+          <article class="stat-card">
+            <span>Eficiencia</span>
+            <strong>91.2%</strong>
+            <small>Rendimiento</small>
+          </article>
+        </section>
+
+        <section class="content-grid">
+          <div class="panel large-panel">
+            <div class="panel-head">
+              <h3>Producción total</h3>
+              <span>Últimos 7 días</span>
+            </div>
+            <div class="chart-bars">
+              <div><span style="height: 40%"></span></div>
+              <div><span style="height: 52%"></span></div>
+              <div><span style="height: 70%"></span></div>
+              <div><span style="height: 66%"></span></div>
+              <div><span style="height: 86%"></span></div>
+              <div><span style="height: 92%"></span></div>
+              <div><span style="height: 100%"></span></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Alertas</h3>
+            </div>
+            <ul class="status-list">
+              <li><span class="dot warn"></span> 12 mantenimientos pendientes</li>
+              <li><span class="dot ok"></span> 92% de sistemas online</li>
+              <li><span class="dot warn"></span> 3 contratos vencidos</li>
+              <li><span class="dot ok"></span> Cobertura normal</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="panel table-panel">
+          <div class="panel-head">
+            <h3>Clientes con mayor consumo</h3>
+            <a href="#">Ver todos</a>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Ubicación</th>
+                <th>Generación</th>
+                <th>Estadísticas</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>María Pérez</td>
+                <td>Valledupar</td>
+                <td>4.8 kWh</td>
+                <td><span class="tag ok">Excelente</span></td>
+              </tr>
+              <tr>
+                <td>Andrés López</td>
+                <td>La Jagua</td>
+                <td>3.9 kWh</td>
+                <td><span class="tag ok">Excelente</span></td>
+              </tr>
+              <tr>
+                <td>Fernanda Ruiz</td>
+                <td>Aguachica</td>
+                <td>2.7 kWh</td>
+                <td><span class="tag warn">Atención</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

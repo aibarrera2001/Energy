@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EnergiApp | Propiedades</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="dashboard-body">
+    <div class="dashboard-shell">
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-mark">⚡</div>
+          <div>
+            <h3>EnergiApp</h3>
+            <small>Usuario</small>
+          </div>
+        </div>
+
+        <nav class="nav-menu">
+          <a href="dashboard.html">🏠 Dashboard</a>
+          <a class="active" href="propiedades.html">🏡 Propiedades</a>
+          <a href="paneles.html">🔋 Paneles</a>
+          <a href="citas.html">📅 Citas</a>
+          <a href="reportes.html">📊 Reportes</a>
+          <a href="asistente.html">🤖 Asistente IA</a>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="badge">Propiedades</span>
+          <strong>3</strong>
+          <small>Casas activas</small>
+        </div>
+      </aside>
+
+      <main class="dashboard-main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Gestión</p>
+            <h2>Mis propiedades</h2>
+          </div>
+          <div class="actions">
+            <button class="ghost-btn">Nueva propiedad</button>
+            <a href="index.html" class="primary-btn small-btn">Salir</a>
+          </div>
+        </header>
+
+        <section class="cards-grid property-grid">
+          <article class="property-card">
+            <div class="property-header">
+              <span class="status-pill ok">Activa</span>
+              <span class="property-code">Casa 01</span>
+            </div>
+            <h3>Villa Los Álamos</h3>
+            <p>Valledupar, Cesar</p>
+            <ul>
+              <li>8 paneles solares</li>
+              <li>Producción: 4.8 kWh</li>
+              <li>Consumo estimado: 3.1 kWh</li>
+            </ul>
+            <button class="secondary-btn full-width">Ver detalle</button>
+          </article>
+
+          <article class="property-card">
+            <div class="property-header">
+              <span class="status-pill ok">Activa</span>
+              <span class="property-code">Casa 02</span>
+            </div>
+            <h3>Residencial El Sol</h3>
+            <p>La Jagua, Cesar</p>
+            <ul>
+              <li>6 paneles solares</li>
+              <li>Producción: 3.9 kWh</li>
+              <li>Consumo estimado: 2.7 kWh</li>
+            </ul>
+            <button class="secondary-btn full-width">Ver detalle</button>
+          </article>
+
+          <article class="property-card">
+            <div class="property-header">
+              <span class="status-pill warn">Revisión</span>
+              <span class="property-code">Casa 03</span>
+            </div>
+            <h3>Apartamento La Esperanza</h3>
+            <p>Aguachica, Cesar</p>
+            <ul>
+              <li>4 paneles solares</li>
+              <li>Producción: 2.7 kWh</li>
+              <li>Consumo estimado: 2.4 kWh</li>
+            </ul>
+            <button class="secondary-btn full-width">Ver detalle</button>
+          </article>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

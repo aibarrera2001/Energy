@@ -156,10 +156,12 @@ public class InicioSessionAdministrativoFX {
             }
         });
 
-        Button btnVolver = new Button("← Volver al inicio");
+        Button btnVolver = new Button("← Cerrar");
         btnVolver.setStyle("-fx-background-color: transparent; -fx-text-fill: " + C_TEXT_S + ";"
                 + "-fx-font-size: 12px; -fx-cursor: hand;");
-        btnVolver.setOnAction(e -> { try { new IngresoFX().start(stage); } catch (Exception ex) { ex.printStackTrace(); } });
+        btnVolver.setOnAction(e -> {
+            stage.close();
+        });
 
         right.getChildren().addAll(lblTitulo, lblSub,
                 new Region() {{ setPrefHeight(8); }},

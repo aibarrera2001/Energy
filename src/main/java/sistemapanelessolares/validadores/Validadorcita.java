@@ -11,15 +11,12 @@ public class Validadorcita {
     private static final LocalTime HORA_APERTURA = LocalTime.of(8, 0);
     private static final LocalTime HORA_CIERRE    = LocalTime.of(17, 0);
 
-    /**
-     * @throws ValidacionNegocioException si algún dato de la cita no cumple las reglas de negocio
-     */
     public static void validarCita(Cita cita) {
         if (cita == null) {
             throw new ValidacionNegocioException("La cita no puede ser nula.");
         }
-        if (cita.getUsuario() == null) {
-            throw new ValidacionNegocioException("La cita debe estar asociada a un usuario.");
+        if (cita.getNombreCliente() == null || cita.getNombreCliente().isBlank()) {
+            throw new ValidacionNegocioException("La cita debe estar asociada a un cliente o contacto.");
         }
         if (cita.getCasa() == null) {
             throw new ValidacionNegocioException("La cita debe estar asociada a una propiedad (casa/apartamento/edificio).");

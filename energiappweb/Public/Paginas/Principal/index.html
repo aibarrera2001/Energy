@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EnergiApp</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="indexStyles.css" />
+  </head>
+  <body>
+    <div class="landing-page">
+      <header class="landing-header">
+        <div class="brand-inline">
+          <div class="brand-mark">⚡</div>
+          <span>EnergiApp</span>
+        </div>
+
+        <nav class="landing-nav" aria-label="Navegación principal">
+          <a href="#importancia">Importancia</a>
+          <a href="#uso">Uso</a>
+          <a href="#beneficios">Beneficios</a>
+        </nav>
+
+        <div class="header-actions">
+          <a class="nav-link secondary" href="target/Paginas/usuario-login.html">Ingresar</a>
+          <a class="nav-link primary" href="target/Paginas/admin-login.html">Admin</a>
+        </div>
+      </header>
+
+      <main class="landing-main">
+        <section class="hero-section">
+          <div class="hero-copy">
+            <span class="eyebrow">Plataforma de energía inteligente</span>
+            <h1>La energía solar que transforma hogares, decisiones y futuro.</h1>
+            <p>
+              EnergiApp ayuda a calcular, analizar y optimizar el uso de paneles solares para
+              que cada usuario entienda cuánto puede ahorrar, cuánta energía puede generar y
+              cómo tomar decisiones más sostenibles.
+            </p>
+
+            <div class="cta-row">
+              <a class="primary-btn" href="target/Paginas/usuario-login.html">Comenzar ahora</a>
+              <a class="secondary-btn" href="#importancia">Conocer más</a>
+            </div>
+
+            <ul class="hero-metrics">
+              <li>
+                <strong>+38%</strong>
+                <span>Ahorro estimado</span>
+              </li>
+              <li>
+                <strong>24/7</strong>
+                <span>Monitoreo</span>
+              </li>
+              <li>
+                <strong>IA</strong>
+                <span>Asistencia inteligente</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="hero-visual" aria-label="Vista previa del sistema">
+            <div class="panel-card main-panel">
+              <div class="panel-header">
+                <span>Producción diaria</span>
+                <span class="chip success">+12.4%</span>
+              </div>
+              <div class="big-number">42.8 kWh</div>
+              <div class="mini-bars" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <div class="panel-card floating-panel">
+              <div class="floating-top">
+                <span class="label">Consumo</span>
+                <span class="value">31.5 kWh</span>
+              </div>
+              <div class="ring-wrap">
+                <div class="ring-chart">
+                  <span>76%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="importancia" class="info-section">
+          <div class="section-heading">
+            <span class="eyebrow small">¿Por qué es importante?</span>
+            <h2>Una herramienta clave para la transición energética.</h2>
+          </div>
+
+          <div class="feature-grid">
+            <article class="info-card">
+              <div class="info-icon">🌍</div>
+              <h3>Impacto ambiental</h3>
+              <p>
+                Reduce la dependencia de fuentes contaminantes y ayuda a construir un futuro
+                más sostenible.
+              </p>
+            </article>
+
+            <article class="info-card">
+              <div class="info-icon">💡</div>
+              <h3>Ahorro real</h3>
+              <p>
+                Permite estimar consumo, rentabilidad y retorno de inversión antes de instalar
+                paneles solares.
+              </p>
+            </article>
+
+            <article class="info-card">
+              <div class="info-icon">📊</div>
+              <h3>Toma de decisiones</h3>
+              <p>
+                Convierte datos de energía en información clara para planificar instalaciones y
+                optimizar el uso del sistema.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section id="uso" class="process-section">
+          <div class="section-heading">
+            <span class="eyebrow small">¿Cómo se usa?</span>
+            <h2>Un flujo simple para usuarios y administradores.</h2>
+          </div>
+
+          <div class="steps-grid">
+            <div class="step-card">
+              <span class="step-number">01</span>
+              <h3>Registrar datos</h3>
+              <p>Se ingresa información del usuario, la vivienda y el consumo energético.</p>
+            </div>
+
+            <div class="step-card">
+              <span class="step-number">02</span>
+              <h3>Simular</h3>
+              <p>La plataforma calcula el número ideal de paneles y su producción estimada.</p>
+            </div>
+
+            <div class="step-card">
+              <span class="step-number">03</span>
+              <h3>Optimizar</h3>
+              <p>Se revisan resultados, ahorro y decisiones para mejorar la eficiencia general.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="beneficios" class="benefit-section">
+          <div class="section-heading">
+            <span class="eyebrow small">Beneficios</span>
+            <h2>Todo lo que ofrece la plataforma.</h2>
+          </div>
+
+          <div class="benefit-list">
+            <div class="benefit-item">
+              <span>✓</span>
+              <p>Diseño claro para usuarios no técnicos.</p>
+            </div>
+            <div class="benefit-item">
+              <span>✓</span>
+              <p>Gestión eficiente de paneles, citas y reportes.</p>
+            </div>
+            <div class="benefit-item">
+              <span>✓</span>
+              <p>Monitoreo de energía con enfoque en ahorro y sostenibilidad.</p>
+            </div>
+            <div class="benefit-item">
+              <span>✓</span>
+              <p>Acceso para usuarios y administradores en una sola solución digital.</p>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="landing-footer">
+        <p>EnergiApp • Soluciones sostenibles para un mejor mañana.</p>
+      </footer>
+    </div>
+  </body>
+</html>
