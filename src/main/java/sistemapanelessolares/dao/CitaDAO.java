@@ -3,7 +3,6 @@ package sistemapanelessolares.dao;
 import sistemapanelessolares.dominio.Casa;
 import sistemapanelessolares.dominio.Cita;
 import sistemapanelessolares.dominio.PanelSolar;
-import sistemapanelessolares.dominio.Usuario;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,40 +12,38 @@ import java.util.List;
 
 public class CitaDAO {
 
-    private final UsuarioDAO usuarioDAO = new UsuarioDAO();
     private final CasaDAO casaDAO = new CasaDAO();
     private final PanelSolarDAO panelSolarDAO = new PanelSolarDAO();
 
     public void guardar(Cita cita) {
-        String sql = "INSERT INTO citas (id_usuario, id_casa, id_panel, fecha, hora, tipo_servicio, estado, "
+        String sql = "INSERT INTO citas (empresa_id, id_usuario, nombre_cliente, id_casa, id_panel, fecha, hora, tipo_servicio, estado, "
                    + "direccion_visita, notas, tecnico_asignado, fecha_creacion) "
-                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id_cita";
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id_cita";
         Connection conn = ConexionDB.conectar();
-        if (conn == null) { System.err.println("ERROR: Sin conexion a Supabase"); return; }
+        if (conn == null) { System.err.println("ERROR: Sin conexion a la base de datos"); return; }
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, cita.getUsuario().getIdUsuario());
-            if (cita.getCasa() != null) ps.setInt(2, cita.getCasa().getIdCasa()); else ps.setNull(2, Types.INTEGER);
-            if (cita.getPanelSolar() != null) ps.setInt(3, cita.getPanelSolar().getId()); else ps.setNull(3, Types.INTEGER);
-            ps.setDate(4, Date.valueOf(cita.getFecha()));
-            ps.setTime(5, Time.valueOf(cita.getHora()));
-            ps.setString(6, cita.getTipoServicio());
-            ps.setString(7, cita.getEstado());
-            ps.setString(8, cita.getDireccionVisita());
-            ps.setString(9, cita.getNotas());
-            ps.setString(10, cita.getTecnicoAsignado());
-            ps.setTimestamp(11, Timestamp.valueOf(cita.getFechaCreacion()));
+            ps.setInt(1, cita.getEmpresaId() > 0 ? cita.getEmpresaId() : 1);
+            ps.setInt(2, 0);
+            ps.setString(3, cita.getNombreCliente() != null ? cita.getNombreCliente() : "Cliente");
+            if (cita.getCasa() != null) ps.setInt(4, cita.getCasa().getIdCasa()); else ps.setNull(4, Types.INTEGER);
+            if (cita.getPanelSolar() != null) ps.setInt(5, cita.getPanelSolar().getId()); else ps.setNull(5, Types.INTEGER);
+            ps.setDate(6, Date.valueOf(cita.getFecha()));
+            ps.setTime(7, Time.valueOf(cita.getHora()));
+            ps.setString(8, cita.getTipoServicio());
+            ps.setString(9, cita.getEstado());
+            ps.setString(10, cita.getDireccionVisita());
+            ps.setString(11, cita.getNotas());
+            ps.setString(12, cita.getTecnicoAsignado());
+            ps.setTimestamp(13, Timestamp.valueOf(cita.getFechaCreacion()));
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 cita.setIdCita(rs.getInt("id_cita"));
-                System.out.println("Cita guardada con ID: " + cita.getIdCita());
             }
         } catch (Exception e) {
             System.err.println("Error al guardar cita: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
-    /** Persiste cambios de fecha/hora/estado/técnico/motivo de cancelación. */
     public boolean actualizarEstado(Cita cita) {
         String sql = "UPDATE citas SET fecha=?, hora=?, estado=?, tecnico_asignado=?, motivo_cancelacion=? WHERE id_cita=?";
         try (Connection conn = ConexionDB.conectar();
@@ -131,7 +128,6 @@ public class CitaDAO {
         return lista;
     }
 
-    /** Consulta directa a la BD para validar disponibilidad de horario (evita condiciones de carrera con caché en memoria). */
     public boolean horarioOcupado(LocalDate fecha, LocalTime hora) {
         String sql = "SELECT COUNT(*) FROM citas WHERE fecha = ? AND hora = ? AND estado <> 'CANCELADA'";
         try (Connection conn = ConexionDB.conectar();
@@ -159,9 +155,6 @@ public class CitaDAO {
     }
 
     private Cita mapear(ResultSet rs) throws SQLException {
-        int idUsuario = rs.getInt("id_usuario");
-        Usuario usuario = usuarioDAO.buscarPorId(idUsuario);
-
         int idCasaRaw = rs.getInt("id_casa");
         Casa casa = rs.wasNull() ? null : casaDAO.buscarPorId(idCasaRaw);
 
@@ -173,7 +166,7 @@ public class CitaDAO {
 
         Cita cita = new Cita(
             rs.getInt("id_cita"),
-            usuario,
+            rs.getString("nombre_cliente") != null ? rs.getString("nombre_cliente") : "Cliente",
             casa,
             panel,
             rs.getDate("fecha").toLocalDate(),
@@ -185,6 +178,7 @@ public class CitaDAO {
             rs.getString("tecnico_asignado"),
             fechaCreacion
         );
+        cita.setEmpresaId(rs.getInt("empresa_id"));
         cita.setMotivoCancelacion(rs.getString("motivo_cancelacion"));
         return cita;
     }

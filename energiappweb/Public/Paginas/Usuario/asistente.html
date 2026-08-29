@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EnergiApp | Asistente IA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="dashboard-body">
+    <div class="dashboard-shell">
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-mark">⚡</div>
+          <div>
+            <h3>EnergiApp</h3>
+            <small>Usuario</small>
+          </div>
+        </div>
+
+        <nav class="nav-menu">
+          <a href="dashboard.html">🏠 Dashboard</a>
+          <a href="propiedades.html">🏡 Propiedades</a>
+          <a href="paneles.html">🔋 Paneles</a>
+          <a href="citas.html">📅 Citas</a>
+          <a href="reportes.html">📊 Reportes</a>
+          <a class="active" href="asistente.html">🤖 Asistente IA</a>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="badge">IA</span>
+          <strong>Online</strong>
+          <small>Disponible</small>
+        </div>
+      </aside>
+
+      <main class="dashboard-main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Asistente</p>
+            <h2>Chat EnergiApp</h2>
+          </div>
+          <div class="actions">
+            <button class="ghost-btn">Nueva consulta</button>
+            <a href="index.html" class="primary-btn small-btn">Salir</a>
+          </div>
+        </header>
+
+        <section class="chat-panel panel">
+          <div class="message bot">
+            <strong>Asistente:</strong>
+            <p>Hola, te ayudo a optimizar el consumo y revisar el rendimiento de tus paneles solares.</p>
+          </div>
+          <div class="message user">
+            <strong>Tú:</strong>
+            <p>¿Qué puedo hacer para reducir mi consumo este mes?</p>
+          </div>
+          <div class="message bot">
+            <strong>Asistente:</strong>
+            <p>Podrías mover más uso hacia horas de mayor producción solar y revisar el equipo de Casa 01, que está funcionando al 87%.</p>
+          </div>
+
+          <div class="chat-input-box">
+            <input type="text" placeholder="Escribe tu consulta..." />
+            <button class="primary-btn">Enviar</button>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

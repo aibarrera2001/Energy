@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EnergiApp | Reportes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="dashboard-body">
+    <div class="dashboard-shell">
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-mark">⚡</div>
+          <div>
+            <h3>EnergiApp</h3>
+            <small>Usuario</small>
+          </div>
+        </div>
+
+        <nav class="nav-menu">
+          <a href="dashboard.html">🏠 Dashboard</a>
+          <a href="propiedades.html">🏡 Propiedades</a>
+          <a href="paneles.html">🔋 Paneles</a>
+          <a href="citas.html">📅 Citas</a>
+          <a class="active" href="reportes.html">📊 Reportes</a>
+          <a href="asistente.html">🤖 Asistente IA</a>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="badge">Finanzas</span>
+          <strong>$2.480</strong>
+          <small>Mes actual</small>
+        </div>
+      </aside>
+
+      <main class="dashboard-main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Análisis</p>
+            <h2>Reportes</h2>
+          </div>
+          <div class="actions">
+            <button class="ghost-btn">Exportar PDF</button>
+            <a href="index.html" class="primary-btn small-btn">Salir</a>
+          </div>
+        </header>
+
+        <section class="stats-grid">
+          <article class="stat-card accent">
+            <span>Generación</span>
+            <strong>1.420 kWh</strong>
+            <small>Este mes</small>
+          </article>
+          <article class="stat-card">
+            <span>Uso</span>
+            <strong>920 kWh</strong>
+            <small>Promedio</small>
+          </article>
+          <article class="stat-card">
+            <span>Ahorro</span>
+            <strong>38%</strong>
+            <small>vs. mes pasado</small>
+          </article>
+          <article class="stat-card">
+            <span>ROI</span>
+            <strong>6.4 años</strong>
+            <small>Retorno</small>
+          </article>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h3>Resumen financiero</h3>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Concepto</th>
+                <th>Mes</th>
+                <th>Valor</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Generación solar</td>
+                <td>Agosto</td>
+                <td>$1.240</td>
+                <td><span class="tag ok">Bueno</span></td>
+              </tr>
+              <tr>
+                <td>Consumo eléctrico</td>
+                <td>Agosto</td>
+                <td>$680</td>
+                <td><span class="tag ok">Normal</span></td>
+              </tr>
+              <tr>
+                <td>Ahorro total</td>
+                <td>Agosto</td>
+                <td>$560</td>
+                <td><span class="tag warn">Mejorable</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

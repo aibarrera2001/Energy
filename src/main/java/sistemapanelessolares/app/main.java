@@ -1,25 +1,40 @@
 package sistemapanelessolares.app;
 
 import java.sql.Connection;
+
 import javafx.application.Application;
+import javafx.stage.Stage;
 import sistemapanelessolares.dao.ConexionDB;
-import sistemapanelessolares.view.IngresoFX;
+import sistemapanelessolares.logica.SolarService;
+import sistemapanelessolares.view.InicioSessionAdministrativoFX;
 
-public class main {
+public class main extends Application {
     public static void main(String[] args) {
+        System.out.println("========================================");
+        System.out.println("EnergiApp - Backend para empresa solar");
+        System.out.println("Modo: una sola empresa");
+        System.out.println("========================================");
 
-        System.out.println("Iniciando EnergiApp y conectando a Supabase...");
+        System.out.println(ConexionDB.getStatus());
 
-        Connection conexion = ConexionDB.conectar();
-
-        if (conexion != null) {
-            System.out.println("Conexion exitosa a Supabase!");
-        } else {
-            System.err.println("No se pudo conectar. La app iniciara sin persistencia.");
+        try (Connection conexion = ConexionDB.conectar()) {
+            if (conexion != null && !conexion.isClosed()) {
+                System.out.println("Conexion validada correctamente con la base de datos.");
+            } else {
+                System.out.println("La base de datos aun no esta configurada. Listo para conectarla con tu nueva estructura.");
+            }
+        } catch (Exception e) {
+            System.err.println("Error al validar la conexion: " + e.getMessage());
         }
 
-        IngresoFX.setConexionDB(conexion);
-        System.out.println("Desplegando Interfaz Grafica...");
-        Application.launch(IngresoFX.class, args);
+        System.out.println("Backend preparado para: inventario, citas, mantenimiento, clientes y gestion operativa.");
+        launch(args);
+    }
+
+    @Override
+    public void start(Stage stage) {
+        SolarService solarService = new SolarService();
+        Connection conexion = ConexionDB.conectar();
+        new InicioSessionAdministrativoFX(solarService, conexion).mostrarVentanaAcceso(stage);
     }
 }

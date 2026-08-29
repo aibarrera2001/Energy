@@ -3,6 +3,7 @@ package sistemapanelessolares.dominio;
 public class Casa {
 
     private int    idCasa;
+    private int    empresaId;
     private String direccion;
     private String ciudad;
     private double consumoMensualKWh;
@@ -32,6 +33,9 @@ public class Casa {
 
     public int    getIdCasa()                      { return idCasa; }
     public void   setIdCasa(int idCasa)            { this.idCasa = idCasa; }
+
+    public int    getEmpresaId()                   { return empresaId; }
+    public void   setEmpresaId(int empresaId)      { this.empresaId = empresaId; }
 
     public String getDireccion()                   { return direccion; }
     public void   setDireccion(String d)           { this.direccion = d; }

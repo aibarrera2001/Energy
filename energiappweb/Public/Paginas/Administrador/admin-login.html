@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EnergiApp | Administrador</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="auth-shell">
+      <div class="auth-card admin-card">
+        <aside class="auth-hero">
+          <div class="brand-logo">⚡</div>
+          <h1>EnergiApp</h1>
+          <p>Panel de administración y control energético</p>
+          <ul class="mini-features">
+            <li>Usuarios y propiedades</li>
+            <li>Configuración del sistema</li>
+            <li>Operación solar inteligente</li>
+          </ul>
+        </aside>
+
+        <main class="auth-form-panel">
+          <div class="topbar-inline">
+            <a href="index.html" class="back-link">← Volver</a>
+          </div>
+
+          <div class="form-header">
+            <h2>Acceso administrativo</h2>
+            <p>Ingresa tus credenciales de administración</p>
+          </div>
+
+          <form class="form-box">
+            <label>
+              <span>Usuario administrador</span>
+              <input type="text" placeholder="admin@energiapp.com" />
+            </label>
+
+            <label>
+              <span>Contraseña</span>
+              <input type="password" placeholder="••••••••" />
+            </label>
+
+            <div class="row-between">
+              <label class="checkbox-row">
+                <input type="checkbox" />
+                <span>Recordarme</span>
+              </label>
+              <a href="#">Soporte</a>
+            </div>
+
+            <button type="submit" class="primary-btn admin-btn">Ingresar</button>
+          </form>
+
+          <div class="separator"><span>o</span></div>
+
+          <a href="admin-dashboard.html" class="secondary-btn">Abrir administrador</a>
+
+          <div class="separator"><span>¿Nueva empresa?</span></div>
+
+          <a href="admin-registro.html" class="secondary-btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none;">
+            Registrar Empresa
+          </a>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

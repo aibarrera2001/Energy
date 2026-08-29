@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EnergiApp | Admin Mantenimiento</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="dashboard-body">
+    <div class="dashboard-shell">
+      <aside class="sidebar admin-sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-mark">⚡</div>
+          <div>
+            <h3>EnergiApp</h3>
+            <small>Administrador</small>
+          </div>
+        </div>
+
+        <nav class="nav-menu">
+          <a href="admin-dashboard.html">🏠 Dashboard</a>
+          <a href="admin-usuarios.html">👥 Usuarios</a>
+          <a href="admin-paneles.html">🔋 Paneles</a>
+          <a href="admin-citas.html">📅 Citas</a>
+          <a class="active" href="admin-mantenimiento.html">🛠️ Mantenimiento</a>
+          <a href="admin-reportes.html">📊 Reportes</a>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="badge">Mantenimiento</span>
+          <strong>12</strong>
+          <small>Pendientes</small>
+        </div>
+      </aside>
+
+      <main class="dashboard-main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Operación</p>
+            <h2>Mantenimiento</h2>
+          </div>
+          <div class="actions">
+            <button class="ghost-btn">Programar</button>
+            <a href="index.html" class="primary-btn small-btn">Salir</a>
+          </div>
+        </header>
+
+        <section class="panel table-panel">
+          <div class="panel-head">
+            <h3>Ordenes de trabajo</h3>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Equipo</th>
+                <th>Ubicación</th>
+                <th>Prioridad</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Inversor 02</td>
+                <td>Valledupar</td>
+                <td>Alta</td>
+                <td><span class="tag warn">Pendiente</span></td>
+              </tr>
+              <tr>
+                <td>Banco de baterías</td>
+                <td>La Jagua</td>
+                <td>Media</td>
+                <td><span class="tag ok">En proceso</span></td>
+              </tr>
+              <tr>
+                <td>Control solar</td>
+                <td>Aguachica</td>
+                <td>Media</td>
+                <td><span class="tag ok">Revisado</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

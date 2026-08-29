@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EnergiApp | Admin Usuarios</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="dashboard-body">
+    <div class="dashboard-shell">
+      <aside class="sidebar admin-sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-mark">⚡</div>
+          <div>
+            <h3>EnergiApp</h3>
+            <small>Administrador</small>
+          </div>
+        </div>
+
+        <nav class="nav-menu">
+          <a href="admin-dashboard.html">🏠 Dashboard</a>
+          <a class="active" href="admin-usuarios.html">👥 Usuarios</a>
+          <a href="admin-paneles.html">🔋 Paneles</a>
+          <a href="admin-citas.html">📅 Citas</a>
+          <a href="admin-mantenimiento.html">🛠️ Mantenimiento</a>
+          <a href="admin-reportes.html">📊 Reportes</a>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="badge">Usuarios</span>
+          <strong>1248</strong>
+          <small>Registrados</small>
+        </div>
+      </aside>
+
+      <main class="dashboard-main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Gestión</p>
+            <h2>Usuarios</h2>
+          </div>
+          <div class="actions">
+            <button class="ghost-btn">Nuevo usuario</button>
+            <a href="index.html" class="primary-btn small-btn">Salir</a>
+          </div>
+        </header>
+
+        <section class="panel table-panel">
+          <div class="panel-head">
+            <h3>Listado de usuarios</h3>
+            <a href="#">Exportar</a>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Tipo</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>María Pérez</td>
+                <td>maria@correo.com</td>
+                <td>Usuario</td>
+                <td><span class="tag ok">Activo</span></td>
+              </tr>
+              <tr>
+                <td>Andrés López</td>
+                <td>andres@correo.com</td>
+                <td>Usuario</td>
+                <td><span class="tag ok">Activo</span></td>
+              </tr>
+              <tr>
+                <td>Laura Gutiérrez</td>
+                <td>laura@correo.com</td>
+                <td>Administrador</td>
+                <td><span class="tag ok">Activo</span></td>
+              </tr>
+              <tr>
+                <td>Pedro Ramos</td>
+                <td>pedro@correo.com</td>
+                <td>Usuario</td>
+                <td><span class="tag warn">Pendiente</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

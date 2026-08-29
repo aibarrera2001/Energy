@@ -8,6 +8,7 @@ package sistemapanelessolares.dominio;
  */
 public class Administrativo extends Persona {
 
+    private int empresaId;
     private String rol;
     private String correo;
     private String contrasena; // Se maneja como contrasena en código Java para evitar problemas de codificación
@@ -17,17 +18,19 @@ public class Administrativo extends Persona {
      * El ID se inicializa por defecto en 0.
      */
     public Administrativo(String nombre, String apellido, String telefono, String rol, String correo, String contrasena) {
-        super(0, nombre, apellido, telefono);
-        this.rol = rol;
-        this.correo = correo;
-        this.contrasena = contrasena;
+        this(0, 1, nombre, apellido, telefono, rol, correo, contrasena);
     }
 
     /**
      * CONSTRUCTOR 2 (Con ID): Utilizado al recuperar los administradores desde la base de datos.
      */
     public Administrativo(int id, String nombre, String apellido, String telefono, String rol, String correo, String contrasena) {
+        this(id, 1, nombre, apellido, telefono, rol, correo, contrasena);
+    }
+
+    public Administrativo(int id, int empresaId, String nombre, String apellido, String telefono, String rol, String correo, String contrasena) {
         super(id, nombre, apellido, telefono);
+        this.empresaId = empresaId;
         this.rol = rol;
         this.correo = correo;
         this.contrasena = contrasena;
@@ -36,6 +39,9 @@ public class Administrativo extends Persona {
     // ----------------------------------------------------------------
     //  Getters y Setters
     // ----------------------------------------------------------------
+
+    public int getEmpresaId() { return empresaId; }
+    public void setEmpresaId(int empresaId) { this.empresaId = empresaId; }
 
     public String getRol() { return rol; }
     public void setRol(String rol) { this.rol = rol; }

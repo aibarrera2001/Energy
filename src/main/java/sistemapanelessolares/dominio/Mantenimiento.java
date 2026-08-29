@@ -3,18 +3,18 @@ package sistemapanelessolares.dominio;
 import java.time.LocalDate;
 
 /**
- * Representa el mantenimiento (preventivo o correctivo) de los
- * paneles solares ya instalados en una propiedad.
+ * Mantenimiento operativo de la empresa para propiedades con instalaciones solares.
  */
 public class Mantenimiento {
 
     private int idMantenimiento;
-    private Usuario usuario;
+    private int empresaId;
+    private String nombreCliente;
     private Casa casa;
-    private String tipoMantenimiento;      // "PREVENTIVO" | "CORRECTIVO"
+    private String tipoMantenimiento;
     private LocalDate fechaProgramada;
-    private LocalDate fechaRealizada;      // null hasta que se ejecute
-    private String estado;                 // "PROGRAMADO" | "EN_PROCESO" | "COMPLETADO" | "CANCELADO"
+    private LocalDate fechaRealizada;
+    private String estado;
     private String descripcionTrabajo;
     private String tecnicoAsignado;
     private double costo;
@@ -23,10 +23,9 @@ public class Mantenimiento {
 
     private static final int MESES_ENTRE_MANTENIMIENTOS = 6;
 
-    // CONSTRUCTOR 1 (Sin ID): para programar un nuevo mantenimiento
-    public Mantenimiento(Usuario usuario, Casa casa, String tipoMantenimiento,
+    public Mantenimiento(String nombreCliente, Casa casa, String tipoMantenimiento,
                           LocalDate fechaProgramada, String descripcionTrabajo) {
-        this.usuario = usuario;
+        this.nombreCliente = nombreCliente;
         this.casa = casa;
         this.tipoMantenimiento = tipoMantenimiento;
         this.fechaProgramada = fechaProgramada;
@@ -34,13 +33,12 @@ public class Mantenimiento {
         this.estado = "PROGRAMADO";
     }
 
-    // CONSTRUCTOR 2 (Con ID): utilizado al recuperar desde la base de datos
-    public Mantenimiento(int idMantenimiento, Usuario usuario, Casa casa, String tipoMantenimiento,
+    public Mantenimiento(int idMantenimiento, String nombreCliente, Casa casa, String tipoMantenimiento,
                           LocalDate fechaProgramada, LocalDate fechaRealizada, String estado,
                           String descripcionTrabajo, String tecnicoAsignado, double costo,
                           String observaciones) {
         this.idMantenimiento = idMantenimiento;
-        this.usuario = usuario;
+        this.nombreCliente = nombreCliente;
         this.casa = casa;
         this.tipoMantenimiento = tipoMantenimiento;
         this.fechaProgramada = fechaProgramada;
@@ -52,11 +50,6 @@ public class Mantenimiento {
         this.observaciones = observaciones;
     }
 
-    // ----------------------------------------------------------------
-    //  Comportamiento
-    // ----------------------------------------------------------------
-
-    /** Marca el mantenimiento como completado y calcula la fecha sugerida del próximo. */
     public void marcarComoRealizado(String tecnicoAsignado, double costo, String observaciones) {
         this.estado = "COMPLETADO";
         this.fechaRealizada = LocalDate.now();
@@ -76,15 +69,14 @@ public class Mantenimiento {
                 && fechaProgramada.isBefore(LocalDate.now());
     }
 
-    // ----------------------------------------------------------------
-    //  Getters y Setters
-    // ----------------------------------------------------------------
-
     public int getIdMantenimiento() { return idMantenimiento; }
     public void setIdMantenimiento(int idMantenimiento) { this.idMantenimiento = idMantenimiento; }
 
-    public Usuario getUsuario() { return usuario; }
-    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
+    public int getEmpresaId() { return empresaId; }
+    public void setEmpresaId(int empresaId) { this.empresaId = empresaId; }
+
+    public String getNombreCliente() { return nombreCliente; }
+    public void setNombreCliente(String nombreCliente) { this.nombreCliente = nombreCliente; }
 
     public Casa getCasa() { return casa; }
     public void setCasa(Casa casa) { this.casa = casa; }
@@ -96,6 +88,7 @@ public class Mantenimiento {
     public void setFechaProgramada(LocalDate fechaProgramada) { this.fechaProgramada = fechaProgramada; }
 
     public LocalDate getFechaRealizada() { return fechaRealizada; }
+    public void setFechaRealizada(LocalDate fechaRealizada) { this.fechaRealizada = fechaRealizada; }
 
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }

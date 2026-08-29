@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EnergiApp | Paneles</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="dashboard-body">
+    <div class="dashboard-shell">
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-mark">⚡</div>
+          <div>
+            <h3>EnergiApp</h3>
+            <small>Usuario</small>
+          </div>
+        </div>
+
+        <nav class="nav-menu">
+          <a href="dashboard.html">🏠 Dashboard</a>
+          <a href="propiedades.html">🏡 Propiedades</a>
+          <a class="active" href="paneles.html">🔋 Paneles</a>
+          <a href="citas.html">📅 Citas</a>
+          <a href="reportes.html">📊 Reportes</a>
+          <a href="asistente.html">🤖 Asistente IA</a>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="badge">Paneles</span>
+          <strong>26</strong>
+          <small>Activos</small>
+        </div>
+      </aside>
+
+      <main class="dashboard-main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Energia</p>
+            <h2>Paneles solares</h2>
+          </div>
+          <div class="actions">
+            <button class="ghost-btn">Calcular desempeño</button>
+            <a href="index.html" class="primary-btn small-btn">Salir</a>
+          </div>
+        </header>
+
+        <section class="stats-grid">
+          <article class="stat-card accent">
+            <span>Producción</span>
+            <strong>18.4 kWh</strong>
+            <small>Hoy</small>
+          </article>
+          <article class="stat-card">
+            <span>Rendimiento</span>
+            <strong>87.5%</strong>
+            <small>Óptimo</small>
+          </article>
+          <article class="stat-card">
+            <span>Ahorrado</span>
+            <strong>$540</strong>
+            <small>Mes actual</small>
+          </article>
+          <article class="stat-card">
+            <span>Estado</span>
+            <strong>Normal</strong>
+            <small>Sin fallas</small>
+          </article>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h3>Inventario de paneles</h3>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Panel</th>
+                <th>Ubicación</th>
+                <th>Producción</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Panel 01</td>
+                <td>Techo norte</td>
+                <td>2.4 kWh</td>
+                <td><span class="tag ok">Excelente</span></td>
+              </tr>
+              <tr>
+                <td>Panel 07</td>
+                <td>Techo sur</td>
+                <td>2.1 kWh</td>
+                <td><span class="tag ok">Excelente</span></td>
+              </tr>
+              <tr>
+                <td>Panel 12</td>
+                <td>Patio</td>
+                <td>1.7 kWh</td>
+                <td><span class="tag warn">Revisión</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

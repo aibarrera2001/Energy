@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EnergiApp | Admin Citas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="dashboard-body">
+    <div class="dashboard-shell">
+      <aside class="sidebar admin-sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-mark">⚡</div>
+          <div>
+            <h3>EnergiApp</h3>
+            <small>Administrador</small>
+          </div>
+        </div>
+
+        <nav class="nav-menu">
+          <a href="admin-dashboard.html">🏠 Dashboard</a>
+          <a href="admin-usuarios.html">👥 Usuarios</a>
+          <a href="admin-paneles.html">🔋 Paneles</a>
+          <a class="active" href="admin-citas.html">📅 Citas</a>
+          <a href="admin-mantenimiento.html">🛠️ Mantenimiento</a>
+          <a href="admin-reportes.html">📊 Reportes</a>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="badge">Citas</span>
+          <strong>42</strong>
+          <small>Este mes</small>
+        </div>
+      </aside>
+
+      <main class="dashboard-main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Agenda</p>
+            <h2>Citas programadas</h2>
+          </div>
+          <div class="actions">
+            <button class="ghost-btn">Nueva cita</button>
+            <a href="index.html" class="primary-btn small-btn">Salir</a>
+          </div>
+        </header>
+
+        <section class="panel table-panel">
+          <div class="panel-head">
+            <h3>Próximas citas</h3>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Servicio</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>María Pérez</td>
+                <td>Mantenimiento</td>
+                <td>12 Ago</td>
+                <td><span class="tag ok">Confirmada</span></td>
+              </tr>
+              <tr>
+                <td>Andrés López</td>
+                <td>Revisión</td>
+                <td>18 Ago</td>
+                <td><span class="tag warn">Pendiente</span></td>
+              </tr>
+              <tr>
+                <td>Fernanda Ruiz</td>
+                <td>Instalación</td>
+                <td>25 Ago</td>
+                <td><span class="tag ok">Programada</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+    <!-- Script dinámico para conectar con la API de administración -->
+    <script src="../../Logica/adminCitas.js"></script>
+  </body>
+</html>

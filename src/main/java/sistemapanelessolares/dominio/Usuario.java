@@ -1,54 +1,135 @@
 package sistemapanelessolares.dominio;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
 
-public class Usuario extends Persona {
+public class Usuario {
 
+    private int idUsuario;
+    private String nombre;
+    private String apellido;
     private String correo;
+    private String telefono;
     private String contrasena;
-    private List<Casa> casas = new ArrayList<>();
-    private PanelSolar panelSeleccionado;
+    private String ciudad;
+    private String estado;
+    private LocalDateTime fechaRegistro;
+    private LocalDateTime ultimoLogin;
 
-    // Constructor 1 (Sin ID) - para registro nuevo
-    public Usuario(String nombre, String apellido, String telefono, String correo, String contrasena) {
-        super(0, nombre, apellido, telefono);
+    public Usuario() {
+        this.estado = "ACTIVO";
+    }
+
+    public Usuario(String nombre, String apellido, String correo, String telefono, String contrasena, String ciudad) {
+        this();
+        this.nombre = nombre;
+        this.apellido = apellido;
         this.correo = correo;
+        this.telefono = telefono;
+        this.contrasena = contrasena;
+        this.ciudad = ciudad;
+    }
+
+    public Usuario(int idUsuario, String nombre, String apellido, String correo, String telefono, String contrasena, String ciudad, String estado) {
+        this.idUsuario = idUsuario;
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.correo = correo;
+        this.telefono = telefono;
+        this.contrasena = contrasena;
+        this.ciudad = ciudad;
+        this.estado = estado != null ? estado : "ACTIVO";
+    }
+
+    // Getters y Setters
+    public int getIdUsuario() {
+        return idUsuario;
+    }
+
+    public void setIdUsuario(int idUsuario) {
+        this.idUsuario = idUsuario;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getApellido() {
+        return apellido;
+    }
+
+    public void setApellido(String apellido) {
+        this.apellido = apellido;
+    }
+
+    public String getCorreo() {
+        return correo;
+    }
+
+    public void setCorreo(String correo) {
+        this.correo = correo;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public String getContrasena() {
+        return contrasena;
+    }
+
+    public void setContrasena(String contrasena) {
         this.contrasena = contrasena;
     }
 
-    // Constructor 2 (Con ID) - para login y recuperar de BD
-    public Usuario(int id, String nombre, String apellido, String telefono, String correo, String contrasena) {
-        super(id, nombre, apellido, telefono);
-        this.correo = correo;
-        this.contrasena = contrasena;
+    public String getCiudad() {
+        return ciudad;
     }
 
-    public void agregarCasa(Casa casa) {
-        this.casas.add(casa);
+    public void setCiudad(String ciudad) {
+        this.ciudad = ciudad;
     }
 
-    public int getIdUsuario() { return super.getId(); }
-    public void setIdUsuario(int idUsuario) { super.setId(idUsuario); }
+    public String getEstado() {
+        return estado;
+    }
 
-    public String getCorreo() { return correo; }
-    public void setCorreo(String correo) { this.correo = correo; }
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
 
-    public String getContrasena() { return contrasena; }
-    public void setContrasena(String contrasena) { this.contrasena = contrasena; }
+    public LocalDateTime getFechaRegistro() {
+        return fechaRegistro;
+    }
 
-    public List<Casa> getCasas() { return casas; }
-    public void setCasas(List<Casa> casas) { this.casas = casas; }
+    public void setFechaRegistro(LocalDateTime fechaRegistro) {
+        this.fechaRegistro = fechaRegistro;
+    }
 
-    public PanelSolar getPanelSeleccionado() { return panelSeleccionado; }
-    public void setPanelSeleccionado(PanelSolar panelSeleccionado) { this.panelSeleccionado = panelSeleccionado; }
+    public LocalDateTime getUltimoLogin() {
+        return ultimoLogin;
+    }
+
+    public void setUltimoLogin(LocalDateTime ultimoLogin) {
+        this.ultimoLogin = ultimoLogin;
+    }
 
     @Override
     public String toString() {
-        return "Usuario{id_usuario=" + getIdUsuario() +
-                ", nombre='" + getNombre() + '\'' +
-                ", apellido='" + getApellido() + '\'' +
-                ", telefono='" + getTelefono() + '\'' +
-                ", correo='" + correo + "'}";
+        return "Usuario{" +
+                "idUsuario=" + idUsuario +
+                ", nombre='" + nombre + '\'' +
+                ", apellido='" + apellido + '\'' +
+                ", correo='" + correo + '\'' +
+                ", ciudad='" + ciudad + '\'' +
+                ", estado='" + estado + '\'' +
+                '}';
     }
 }

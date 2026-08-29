@@ -2,44 +2,42 @@ package sistemapanelessolares.dao;
 
 import sistemapanelessolares.dominio.Casa;
 import sistemapanelessolares.dominio.Mantenimiento;
-import sistemapanelessolares.dominio.Usuario;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MantenimientoDAO {
 
-    private final UsuarioDAO usuarioDAO = new UsuarioDAO();
     private final CasaDAO casaDAO = new CasaDAO();
 
     public void guardar(Mantenimiento m) {
-        String sql = "INSERT INTO mantenimientos (id_usuario, id_casa, tipo_mantenimiento, fecha_programada, "
+        String sql = "INSERT INTO mantenimientos (empresa_id, id_usuario, nombre_cliente, id_casa, tipo_mantenimiento, fecha_programada, "
                    + "fecha_realizada, estado, descripcion_trabajo, tecnico_asignado, costo, observaciones, "
-                   + "fecha_proximo_mantenimiento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id_mantenimiento";
+                   + "fecha_proximo_mantenimiento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id_mantenimiento";
         Connection conn = ConexionDB.conectar();
-        if (conn == null) { System.err.println("ERROR: Sin conexion a Supabase"); return; }
+        if (conn == null) { System.err.println("ERROR: Sin conexion a la base de datos"); return; }
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, m.getUsuario().getIdUsuario());
-            ps.setInt(2, m.getCasa().getIdCasa());
-            ps.setString(3, m.getTipoMantenimiento());
-            ps.setDate(4, Date.valueOf(m.getFechaProgramada()));
-            if (m.getFechaRealizada() != null) ps.setDate(5, Date.valueOf(m.getFechaRealizada()));
-            else ps.setNull(5, Types.DATE);
-            ps.setString(6, m.getEstado());
-            ps.setString(7, m.getDescripcionTrabajo());
-            ps.setString(8, m.getTecnicoAsignado());
-            ps.setDouble(9, m.getCosto());
-            ps.setString(10, m.getObservaciones());
-            if (m.getFechaProximoMantenimiento() != null) ps.setDate(11, Date.valueOf(m.getFechaProximoMantenimiento()));
-            else ps.setNull(11, Types.DATE);
+            ps.setInt(1, m.getEmpresaId() > 0 ? m.getEmpresaId() : 1);
+            ps.setInt(2, 0);
+            ps.setString(3, m.getNombreCliente() != null ? m.getNombreCliente() : "Cliente");
+            ps.setInt(4, m.getCasa() != null ? m.getCasa().getIdCasa() : 0);
+            ps.setString(5, m.getTipoMantenimiento());
+            ps.setDate(6, Date.valueOf(m.getFechaProgramada()));
+            if (m.getFechaRealizada() != null) ps.setDate(7, Date.valueOf(m.getFechaRealizada()));
+            else ps.setNull(7, Types.DATE);
+            ps.setString(8, m.getEstado());
+            ps.setString(9, m.getDescripcionTrabajo());
+            ps.setString(10, m.getTecnicoAsignado());
+            ps.setDouble(11, m.getCosto());
+            ps.setString(12, m.getObservaciones());
+            if (m.getFechaProximoMantenimiento() != null) ps.setDate(13, Date.valueOf(m.getFechaProximoMantenimiento()));
+            else ps.setNull(13, Types.DATE);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 m.setIdMantenimiento(rs.getInt("id_mantenimiento"));
-                System.out.println("Mantenimiento guardado con ID: " + m.getIdMantenimiento());
             }
         } catch (Exception e) {
             System.err.println("Error guardar mantenimiento: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
@@ -147,8 +145,6 @@ public class MantenimientoDAO {
     }
 
     private Mantenimiento mapear(ResultSet rs) throws SQLException {
-        int idUsuario = rs.getInt("id_usuario");
-        Usuario usuario = usuarioDAO.buscarPorId(idUsuario);
         int idCasa = rs.getInt("id_casa");
         Casa casa = casaDAO.buscarPorId(idCasa);
 
@@ -156,18 +152,19 @@ public class MantenimientoDAO {
         Date fechaProximo = rs.getDate("fecha_proximo_mantenimiento");
 
         Mantenimiento m = new Mantenimiento(
-            rs.getInt("id_mantenimiento"),
-            usuario,
+            rs.getString("nombre_cliente") != null ? rs.getString("nombre_cliente") : "Cliente",
             casa,
             rs.getString("tipo_mantenimiento"),
             rs.getDate("fecha_programada").toLocalDate(),
-            fechaRealizada != null ? fechaRealizada.toLocalDate() : null,
-            rs.getString("estado"),
-            rs.getString("descripcion_trabajo"),
-            rs.getString("tecnico_asignado"),
-            rs.getDouble("costo"),
-            rs.getString("observaciones")
+            rs.getString("descripcion_trabajo")
         );
+        m.setIdMantenimiento(rs.getInt("id_mantenimiento"));
+        m.setEmpresaId(rs.getInt("empresa_id"));
+        m.setFechaRealizada(fechaRealizada != null ? fechaRealizada.toLocalDate() : null);
+        m.setEstado(rs.getString("estado"));
+        m.setTecnicoAsignado(rs.getString("tecnico_asignado"));
+        m.setCosto(rs.getDouble("costo"));
+        m.setObservaciones(rs.getString("observaciones"));
         m.setFechaProximoMantenimiento(fechaProximo != null ? fechaProximo.toLocalDate() : null);
         return m;
     }
