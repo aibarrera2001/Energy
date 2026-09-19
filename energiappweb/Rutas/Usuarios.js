@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const authController = require('../controllers/authController');
-const usuarioController = require('../controllers/usuarioController');
+const authController = require('../Controladores/autenficacionUsuari');
+const usuarioController = require('../Controladores/autenficacionCasaUsuario');
 
 // Rutas Públicas de Auth
 router.post('/registrar', authController.registrarUsuario);

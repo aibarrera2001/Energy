@@ -1,41 +1,70 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const usuarioId = localStorage.getItem('usuarioId');
   const chatPanel = document.querySelector('.chat-panel');
-  const input = chatPanel.querySelector('input[type="text"]');
-  const btnEnviar = chatPanel.querySelector('.primary-btn');
+  const inputBox = document.querySelector('.chat-input-box');
+
+  if (!chatPanel || !inputBox) return;
+
+  const input = inputBox.querySelector('input');
+  const btnEnviar = inputBox.querySelector('button');
+
+  if (!input || !btnEnviar) return;
 
   btnEnviar.addEventListener('click', enviarMensaje);
-  input.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') enviarMensaje();
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      enviarMensaje();
+    }
   });
 
   async function enviarMensaje() {
-    const texto = input.value.trim();
-    if (!texto) return;
+    const mensaje = input.value.trim();
+    if (!mensaje) return;
 
-    // Dibujar mensaje del usuario
-    const msgUser = document.createElement('div');
-    msgUser.className = 'message user';
-    msgUser.innerHTML = `<strong>Tú:</strong><p>${texto}</p>`;
-    chatPanel.insertBefore(msgUser, chatPanel.querySelector('.chat-input-box'));
-
+    agregarMensaje('user', 'Tú', mensaje);
     input.value = '';
+    input.disabled = true;
+    btnEnviar.disabled = true;
 
     try {
       const res = await fetch('/api/usuarios/asistente', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mensaje: texto })
+        body: JSON.stringify({
+          mensaje,
+          id_usuario: usuarioId ? parseInt(usuarioId, 10) : null
+        })
       });
 
       const data = await res.json();
 
-      // Dibujar respuesta de la IA
-      const msgBot = document.createElement('div');
-      msgBot.className = 'message bot';
-      msgBot.innerHTML = `<strong>Asistente:</strong><p>${data.respuesta}</p>`;
-      chatPanel.insertBefore(msgBot, chatPanel.querySelector('.chat-input-box'));
+      if (data.exito && data.respuesta) {
+        agregarMensaje('bot', 'Asistente', data.respuesta);
+      } else {
+        agregarMensaje('bot', 'Asistente', data.mensaje || 'No pude procesar tu consulta.');
+      }
     } catch (err) {
-      console.error('Error en el asistente:', err);
+      console.error('Error al consultar el asistente:', err);
+      agregarMensaje('bot', 'Asistente', 'Hubo un error de conexión con el servidor.');
+    } finally {
+      input.disabled = false;
+      btnEnviar.disabled = false;
+      input.focus();
     }
+  }
+
+  function agregarMensaje(tipo, etiqueta, texto) {
+    const div = document.createElement('div');
+    div.className = `message ${tipo}`;
+    div.innerHTML = `<strong>${etiqueta}:</strong><p>${escaparHtml(String(texto || ''))}</p>`;
+    chatPanel.insertBefore(div, inputBox);
+    chatPanel.scrollTop = chatPanel.scrollHeight;
+  }
+
+  function escaparHtml(texto) {
+    const div = document.createElement('div');
+    div.textContent = texto;
+    return div.innerHTML;
   }
 });
