@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="../../estilo/indexStyles.css" />
   </head>
   <body class="dashboard-body">
     <div class="dashboard-shell">
@@ -31,8 +31,8 @@
 
         <div class="sidebar-card">
           <span class="badge">Propiedades</span>
-          <strong>3</strong>
-          <small>Casas activas</small>
+          <strong id="cantidadPropiedades">0</strong>
+          <small id="textoCantidadPropiedades">Casas activas</small>
         </div>
       </aside>
 
@@ -43,58 +43,50 @@
             <h2>Mis propiedades</h2>
           </div>
           <div class="actions">
-            <button class="ghost-btn">Nueva propiedad</button>
-            <a href="index.html" class="primary-btn small-btn">Salir</a>
+            <button class="ghost-btn" id="toggleFormBtn">Nueva propiedad</button>
+            <a href="../Principal/index.html" class="primary-btn small-btn">Salir</a>
           </div>
         </header>
 
-        <section class="cards-grid property-grid">
-          <article class="property-card">
-            <div class="property-header">
-              <span class="status-pill ok">Activa</span>
-              <span class="property-code">Casa 01</span>
-            </div>
-            <h3>Villa Los Álamos</h3>
-            <p>Valledupar, Cesar</p>
-            <ul>
-              <li>8 paneles solares</li>
-              <li>Producción: 4.8 kWh</li>
-              <li>Consumo estimado: 3.1 kWh</li>
-            </ul>
-            <button class="secondary-btn full-width">Ver detalle</button>
-          </article>
+        <section class="panel" id="formPropiedadPanel" style="display: none; margin-bottom: 20px;">
+          <div class="panel-head">
+            <h3>Registrar nueva propiedad</h3>
+          </div>
+          <form id="formPropiedad" class="booking-form">
+            <label>
+              <span>Dirección</span>
+              <input type="text" id="direccionPropiedad" placeholder="Cra 12 # 4-56" required />
+            </label>
+            <label>
+              <span>Ciudad</span>
+              <input type="text" id="ciudadPropiedad" placeholder="Valledupar" required />
+            </label>
+            <label>
+              <span>Tipo de propiedad</span>
+              <select id="tipoPropiedad">
+                <option value="CASA">Casa</option>
+                <option value="APARTAMENTO">Apartamento</option>
+                <option value="EDIFICIO">Edificio</option>
+              </select>
+            </label>
+            <label>
+              <span>Consumo mensual (kWh)</span>
+              <input type="number" id="consumoMensual" min="0" step="0.01" value="0" />
+            </label>
+            <label>
+              <span>Área de techo (m²)</span>
+              <input type="number" id="areaTecho" min="0" step="0.01" value="0" />
+            </label>
+            <button type="submit" class="primary-btn">Guardar propiedad</button>
+          </form>
+        </section>
 
-          <article class="property-card">
-            <div class="property-header">
-              <span class="status-pill ok">Activa</span>
-              <span class="property-code">Casa 02</span>
-            </div>
-            <h3>Residencial El Sol</h3>
-            <p>La Jagua, Cesar</p>
-            <ul>
-              <li>6 paneles solares</li>
-              <li>Producción: 3.9 kWh</li>
-              <li>Consumo estimado: 2.7 kWh</li>
-            </ul>
-            <button class="secondary-btn full-width">Ver detalle</button>
-          </article>
-
-          <article class="property-card">
-            <div class="property-header">
-              <span class="status-pill warn">Revisión</span>
-              <span class="property-code">Casa 03</span>
-            </div>
-            <h3>Apartamento La Esperanza</h3>
-            <p>Aguachica, Cesar</p>
-            <ul>
-              <li>4 paneles solares</li>
-              <li>Producción: 2.7 kWh</li>
-              <li>Consumo estimado: 2.4 kWh</li>
-            </ul>
-            <button class="secondary-btn full-width">Ver detalle</button>
-          </article>
+        <section class="cards-grid property-grid" id="propertyGrid">
+          <p style="padding: 15px; color: #666;">Cargando propiedades...</p>
         </section>
       </main>
     </div>
+
+    <script src="../../Logica/propiedades.js"></script>
   </body>
 </html>

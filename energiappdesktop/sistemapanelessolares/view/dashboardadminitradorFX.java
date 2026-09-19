@@ -71,9 +71,10 @@ public class dashboardadminitradorFX {
 
         Tab tabPaneles = new Tab("⚡  Catálogo de Paneles", crearPanelPaneles());
         Tab tabClientes = new Tab("👥  Clientes", crearPanelUsuarios());
+        Tab tabVista3D = new Tab("🏠  Vista 3D", crearPanelVista3D());
         Tab tabCitas = new PestanaCitasAdminFX(solarServicio).crearPestana();
 
-        tabPane.getTabs().addAll(tabPaneles, tabClientes, tabCitas);
+        tabPane.getTabs().addAll(tabPaneles, tabClientes, tabVista3D, tabCitas);
         root.setCenter(tabPane);
 
         Scene scene = new Scene(root, 1400, 800);
@@ -452,6 +453,122 @@ public class dashboardadminitradorFX {
                 System.err.println("Error actualizar estado: " + ex.getMessage());
             }
         }
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // ── TAB: VISTA 3D DE LA PROPIEDAD ─────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════
+    private VBox crearPanelVista3D() {
+        VBox layout = new VBox(18);
+        layout.setPadding(new Insets(20));
+        layout.setStyle("-fx-background-color: " + C_BG + ";");
+
+        Label titulo = new Label("Visualización 3D de vivienda y paneles solares");
+        titulo.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: " + C_TEXT + ";");
+
+        Label sub = new Label("Compara tres modelos típicos: casa residencial, apartamento y edificio para evaluar el espacio disponible.");
+        sub.setStyle("-fx-font-size: 12px; -fx-text-fill: " + C_TEXT_S + ";");
+
+        ComboBox<String> comboModelo = new ComboBox<>();
+        comboModelo.getItems().addAll("Casa residencial", "Apartamento", "Edificio");
+        comboModelo.setValue("Casa residencial");
+
+        StackPane vista3D = new StackPane();
+        vista3D.setStyle("-fx-background-color: " + C_SURFACE + "; -fx-background-radius: 18; -fx-border-color: " + C_BORDER + "; -fx-border-radius: 18;");
+        vista3D.setPrefSize(820, 460);
+        vista3D.setMinSize(600, 400);
+        vista3D.setPadding(new Insets(12));
+
+        Label resumen = new Label();
+        resumen.setWrapText(true);
+        resumen.setStyle("-fx-font-size: 12px; -fx-text-fill: " + C_TEXT + "; -fx-padding: 12; -fx-background-color: rgba(255,255,255,0.6); -fx-background-radius: 10;");
+
+        Runnable actualizarVista = () -> {
+            PanelSolar panelDemo = new PanelSolar(
+                    "SunPower Maxeon 3",
+                    "Monocristalino",
+                    400,
+                    22.6,
+                    350,
+                    80,
+                    "25",
+                    "Panel premium para máxima producción"
+            );
+
+            sistemapanelessolares.dominio.Casa casaDemo;
+            String tipo = comboModelo.getValue();
+            switch (tipo) {
+                case "Apartamento":
+                    sistemapanelessolares.dominio.Apartamento apto = new sistemapanelessolares.dominio.Apartamento(
+                            "Apto. 305 - Torre Norte",
+                            "Bogotá",
+                            260,
+                            4.7,
+                            -74.1,
+                            5,
+                            "Torre Norte",
+                            true,
+                            18,
+                            "Este");
+                    apto.setAreaAzoteaAsignadaM2(30);
+                    casaDemo = apto;
+                    break;
+                case "Edificio":
+                    sistemapanelessolares.dominio.Edificio edificio = new sistemapanelessolares.dominio.Edificio(
+                            "Av. 80 # 15 - 35",
+                            "Bogotá",
+                            950,
+                            4.7,
+                            -74.1,
+                            14,
+                            36,
+                            620,
+                            true
+                    );
+                    casaDemo = edificio;
+                    break;
+                default:
+                    sistemapanelessolares.dominio.CasaUnifamiliar casa = new sistemapanelessolares.dominio.CasaUnifamiliar(
+                            "Calle 10 # 15 - 20",
+                            "Valledupar",
+                            420,
+                            10.5,
+                            -73.2,
+                            1,
+                            120,
+                            "Inclinado",
+                            "Sur",
+                            28
+                    );
+                    casaDemo = casa;
+                    break;
+            }
+
+            int panelesNecesarios = Math.max(4, new sistemapanelessolares.logica.CalculadoraPanels(casaDemo, panelDemo, panelDemo.getCostoInstalacion()).calcularNumeroPaneles());
+            vista3D.getChildren().setAll(VistaModeloSolar3D.crearSubScene(casaDemo, panelDemo, panelesNecesarios));
+
+            double areaDisponible = casaDemo instanceof sistemapanelessolares.dominio.CasaUnifamiliar
+                    ? ((sistemapanelessolares.dominio.CasaUnifamiliar) casaDemo).getAreaDisponibleParaPaneles()
+                    : casaDemo instanceof sistemapanelessolares.dominio.Apartamento
+                            ? ((sistemapanelessolares.dominio.Apartamento) casaDemo).getAreaDisponibleParaPaneles()
+                            : casaDemo instanceof sistemapanelessolares.dominio.Edificio
+                                    ? ((sistemapanelessolares.dominio.Edificio) casaDemo).getAreaDisponibleParaPaneles()
+                                    : 0;
+
+            resumen.setText("Propiedad: " + tipo + "\n"
+                    + "Área útil estimada: " + String.format("%.1f m²", areaDisponible) + "\n"
+                    + "Paneles sugeridos: " + panelesNecesarios + "\n"
+                    + "Producción estimada: " + String.format("%.1f kWh/mes", new sistemapanelessolares.logica.CalculadoraPanels(casaDemo, panelDemo, panelDemo.getCostoInstalacion()).calcularGeneracionMensualKWh()));
+        };
+
+        comboModelo.setOnAction(e -> actualizarVista.run());
+        actualizarVista.run();
+
+        HBox toolbar = new HBox(12, new Label("Tipo de inmueble:"), comboModelo);
+        toolbar.setAlignment(Pos.CENTER_LEFT);
+
+        layout.getChildren().addAll(titulo, sub, toolbar, vista3D, resumen);
+        return layout;
     }
 
     // ── Helpers ───────────────────────────────────────────────────────

@@ -86,14 +86,67 @@ exports.crearCita = async (req, res) => {
   }
 };
 
-// Asistente IA / Chat Mock de integración con DeepSeek API
+// Asistente IA conectado a la base de datos PostgreSQL
 exports.procesarAsistenteIA = async (req, res) => {
-  const { mensaje } = req.body;
+  const { mensaje, id_usuario } = req.body || {};
   try {
-    // Si cuentas con la libreria de DeepSeek / OpenAI, aquí se redirige la solicitud.
-    const respuesta = `He analizado tu mensaje: "${mensaje}". Te sugiero revisar el rendimiento de tus paneles entre las 11:00 AM y 2:00 PM para un ahorro óptimo.`;
+    const texto = (mensaje || '').trim();
+
+    const usuarioResult = id_usuario
+      ? await db.query(
+          `SELECT id_usuario, nombre, apellido, ciudad FROM usuarios WHERE id_usuario = $1`,
+          [id_usuario]
+        )
+      : await db.query(
+          `SELECT id_usuario, nombre, apellido, ciudad FROM usuarios ORDER BY id_usuario ASC LIMIT 1`
+        );
+
+    const casaResult = id_usuario
+      ? await db.query(
+          `SELECT id_casa, direccion, ciudad, consumo_mensual FROM casas WHERE id_usuario = $1 ORDER BY id_casa DESC LIMIT 1`,
+          [id_usuario]
+        )
+      : await db.query(
+          `SELECT id_casa, direccion, ciudad, consumo_mensual FROM casas ORDER BY id_casa DESC LIMIT 1`
+        );
+
+    const citaResult = id_usuario
+      ? await db.query(
+          `SELECT COUNT(*) AS total_citas, SUM(CASE WHEN estado = 'PENDIENTE' THEN 1 ELSE 0 END) AS pendientes FROM citas WHERE id_usuario = $1`,
+          [id_usuario]
+        )
+      : await db.query(
+          `SELECT COUNT(*) AS total_citas, SUM(CASE WHEN estado = 'PENDIENTE' THEN 1 ELSE 0 END) AS pendientes FROM citas`
+        );
+
+    const usuario = usuarioResult.rows[0];
+    const casa = casaResult.rows[0];
+    const cita = citaResult.rows[0];
+
+    const nombreUsuario = usuario ? `${usuario.nombre} ${usuario.apellido}`.trim() : 'usuario';
+    const direccionCasa = casa ? casa.direccion : 'tu propiedad';
+    const consumoMensual = casa ? Number(casa.consumo_mensual || 0).toFixed(0) : '0';
+    const citasPendientes = Number(cita?.pendientes || 0);
+    const textoLower = texto.toLowerCase();
+
+    let respuesta = `He revisado la información registrada en la base de datos para ${nombreUsuario}.`;
+
+    if (textoLower.includes('ahorro') || textoLower.includes('consumo')) {
+      respuesta += ` Tu vivienda ${direccionCasa} registra un consumo mensual de ${consumoMensual} kWh.`;
+      if (citasPendientes > 0) {
+        respuesta += ` También tienes ${citasPendientes} citas pendientes para revisar tu sistema solar.`;
+      } else {
+        respuesta += ` No tienes citas pendientes; puedes revisar el rendimiento del sistema.`;
+      }
+    } else if (textoLower.includes('cita') || textoLower.includes('agenda')) {
+      respuesta += ` Actualmente tienes ${citasPendientes} citas pendientes y puedes programar una nueva visita técnica.`;
+    } else {
+      respuesta += ` En ${direccionCasa} puedo ayudarte a revisar consumo, producción y mantenimiento del sistema solar.`;
+    }
+
     res.json({ exito: true, respuesta });
   } catch (error) {
-    res.status(500).json({ exito: false, mensaje: 'Error al conectar con la IA' });
+    console.error('Error al consultar el asistente IA:', error);
+    res.status(500).json({ exito: false, mensaje: 'Error al conectar con la base de datos' });
   }
 };

@@ -13,9 +13,9 @@ exports.registrarUsuario = async (req, res) => {
 
     // Insertar nuevo usuario según baseDatos.sql
     const query = `
-      INSERT INTO usuarios (nombre, apellido, correo, ciudad, telefono, contrasena)
-      VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING id_usuario, nombre, apellido, correo, ciudad, telefono
+      INSERT INTO usuarios (nombre, apellido, correo, ciudad, telefono, contrasena, estado)
+      VALUES ($1, $2, $3, $4, $5, $6, 'ACTIVO')
+      RETURNING id_usuario, nombre, apellido, correo, ciudad, telefono, estado
     `;
     const valores = [nombre, apellido, correo, ciudad, telefono, contrasena];
     const resultado = await db.query(query, valores);
@@ -73,4 +73,4 @@ exports.loginUsuario = async (req, res) => {
     console.error('Error en loginUsuario:', error);
     res.status(500).json({ exito: false, mensaje: 'Error al procesar la solicitud' });
   }
-};s
+};

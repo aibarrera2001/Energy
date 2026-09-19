@@ -273,57 +273,70 @@
     </div>
 
     <script>
-      document.getElementById('loginForm').addEventListener('submit', function(e) {
+      async function parseJsonSeguro(response) {
+        const contentType = response.headers.get('content-type') || '';
+
+        if (contentType.includes('application/json')) {
+          return response.json();
+        }
+
+        const text = await response.text();
+
+        if (!text) {
+          return {};
+        }
+
+        try {
+          return JSON.parse(text);
+        } catch (error) {
+          return {
+            exito: false,
+            mensaje: text || 'Error de conexión con el servidor'
+          };
+        }
+      }
+
+      document.getElementById('loginForm').addEventListener('submit', async function(e) {
         e.preventDefault();
 
         const correo = document.getElementById('correo').value.trim();
         const contrasena = document.getElementById('contrasena').value;
-        const errorDiv = document.getElementById('errorMessage');
 
-        // Validar campos
         if (!correo || !contrasena) {
           mostrarError('Por favor completa todos los campos');
           return;
         }
 
-        // Crear objeto con datos del login
         const datosLogin = {
           correo: correo,
           contrasena: contrasena
         };
 
-        // Enviar al servidor
-        fetch('/api/usuarios/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(datosLogin)
-        })
-        .then(response => {
-          if (!response.ok) {
-            return response.json().then(data => Promise.reject(data));
+        try {
+          const response = await fetch('/api/usuarios/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(datosLogin)
+          });
+
+          const data = await parseJsonSeguro(response);
+
+          if (!response.ok || !data.exito) {
+            throw new Error(data.mensaje || 'Error al iniciar sesión');
           }
-          return response.json();
-        })
-        .then(data => {
-          if (data.exito) {
-            mostrarError('');
-            // Guardar información en localStorage
-            localStorage.setItem('usuarioId', data.datos.id);
-            localStorage.setItem('usuarioNombre', data.datos.nombre);
-            localStorage.setItem('usuarioCorreo', data.datos.correo);
-            
-            // Redirigir al dashboard
-            window.location.href = 'usuario-dashboard.html';
-          } else {
-            mostrarError(data.mensaje || 'Error al iniciar sesión');
-          }
-        })
-        .catch(error => {
+
+          mostrarError('');
+          localStorage.setItem('usuarioId', data.datos.id);
+          localStorage.setItem('usuarioNombre', data.datos.nombre);
+          localStorage.setItem('usuarioCorreo', data.datos.correo);
+
+          window.location.href = 'dashboard.html';
+        } catch (error) {
           console.error('Error:', error);
-          mostrarError(error.mensaje || 'Error de conexión con el servidor');
-        });
+          mostrarError(error.message || 'Error de conexión con el servidor');
+        }
       });
 
       function mostrarError(mensaje) {

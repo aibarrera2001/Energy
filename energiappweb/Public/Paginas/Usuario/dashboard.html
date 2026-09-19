@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EnergiApp | Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../../estilo/indexStyles.css" />
+  </head>
+  <body class="dashboard-body">
+    <div class="dashboard-shell">
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-mark">⚡</div>
+          <div>
+            <h3>EnergiApp</h3>
+            <small>Usuario</small>
+          </div>
+        </div>
+
+        <nav class="nav-menu">
+          <a class="active" href="dashboard.html">🏠 Dashboard</a>
+          <a href="propiedades.html">🏡 Propiedades</a>
+          <a href="paneles.html">🔋 Paneles</a>
+          <a href="citas.html">📅 Citas</a>
+          <a href="reportes.html">📊 Reportes</a>
+          <a href="asistente.html">🤖 Asistente IA</a>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="badge">Estado</span>
+          <strong>Online</strong>
+          <small>Rendimiento normal</small>
+        </div>
+      </aside>
+
+      <main class="dashboard-main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Panel del usuario</p>
+            <h2>Resumen de energía</h2>
+          </div>
+          <div class="actions">
+            <button class="ghost-btn">Exportar</button>
+            <a href="../Principal/index.html" class="primary-btn small-btn">Salir</a>
+          </div>
+        </header>
+
+        <section class="stats-grid">
+          <article class="stat-card accent">
+            <span>Producción</span>
+            <strong>0.0 kWh</strong>
+            <small>Sin datos</small>
+          </article>
+          <article class="stat-card">
+            <span>Consumo</span>
+            <strong>0.0 kWh</strong>
+            <small>Sin datos</small>
+          </article>
+          <article class="stat-card">
+            <span>Ahorro</span>
+            <strong>+0%</strong>
+            <small>Inicia sesión</small>
+          </article>
+          <article class="stat-card">
+            <span>Paneles</span>
+            <strong>0</strong>
+            <small>Activos</small>
+          </article>
+        </section>
+
+        <section class="content-grid">
+          <div class="panel large-panel">
+            <div class="panel-head">
+              <h3>Producción diaria</h3>
+              <span>Últimos 7 días</span>
+            </div>
+            <div class="chart-bars">
+              <div><span style="height: 38%"></span></div>
+              <div><span style="height: 52%"></span></div>
+              <div><span style="height: 62%"></span></div>
+              <div><span style="height: 70%"></span></div>
+              <div><span style="height: 84%"></span></div>
+              <div><span style="height: 92%"></span></div>
+              <div><span style="height: 100%"></span></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Alertas</h3>
+            </div>
+            <ul class="status-list">
+              <li><span class="dot ok"></span> Sistema funcionando normalmente</li>
+              <li><span class="dot warn"></span> Revisión recomendada en 2 días</li>
+              <li><span class="dot ok"></span> Cobertura solar estable</li>
+            </ul>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="../../Logica/dashboard.js"></script>
+  </body>
+</html>
