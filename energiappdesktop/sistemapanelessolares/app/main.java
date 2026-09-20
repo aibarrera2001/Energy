@@ -21,7 +21,7 @@ public class main extends Application {
             if (conexion != null && !conexion.isClosed()) {
                 System.out.println("Conexion validada correctamente con la base de datos.");
             } else {
-                System.out.println("La base de datos aun no esta configurada. Listo para conectarla con tu nueva estructura.");
+                System.out.println("No se pudo conectar. Revisa las variables DB_URL, DB_USER y DB_PASSWORD.");
             }
         } catch (Exception e) {
             System.err.println("Error al validar la conexion: " + e.getMessage());
@@ -35,6 +35,9 @@ public class main extends Application {
     public void start(Stage stage) {
         SolarService solarService = new SolarService();
         Connection conexion = ConexionDB.conectar();
+        if (conexion == null) {
+            System.err.println("Advertencia: la aplicación inicia sin conexión a la base de datos.");
+        }
         new InicioSessionAdministrativoFX(solarService, conexion).mostrarVentanaAcceso(stage);
     }
 }
