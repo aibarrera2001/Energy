@@ -34,10 +34,9 @@ const config = process.env.DATABASE_URL
         ...(isSupabaseConnection ? { ssl: { rejectUnauthorized: false } } : {})
       };
 
-if (process.env.SUPABASE_URL && !process.env.DB_PASSWORD) {
-  console.warn('Supabase configurado, pero falta DB_PASSWORD para la conexión directa a PostgreSQL. Añádelo al .env.');
+if (!process.env.DATABASE_URL) {
+  console.warn('Falta DATABASE_URL en el .env: se usará la configuración local (localhost).');
 }
-
 const pool = new Pool(config);
 
 pool.on('connect', () => {
