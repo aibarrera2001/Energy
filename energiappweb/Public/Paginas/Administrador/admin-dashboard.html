@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="../../estilo/indexStyles.css" />
   </head>
   <body class="dashboard-body">
     <div class="dashboard-shell">
@@ -21,12 +21,12 @@
         </div>
 
         <nav class="nav-menu">
-          <a class="active" href="admin-dashboard.html">🏠 Dashboard</a>
-          <a href="admin-usuarios.html">👥 Usuarios</a>
-          <a href="admin-paneles.html">🔋 Paneles</a>
-          <a href="admin-citas.html">📅 Citas</a>
-          <a href="admin-mantenimiento.html">🛠️ Mantenimiento</a>
-          <a href="admin-reportes.html">📊 Reportes</a>
+          <a class="active" href="/admin-dashboard">🏠 Dashboard</a>
+          <a href="/Paginas/Administrador/admin-usuarios.html">👥 Usuarios</a>
+          <a href="/Paginas/Administrador/admin-paneles.html">🔋 Paneles</a>
+          <a href="/Paginas/Administrador/admin-citas.html">📅 Citas</a>
+          <a href="/Paginas/Administrador/admin-mantenimiento.html">🛠️ Mantenimiento</a>
+          <a href="/Paginas/Administrador/admin-reportes.html">📊 Reportes</a>
         </nav>
 
         <div class="sidebar-card">
@@ -40,34 +40,34 @@
         <header class="topbar">
           <div>
             <p class="eyebrow">Panel administrativo</p>
-            <h2>Resumen general</h2>
+            <h2 id="empresaNombre">Resumen general</h2>
           </div>
           <div class="actions">
             <button class="ghost-btn">Exportar</button>
-            <a href="index.html" class="primary-btn small-btn">Salir</a>
+            <a href="/admin-login" class="primary-btn small-btn">Salir</a>
           </div>
         </header>
 
         <section class="stats-grid">
           <article class="stat-card accent">
             <span>Usuarios</span>
-            <strong>1.248</strong>
-            <small>+8% este mes</small>
+            <strong id="usuariosTotal">0</strong>
+            <small>Registrados</small>
           </article>
           <article class="stat-card">
             <span>Casas</span>
-            <strong>528</strong>
+            <strong id="casasTotal">0</strong>
             <small>Activas</small>
           </article>
           <article class="stat-card">
-            <span>Incidencias</span>
-            <strong>24</strong>
-            <small>12 críticas</small>
+            <span>Citas pendientes</span>
+            <strong id="citasPendientes">0</strong>
+            <small>Por revisar</small>
           </article>
           <article class="stat-card">
-            <span>Eficiencia</span>
-            <strong>91.2%</strong>
-            <small>Rendimiento</small>
+            <span>Paneles</span>
+            <strong id="panelesTotal">0</strong>
+            <small>En inventario</small>
           </article>
         </section>
 
@@ -139,5 +139,41 @@
         </section>
       </main>
     </div>
+
+    <script>
+      const storedEmpresa = JSON.parse(localStorage.getItem('adminEmpresa') || 'null');
+
+      if (!storedEmpresa || !storedEmpresa.id_empresa) {
+        window.location.href = '/admin-login';
+      } else {
+        const empresaNombre = document.getElementById('empresaNombre');
+        const usuariosTotal = document.getElementById('usuariosTotal');
+        const casasTotal = document.getElementById('casasTotal');
+        const citasPendientes = document.getElementById('citasPendientes');
+        const panelesTotal = document.getElementById('panelesTotal');
+
+        empresaNombre.textContent = storedEmpresa.nombre || 'Empresa EnergiApp';
+
+        fetch(`/api/admin/dashboard/${storedEmpresa.id_empresa}`)
+          .then((response) => response.json())
+          .then((data) => {
+            if (!data.exito) {
+              throw new Error(data.mensaje || 'No se pudo cargar el resumen.');
+            }
+
+            usuariosTotal.textContent = data.metrics?.usuarios ?? 0;
+            casasTotal.textContent = data.metrics?.casas ?? 0;
+            citasPendientes.textContent = data.metrics?.citas_pendientes ?? 0;
+            panelesTotal.textContent = data.metrics?.total_paneles ?? 0;
+          })
+          .catch((error) => {
+            console.error(error);
+            usuariosTotal.textContent = '0';
+            casasTotal.textContent = '0';
+            citasPendientes.textContent = '0';
+            panelesTotal.textContent = '0';
+          });
+      }
+    </script>
   </body>
 </html>

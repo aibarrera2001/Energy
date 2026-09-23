@@ -1,0 +1,116 @@
+"""
+Construye una escena 3D interactiva (rotar, hacer zoom, hover) de la casa y
+sus paneles solares con Plotly. Devuelve la figura como dict (fig.to_dict())
+para que el frontend la renderice con Plotly.js:
+
+    fetch('/api/visualizacion/3d', {...})
+      .then(r => r.json())
+      .then(({data, layout}) => Plotly.newPlot('contenedor3d', data, layout));
+
+Plotly.js se carga una sola vez por CDN en la página del usuario
+(https://cdn.plot.ly/plotly-2.35.2.min.js) — no hace falta reenviarlo.
+"""
+
+import plotly.graph_objects as go
+
+from calculos_financieros import area_utilizable_m2, numero_paneles_estimado, AREA_PANEL_M2
+
+COLOR_MURO = "#cbd5e1"
+COLOR_TECHO = "#94a3b8"
+COLOR_PANEL = "#1e293b"
+COLOR_PANEL_BORDE = "#38bdf8"
+
+ALTURA_PISO = 3.0  # metros
+
+
+def _cuboid(x0, y0, z0, dx, dy, dz, color, opacity=1.0, nombre=""):
+    """Un prisma rectangular (muro/piso) como Mesh3d."""
+    x = [x0, x0, x0 + dx, x0 + dx, x0, x0, x0 + dx, x0 + dx]
+    y = [y0, y0 + dy, y0 + dy, y0, y0, y0 + dy, y0 + dy, y0]
+    z = [z0, z0, z0, z0, z0 + dz, z0 + dz, z0 + dz, z0 + dz]
+
+    i = [0, 0, 4, 4, 0, 0, 1, 1, 2, 2, 3, 3]
+    j = [1, 2, 5, 6, 1, 5, 2, 6, 3, 7, 0, 4]
+    k = [2, 3, 6, 7, 5, 4, 6, 5, 7, 6, 4, 7]
+
+    return go.Mesh3d(
+        x=x, y=y, z=z, i=i, j=j, k=k,
+        color=color, opacity=opacity, name=nombre,
+        flatshading=True, hoverinfo="name",
+    )
+
+
+def _panel(x0, y0, z, ancho, largo, indice):
+    """Un panel solar como rectángulo plano ligeramente elevado sobre el techo."""
+    x = [x0, x0 + ancho, x0 + ancho, x0]
+    y = [y0, y0, y0 + largo, y0 + largo]
+    z4 = [z, z, z, z]
+
+    return go.Mesh3d(
+        x=x, y=y, z=z4,
+        i=[0], j=[1], k=[2],
+        color=COLOR_PANEL, opacity=0.95,
+        name=f"Panel {indice}",
+        hovertemplate=f"Panel solar {indice}<extra></extra>",
+    )
+
+
+def generar_escena_3d(
+    area_techo_m2: float,
+    tipo_propiedad: str,
+    numero_pisos: int,
+    eficiencia_panel: float = 0.18,
+    numero_paneles: int | None = None,
+) -> dict:
+    # Aproximamos una huella cuadrada a partir del área de techo total
+    lado = max(4.0, area_techo_m2 ** 0.5)
+    altura_total = ALTURA_PISO * max(1, numero_pisos)
+
+    figura_data = []
+
+    # Cuerpo del edificio/casa
+    figura_data.append(_cuboid(0, 0, 0, lado, lado, altura_total, COLOR_MURO, opacity=0.55, nombre=tipo_propiedad.title()))
+    # Techo (losa delgada)
+    figura_data.append(_cuboid(0, 0, altura_total, lado, lado, 0.2, COLOR_TECHO, opacity=0.9, nombre="Techo"))
+
+    # Distribución de paneles sobre el techo utilizable
+    n_paneles = numero_paneles if numero_paneles is not None else numero_paneles_estimado(area_techo_m2, tipo_propiedad)
+    area_util = area_utilizable_m2(area_techo_m2, tipo_propiedad)
+
+    ancho_panel = AREA_PANEL_M2 ** 0.5 * 1.3   # panel apaisado ~1.6m x 1.3m
+    largo_panel = AREA_PANEL_M2 / ancho_panel
+    margen = lado * 0.08
+    z_paneles = altura_total + 0.25
+
+    columnas = max(1, int((lado - 2 * margen) // (ancho_panel + 0.15)))
+    fila, columna = 0, 0
+
+    for idx in range(1, n_paneles + 1):
+        x0 = margen + columna * (ancho_panel + 0.15)
+        y0 = margen + fila * (largo_panel + 0.15)
+
+        if y0 + largo_panel > lado - margen:
+            break  # techo lleno, sin más espacio físico
+
+        figura_data.append(_panel(x0, y0, z_paneles, ancho_panel, largo_panel, idx))
+
+        columna += 1
+        if columna >= columnas:
+            columna = 0
+            fila += 1
+
+    layout = go.Layout(
+        scene=dict(
+            xaxis=dict(title="", visible=False),
+            yaxis=dict(title="", visible=False),
+            zaxis=dict(title="Altura (m)", visible=True),
+            aspectmode="data",
+            camera=dict(eye=dict(x=1.6, y=1.6, z=1.1)),
+        ),
+        margin=dict(l=0, r=0, t=30, b=0),
+        title=f"{tipo_propiedad.title()} — {n_paneles} paneles solares estimados",
+        showlegend=False,
+    )
+
+    fig = go.Figure(data=figura_data, layout=layout)
+    return fig.to_dict()

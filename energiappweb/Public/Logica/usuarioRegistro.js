@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
       mostrarExito('✓ Cuenta creada exitosamente. Serás redirigido...');
 
       setTimeout(() => {
-        window.location.href = 'usuario-login.html';
+        window.location.href = '/usuario-login';
       }, 1500);
     } catch (error) {
       console.error('Error al registrar usuario:', error);

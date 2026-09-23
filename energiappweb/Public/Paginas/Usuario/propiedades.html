@@ -20,13 +20,18 @@
           </div>
         </div>
 
-        <nav class="nav-menu">
-          <a href="dashboard.html">🏠 Dashboard</a>
-          <a class="active" href="propiedades.html">🏡 Propiedades</a>
-          <a href="paneles.html">🔋 Paneles</a>
-          <a href="citas.html">📅 Citas</a>
-          <a href="reportes.html">📊 Reportes</a>
-          <a href="asistente.html">🤖 Asistente IA</a>
+        <nav class="nav-menu" aria-label="Menú principal">
+          <div class="nav-home-wrap">
+            <button class="nav-home-trigger active" type="button" aria-expanded="false">🏠 Inicio <span>▾</span></button>
+            <div class="nav-submenu open">
+              <a href="/dashboard">📊 Dashboard</a>
+              <a class="active" href="/Paginas/Usuario/propiedades.html">🏡 Propiedades</a>
+              <a href="/Paginas/Usuario/paneles.html">🔋 Paneles</a>
+              <a href="/Paginas/Usuario/citas.html">📅 Citas</a>
+              <a href="/Paginas/Usuario/reportes.html">📊 Reportes</a>
+              <a href="/Paginas/Usuario/asistente.html">🤖 Asistente IA</a>
+            </div>
+          </div>
         </nav>
 
         <div class="sidebar-card">
@@ -44,7 +49,7 @@
           </div>
           <div class="actions">
             <button class="ghost-btn" id="toggleFormBtn">Nueva propiedad</button>
-            <a href="../Principal/index.html" class="primary-btn small-btn">Salir</a>
+            <a href="/usuario-login" class="primary-btn small-btn" onclick="localStorage.clear()">Salir</a>
           </div>
         </header>
 
@@ -87,6 +92,8 @@
       </main>
     </div>
 
-    <script src="../../Logica/propiedades.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script src="../../Logica/verificacionInicioseccion.js"></script>
+    <script src="../../Logica/Propiedades.js"></script>
   </body>
 </html>

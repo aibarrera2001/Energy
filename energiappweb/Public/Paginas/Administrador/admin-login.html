@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="../../estilo/registroAdminStyle.css" />
   </head>
   <body>
     <div class="auth-shell">
@@ -25,7 +25,7 @@
 
         <main class="auth-form-panel">
           <div class="topbar-inline">
-            <a href="index.html" class="back-link">← Volver</a>
+            <a href="/" class="back-link">← Volver</a>
           </div>
 
           <div class="form-header">
@@ -33,15 +33,15 @@
             <p>Ingresa tus credenciales de administración</p>
           </div>
 
-          <form class="form-box">
+          <form class="form-box" id="adminLoginForm">
             <label>
               <span>Usuario administrador</span>
-              <input type="text" placeholder="admin@energiapp.com" />
+              <input id="adminEmail" name="email" type="email" placeholder="admin@energiapp.com" required />
             </label>
 
             <label>
               <span>Contraseña</span>
-              <input type="password" placeholder="••••••••" />
+              <input id="adminPassword" name="password" type="password" placeholder="••••••••" required />
             </label>
 
             <div class="row-between">
@@ -57,15 +57,52 @@
 
           <div class="separator"><span>o</span></div>
 
-          <a href="admin-dashboard.html" class="secondary-btn">Abrir administrador</a>
+          <a href="/admin-login" class="secondary-btn">Abrir administrador</a>
 
           <div class="separator"><span>¿Nueva empresa?</span></div>
 
-          <a href="admin-registro.html" class="secondary-btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none;">
+          <a href="/admin-registro" class="secondary-btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none;">
             Registrar Empresa
           </a>
         </main>
       </div>
     </div>
+
+    <script>
+      const form = document.getElementById('adminLoginForm');
+      const emailInput = document.getElementById('adminEmail');
+      const passwordInput = document.getElementById('adminPassword');
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const email = emailInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        if (!email || !password) {
+          alert('Debes ingresar el correo y la contraseña del administrador.');
+          return;
+        }
+
+        try {
+          const response = await fetch('/api/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+
+          const data = await response.json();
+
+          if (!response.ok || !data.exito) {
+            throw new Error(data.mensaje || 'No se pudo iniciar sesión.');
+          }
+
+          localStorage.setItem('adminEmpresa', JSON.stringify(data.empresa));
+          window.location.href = '/admin-dashboard';
+        } catch (error) {
+          alert(error.message || 'Error en el inicio de sesión');
+        }
+      });
+    </script>
   </body>
 </html>

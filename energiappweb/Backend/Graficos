@@ -1,0 +1,64 @@
+"""
+Genera gráficos de balance energético y proyección económica como PNG en
+base64, listos para insertar en el frontend con:
+    <img src="data:image/png;base64,{valor_recibido}" />
+"""
+
+import base64
+import io
+
+import matplotlib
+matplotlib.use("Agg")  # backend sin pantalla, requerido en un servidor
+import matplotlib.pyplot as plt
+
+COLOR_PRODUCCION = "#f59e0b"  # ámbar, acorde al acento solar de EnergiApp
+COLOR_CONSUMO = "#667eea"
+COLOR_AHORRO = "#27ae60"
+
+
+def _figura_a_base64(fig) -> str:
+    buffer = io.BytesIO()
+    fig.savefig(buffer, format="png", dpi=150, bbox_inches="tight", transparent=True)
+    plt.close(fig)
+    buffer.seek(0)
+    return base64.b64encode(buffer.read()).decode("utf-8")
+
+
+def generar_grafico_balance(consumo_mensual_kwh: float, produccion_mensual_kwh: float) -> str:
+    """Barra comparativa producción vs. consumo mensual."""
+    fig, ax = plt.subplots(figsize=(5, 3.5))
+    categorias = ["Producción", "Consumo"]
+    valores = [produccion_mensual_kwh, consumo_mensual_kwh]
+    colores = [COLOR_PRODUCCION, COLOR_CONSUMO]
+
+    barras = ax.bar(categorias, valores, color=colores, width=0.5)
+    ax.set_ylabel("kWh / mes")
+    ax.set_title("Balance energético mensual")
+    ax.spines[["top", "right"]].set_visible(False)
+
+    for barra, valor in zip(barras, valores):
+        ax.annotate(f"{valor:.1f}", (barra.get_x() + barra.get_width() / 2, valor),
+                    textcoords="offset points", xytext=(0, 4), ha="center", fontsize=9)
+
+    return _figura_a_base64(fig)
+
+
+def generar_grafico_prediccion(proyeccion: list, payback_estimado_anios) -> str:
+    """Ahorro acumulado vs. costo de instalación a lo largo de los años."""
+    anios = [p["anio"] for p in proyeccion]
+    ahorro_acumulado = [p["ahorro_acumulado"] for p in proyeccion]
+
+    fig, ax = plt.subplots(figsize=(6, 3.5))
+    ax.plot(anios, ahorro_acumulado, color=COLOR_AHORRO, marker="o", linewidth=2, label="Ahorro acumulado")
+
+    if payback_estimado_anios is not None:
+        ax.axvline(payback_estimado_anios, color="#c62828", linestyle="--", linewidth=1,
+                    label=f"Retorno de inversión (~{payback_estimado_anios} años)")
+
+    ax.set_xlabel("Año")
+    ax.set_ylabel("$ acumulado")
+    ax.set_title("Proyección de ahorro económico")
+    ax.spines[["top", "right"]].set_visible(False)
+    ax.legend(fontsize=8, frameon=False)
+
+    return _figura_a_base64(fig)

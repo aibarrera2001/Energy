@@ -1,0 +1,130 @@
+"""
+Cálculo de aprovechamiento fotovoltaico y predicciones económicas.
+
+Fórmulas base (fase actual). La fase avanzada (regresión/series de tiempo
+sobre históricos reales de consumo/producción con scikit-learn) queda como
+`calcular_prediccion_avanzada` (stub) para cuando existan datos suficientes.
+"""
+
+from typing import Optional
+
+# Fracción del área de techo realmente aprovechable para paneles,
+# según el tipo de propiedad (el resto son accesos, sombras, equipos, etc.)
+FRACCION_UTILIZABLE = {
+    "CASA": 0.60,
+    "APARTAMENTO": 0.30,
+    "EDIFICIO": 0.50,
+}
+
+POTENCIA_PANEL_KW = 0.45  # panel estándar residencial ~450W
+AREA_PANEL_M2 = 2.1
+
+
+def area_utilizable_m2(area_techo_m2: float, tipo_propiedad: str) -> float:
+    fraccion = FRACCION_UTILIZABLE.get(tipo_propiedad, 0.5)
+    return area_techo_m2 * fraccion
+
+
+def numero_paneles_estimado(area_techo_m2: float, tipo_propiedad: str) -> int:
+    return max(0, int(area_utilizable_m2(area_techo_m2, tipo_propiedad) // AREA_PANEL_M2))
+
+
+def calcular_produccion_mensual(
+    area_techo_m2: float,
+    tipo_propiedad: str,
+    eficiencia_panel: float = 0.18,
+    horas_sol_pico: float = 5.0,
+    factor_perdidas: float = 0.85,
+) -> dict:
+    """Producción estimada a partir del área de techo y tipo de propiedad."""
+    n_paneles = numero_paneles_estimado(area_techo_m2, tipo_propiedad)
+    potencia_instalada_kw = n_paneles * POTENCIA_PANEL_KW
+    produccion_diaria_kwh = potencia_instalada_kw * horas_sol_pico * factor_perdidas
+    produccion_mensual_kwh = produccion_diaria_kwh * 30
+
+    return {
+        "numero_paneles": n_paneles,
+        "potencia_instalada_kw": round(potencia_instalada_kw, 2),
+        "produccion_diaria_kwh": round(produccion_diaria_kwh, 2),
+        "produccion_mensual_kwh": round(produccion_mensual_kwh, 2),
+    }
+
+
+def calcular_balance_energetico(consumo_mensual_kwh: float, produccion_mensual_kwh: float) -> dict:
+    autoconsumo = min(consumo_mensual_kwh, produccion_mensual_kwh)
+    excedente = max(0.0, produccion_mensual_kwh - consumo_mensual_kwh)
+    deficit = max(0.0, consumo_mensual_kwh - produccion_mensual_kwh)
+    cobertura_pct = round((produccion_mensual_kwh / consumo_mensual_kwh) * 100, 1) if consumo_mensual_kwh > 0 else 0.0
+
+    return {
+        "consumo_mensual_kwh": round(consumo_mensual_kwh, 2),
+        "produccion_mensual_kwh": round(produccion_mensual_kwh, 2),
+        "autoconsumo_kwh": round(autoconsumo, 2),
+        "excedente_kwh": round(excedente, 2),
+        "deficit_kwh": round(deficit, 2),
+        "cobertura_pct": cobertura_pct,
+    }
+
+
+def calcular_prediccion_economica(
+    consumo_mensual_kwh: float,
+    produccion_mensual_kwh: float,
+    tarifa_kwh: float,
+    costo_instalacion: float,
+    tarifa_excedente_kwh: Optional[float] = None,
+    anios_proyeccion: int = 10,
+    incremento_tarifa_anual: float = 0.05,
+) -> dict:
+    tarifa_excedente = tarifa_excedente_kwh if tarifa_excedente_kwh is not None else tarifa_kwh * 0.5
+
+    autoconsumo_anual_kwh = min(consumo_mensual_kwh, produccion_mensual_kwh) * 12
+    excedente_anual_kwh = max(0.0, produccion_mensual_kwh - consumo_mensual_kwh) * 12
+
+    proyeccion = []
+    ahorro_acumulado = 0.0
+    payback_anios = None
+
+    for anio in range(1, anios_proyeccion + 1):
+        tarifa_actual = tarifa_kwh * ((1 + incremento_tarifa_anual) ** (anio - 1))
+        tarifa_excedente_actual = tarifa_excedente * ((1 + incremento_tarifa_anual) ** (anio - 1))
+
+        ahorro_anual = (autoconsumo_anual_kwh * tarifa_actual) + (excedente_anual_kwh * tarifa_excedente_actual)
+        ahorro_acumulado += ahorro_anual
+
+        if payback_anios is None and ahorro_acumulado >= costo_instalacion:
+            # interpolación simple dentro del año en que se recupera la inversión
+            ahorro_anio_anterior = ahorro_acumulado - ahorro_anual
+            fraccion_anio = (costo_instalacion - ahorro_anio_anterior) / ahorro_anual if ahorro_anual > 0 else 0
+            payback_anios = round((anio - 1) + fraccion_anio, 2)
+
+        roi_pct = round(((ahorro_acumulado - costo_instalacion) / costo_instalacion) * 100, 1)
+
+        proyeccion.append({
+            "anio": anio,
+            "ahorro_anual": round(ahorro_anual, 2),
+            "ahorro_acumulado": round(ahorro_acumulado, 2),
+            "roi_pct": roi_pct,
+        })
+
+    return {
+        "costo_instalacion": costo_instalacion,
+        "payback_estimado_anios": payback_anios,
+        "ahorro_total_periodo": round(ahorro_acumulado, 2),
+        "roi_final_pct": proyeccion[-1]["roi_pct"] if proyeccion else None,
+        "proyeccion": proyeccion,
+    }
+
+
+def calcular_prediccion_avanzada(historico_consumo_produccion: list) -> dict:
+    """
+    Fase futura: modelo de regresión/series de tiempo (scikit-learn) sobre
+    históricos reales de consumo y producción por casa, para proyectar
+    tendencias en vez de asumir una tarifa/consumo constantes.
+
+    Aún no implementado — requiere que existan suficientes registros
+    históricos en la tabla `casas`/futuras tablas de lecturas.
+    """
+    raise NotImplementedError(
+        "Modelo avanzado pendiente: se activará cuando haya histórico suficiente "
+        "de consumo/producción por casa."
+    )

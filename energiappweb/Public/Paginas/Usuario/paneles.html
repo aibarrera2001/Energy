@@ -20,19 +20,24 @@
           </div>
         </div>
 
-        <nav class="nav-menu">
-          <a href="dashboard.html">🏠 Dashboard</a>
-          <a href="propiedades.html">🏡 Propiedades</a>
-          <a class="active" href="paneles.html">🔋 Paneles</a>
-          <a href="citas.html">📅 Citas</a>
-          <a href="reportes.html">📊 Reportes</a>
-          <a href="asistente.html">🤖 Asistente IA</a>
+        <nav class="nav-menu" aria-label="Menú principal">
+          <div class="nav-home-wrap">
+            <button class="nav-home-trigger active" type="button" aria-expanded="false">🏠 Inicio <span>▾</span></button>
+            <div class="nav-submenu open">
+              <a href="/dashboard">📊 Dashboard</a>
+              <a href="/Paginas/Usuario/propiedades.html">🏡 Propiedades</a>
+              <a class="active" href="/Paginas/Usuario/paneles.html">🔋 Paneles</a>
+              <a href="/Paginas/Usuario/citas.html">📅 Citas</a>
+              <a href="/Paginas/Usuario/reportes.html">📊 Reportes</a>
+              <a href="/Paginas/Usuario/asistente.html">🤖 Asistente IA</a>
+            </div>
+          </div>
         </nav>
 
         <div class="sidebar-card">
           <span class="badge">Paneles</span>
-          <strong>26</strong>
-          <small>Activos</small>
+          <strong id="panelesBadge">0</strong>
+          <small id="panelesBadgeLabel">Sin paneles</small>
         </div>
       </aside>
 
@@ -44,69 +49,82 @@
           </div>
           <div class="actions">
             <button class="ghost-btn">Calcular desempeño</button>
-            <a href="index.html" class="primary-btn small-btn">Salir</a>
+            <a href="/usuario-login" class="primary-btn small-btn" onclick="localStorage.clear()">Salir</a>
           </div>
         </header>
 
         <section class="stats-grid">
           <article class="stat-card accent">
             <span>Producción</span>
-            <strong>18.4 kWh</strong>
-            <small>Hoy</small>
+            <strong id="prodPaneles">0 kWh</strong>
+            <small id="prodPanelesTexto">Sin datos</small>
           </article>
           <article class="stat-card">
             <span>Rendimiento</span>
-            <strong>87.5%</strong>
-            <small>Óptimo</small>
-          </article>
-          <article class="stat-card">
-            <span>Ahorrado</span>
-            <strong>$540</strong>
-            <small>Mes actual</small>
+            <strong id="rendPaneles">0%</strong>
+            <small id="rendPanelesTexto">Sin datos</small>
           </article>
           <article class="stat-card">
             <span>Estado</span>
-            <strong>Normal</strong>
-            <small>Sin fallas</small>
+            <strong id="estadoPaneles">Sin datos</strong>
+            <small id="estadoPanelesTexto">Sin paneles</small>
           </article>
+          <article class="stat-card">
+            <span>Selección</span>
+            <strong id="panelSeleccionado">-</strong>
+            <small id="panelSeleccionadoTexto">Sin elegir</small>
+          </article>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h3>Registrar panel</h3>
+          </div>
+          <form id="panelInventoryForm" class="booking-form panel-inventory-form">
+            <div class="inventory-grid">
+              <label>
+                <span>Nombre del modelo</span>
+                <input type="text" id="panelNombre" placeholder="Panel X200" maxlength="80" required />
+              </label>
+              <label>
+                <span>Tipo</span>
+                <input type="text" id="panelTipo" placeholder="Monocristalino" maxlength="50" required />
+              </label>
+              <label>
+                <span>Potencia (W)</span>
+                <input type="number" id="panelPotencia" placeholder="450" min="0" step="0.01" required />
+              </label>
+              <label>
+                <span>Eficiencia (%)</span>
+                <input type="number" id="panelEficiencia" placeholder="22" min="0" max="100" step="0.01" required />
+              </label>
+              <label>
+                <span>Stock</span>
+                <input type="number" id="panelStock" placeholder="12" min="0" step="1" required />
+              </label>
+              <label>
+                <span>Precio</span>
+                <input type="number" id="panelPrecio" placeholder="450000" min="0" step="0.01" required />
+              </label>
+            </div>
+            <div class="inline-form-actions">
+              <button type="submit" class="primary-btn">Guardar en inventario</button>
+              <span id="panelInventoryStatus" class="form-status" aria-live="polite"></span>
+            </div>
+          </form>
         </section>
 
         <section class="panel">
           <div class="panel-head">
             <h3>Inventario de paneles</h3>
           </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Panel</th>
-                <th>Ubicación</th>
-                <th>Producción</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Panel 01</td>
-                <td>Techo norte</td>
-                <td>2.4 kWh</td>
-                <td><span class="tag ok">Excelente</span></td>
-              </tr>
-              <tr>
-                <td>Panel 07</td>
-                <td>Techo sur</td>
-                <td>2.1 kWh</td>
-                <td><span class="tag ok">Excelente</span></td>
-              </tr>
-              <tr>
-                <td>Panel 12</td>
-                <td>Patio</td>
-                <td>1.7 kWh</td>
-                <td><span class="tag warn">Revisión</span></td>
-              </tr>
-            </tbody>
-          </table>
+          <div id="panelesContainer">
+            <p style="padding:15px;color:#666;">Cargando paneles disponibles...</p>
+          </div>
         </section>
       </main>
     </div>
+    <script src="../../Logica/verificacionInicioseccion.js"></script>
+    <script src="../../Logica/panelesUsuario.js"></script>
   </body>
 </html>

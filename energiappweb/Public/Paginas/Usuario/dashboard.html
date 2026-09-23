@@ -20,13 +20,17 @@
           </div>
         </div>
 
-        <nav class="nav-menu">
-          <a class="active" href="dashboard.html">🏠 Dashboard</a>
-          <a href="propiedades.html">🏡 Propiedades</a>
-          <a href="paneles.html">🔋 Paneles</a>
-          <a href="citas.html">📅 Citas</a>
-          <a href="reportes.html">📊 Reportes</a>
-          <a href="asistente.html">🤖 Asistente IA</a>
+        <nav class="nav-menu" aria-label="Menú principal">
+          <div class="nav-home-wrap">
+            <button class="nav-home-trigger active" type="button" aria-expanded="false">🏠 Inicio <span>▾</span></button>
+            <div class="nav-submenu open">
+              <a href="/Paginas/Usuario/propiedades.html">🏡 Propiedades</a>
+              <a href="/Paginas/Usuario/paneles.html">🔋 Paneles</a>
+              <a href="/Paginas/Usuario/citas.html">📅 Citas</a>
+              <a href="/Paginas/Usuario/reportes.html">📊 Reportes</a>
+              <a href="/Paginas/Usuario/asistente.html">🤖 Asistente IA</a>
+            </div>
+          </div>
         </nav>
 
         <div class="sidebar-card">
@@ -40,11 +44,11 @@
         <header class="topbar">
           <div>
             <p class="eyebrow">Panel del usuario</p>
-            <h2>Resumen de energía</h2>
+            <h2 id="usuarioNombreHeader">Resumen de energía</h2>
           </div>
           <div class="actions">
             <button class="ghost-btn">Exportar</button>
-            <a href="../Principal/index.html" class="primary-btn small-btn">Salir</a>
+            <a href="/usuario-login" class="primary-btn small-btn" onclick="localStorage.clear()">Salir</a>
           </div>
         </header>
 
@@ -74,17 +78,12 @@
         <section class="content-grid">
           <div class="panel large-panel">
             <div class="panel-head">
-              <h3>Producción diaria</h3>
-              <span>Últimos 7 días</span>
+              <h3>Balance energético</h3>
+              <span>Producción vs consumo</span>
             </div>
-            <div class="chart-bars">
-              <div><span style="height: 38%"></span></div>
-              <div><span style="height: 52%"></span></div>
-              <div><span style="height: 62%"></span></div>
-              <div><span style="height: 70%"></span></div>
-              <div><span style="height: 84%"></span></div>
-              <div><span style="height: 92%"></span></div>
-              <div><span style="height: 100%"></span></div>
+            <div class="chart-panel" style="display: flex; justify-content: center; align-items: center; min-height: 260px;">
+              <img id="graficoBalance" alt="Gráfico de balance energético" style="display: none; max-width: 100%; border-radius: 12px;" />
+              <p id="balanceEmpty" style="margin: 0; color: #6b7280; font-size: 0.95rem;">Cargando balance de la propiedad…</p>
             </div>
           </div>
 
@@ -99,8 +98,20 @@
             </ul>
           </div>
         </section>
+
+        <section class="content-grid">
+          <div class="panel large-panel">
+            <div class="panel-head">
+              <h3>Escena 3D</h3>
+              <span>Vista interactiva del techo solar</span>
+            </div>
+            <div id="escena3d" style="width: 100%; height: 420px; min-height: 420px; background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%); border-radius: 14px; overflow: hidden;"></div>
+          </div>
+        </section>
       </main>
     </div>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script src="../../Logica/verificacionInicioseccion.js"></script>
     <script src="../../Logica/dashboard.js"></script>
   </body>
 </html>

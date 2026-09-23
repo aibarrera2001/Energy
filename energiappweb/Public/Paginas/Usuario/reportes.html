@@ -20,19 +20,24 @@
           </div>
         </div>
 
-        <nav class="nav-menu">
-          <a href="dashboard.html">🏠 Dashboard</a>
-          <a href="propiedades.html">🏡 Propiedades</a>
-          <a href="paneles.html">🔋 Paneles</a>
-          <a href="citas.html">📅 Citas</a>
-          <a class="active" href="reportes.html">📊 Reportes</a>
-          <a href="asistente.html">🤖 Asistente IA</a>
+        <nav class="nav-menu" aria-label="Menú principal">
+          <div class="nav-home-wrap">
+            <button class="nav-home-trigger active" type="button" aria-expanded="false">🏠 Inicio <span>▾</span></button>
+            <div class="nav-submenu open">
+              <a href="/dashboard">📊 Dashboard</a>
+              <a href="/Paginas/Usuario/propiedades.html">🏡 Propiedades</a>
+              <a href="/Paginas/Usuario/paneles.html">🔋 Paneles</a>
+              <a href="/Paginas/Usuario/citas.html">📅 Citas</a>
+              <a class="active" href="/Paginas/Usuario/reportes.html">📊 Reportes</a>
+              <a href="/Paginas/Usuario/asistente.html">🤖 Asistente IA</a>
+            </div>
+          </div>
         </nav>
 
         <div class="sidebar-card">
           <span class="badge">Finanzas</span>
-          <strong>$2.480</strong>
-          <small>Mes actual</small>
+          <strong id="finanzasBadge">$0</strong>
+          <small id="finanzasLabel">Sin datos</small>
         </div>
       </aside>
 
@@ -44,69 +49,44 @@
           </div>
           <div class="actions">
             <button class="ghost-btn">Exportar PDF</button>
-            <a href="index.html" class="primary-btn small-btn">Salir</a>
+            <a href="/usuario-login" class="primary-btn small-btn" onclick="localStorage.clear()">Salir</a>
           </div>
         </header>
 
         <section class="stats-grid">
           <article class="stat-card accent">
             <span>Generación</span>
-            <strong>1.420 kWh</strong>
-            <small>Este mes</small>
+            <strong id="reporteGeneracion">0 kWh</strong>
+            <small id="reporteGeneracionTexto">Sin propiedades</small>
           </article>
           <article class="stat-card">
-            <span>Uso</span>
-            <strong>920 kWh</strong>
-            <small>Promedio</small>
+            <span>Consumo</span>
+            <strong id="reporteConsumo">0 kWh</strong>
+            <small id="reporteConsumoTexto">Sin datos</small>
           </article>
           <article class="stat-card">
             <span>Ahorro</span>
-            <strong>38%</strong>
-            <small>vs. mes pasado</small>
+            <strong id="reporteAhorro">0%</strong>
+            <small id="reporteAhorroTexto">Sin datos</small>
           </article>
           <article class="stat-card">
-            <span>ROI</span>
-            <strong>6.4 años</strong>
-            <small>Retorno</small>
+            <span>Estado</span>
+            <strong id="reporteEstado">Sin datos</strong>
+            <small id="reporteEstadoTexto">Sin propiedades</small>
           </article>
         </section>
 
         <section class="panel">
           <div class="panel-head">
-            <h3>Resumen financiero</h3>
+            <h3>Reportes por casa</h3>
           </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Concepto</th>
-                <th>Mes</th>
-                <th>Valor</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Generación solar</td>
-                <td>Agosto</td>
-                <td>$1.240</td>
-                <td><span class="tag ok">Bueno</span></td>
-              </tr>
-              <tr>
-                <td>Consumo eléctrico</td>
-                <td>Agosto</td>
-                <td>$680</td>
-                <td><span class="tag ok">Normal</span></td>
-              </tr>
-              <tr>
-                <td>Ahorro total</td>
-                <td>Agosto</td>
-                <td>$560</td>
-                <td><span class="tag warn">Mejorable</span></td>
-              </tr>
-            </tbody>
-          </table>
+          <div id="reportesContainer">
+            <p style="padding:15px;color:#666;">Cargando reportes...</p>
+          </div>
         </section>
       </main>
     </div>
+    <script src="../../Logica/verificacionInicioseccion.js"></script>
+    <script src="../../Logica/reportesUsuario.js"></script>
   </body>
 </html>
