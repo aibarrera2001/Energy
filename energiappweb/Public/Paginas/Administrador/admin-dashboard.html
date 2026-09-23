@@ -44,7 +44,7 @@
           </div>
           <div class="actions">
             <button class="ghost-btn">Exportar</button>
-            <a href="/admin-login" class="primary-btn small-btn">Salir</a>
+            <button id="btnSalirAdmin" class="primary-btn small-btn" type="button">Salir</button>
           </div>
         </header>
 
@@ -142,6 +142,14 @@
 
     <script>
       const storedEmpresa = JSON.parse(localStorage.getItem('adminEmpresa') || 'null');
+      const btnSalirAdmin = document.getElementById('btnSalirAdmin');
+
+      if (btnSalirAdmin) {
+        btnSalirAdmin.addEventListener('click', () => {
+          localStorage.removeItem('adminEmpresa');
+          window.location.href = '/admin-login';
+        });
+      }
 
       if (!storedEmpresa || !storedEmpresa.id_empresa) {
         window.location.href = '/admin-login';

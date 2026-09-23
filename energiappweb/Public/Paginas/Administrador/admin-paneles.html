@@ -30,9 +30,9 @@
         </nav>
 
         <div class="sidebar-card">
-          <span class="badge">Paneles</span>
-          <strong>2.700</strong>
-          <small>Instalados</small>
+          <span class="badge" id="sidebarBadge">Paneles</span>
+          <strong id="sidebarMetric">0</strong>
+          <small id="sidebarMetricLabel">Instalados</small>
         </div>
       </aside>
 
@@ -43,7 +43,7 @@
             <h2>Paneles solares</h2>
           </div>
           <div class="actions">
-            <button class="ghost-btn">Ver inventario</button>
+            <button id="btnVerInventario" class="ghost-btn" type="button">Ver inventario</button>
             <a href="index.html" class="primary-btn small-btn">Salir</a>
           </div>
         </header>
@@ -51,62 +51,200 @@
         <section class="stats-grid">
           <article class="stat-card accent">
             <span>Instalados</span>
-            <strong>2.700</strong>
+            <strong id="panelesTotal">0</strong>
             <small>Totales</small>
           </article>
           <article class="stat-card">
             <span>Rendimiento</span>
-            <strong>91.2%</strong>
+            <strong id="rendimientoTotal">0%</strong>
             <small>Óptimo</small>
           </article>
           <article class="stat-card">
             <span>Fallas</span>
-            <strong>18</strong>
+            <strong id="fallasTotal">0</strong>
             <small>Requieren revisión</small>
           </article>
           <article class="stat-card">
             <span>Producción</span>
-            <strong>4.8 MWh</strong>
+            <strong id="produccionTotal">0 MWh</strong>
             <small>Mes actual</small>
           </article>
         </section>
 
-        <section class="panel table-panel">
+        <section id="inventarioSection" class="panel table-panel" style="display: none; margin-top: 18px;">
           <div class="panel-head">
-            <h3>Inventario</h3>
+            <h3>Inventario de la empresa</h3>
           </div>
+
+          <form id="inventarioForm" class="booking-form" style="margin-bottom: 18px;">
+            <div class="inventory-grid">
+              <label>
+                <span>Nombre del panel</span>
+                <input type="text" id="inventarioNombre" placeholder="Panel X200" required />
+              </label>
+              <label>
+                <span>Cantidad</span>
+                <input type="number" id="inventarioCantidad" min="1" step="1" placeholder="12" required />
+              </label>
+              <label>
+                <span>Precio unitario</span>
+                <input type="number" id="inventarioPrecio" min="0" step="0.01" placeholder="450000" required />
+              </label>
+            </div>
+            <div class="inline-form-actions">
+              <button type="submit" class="primary-btn">Guardar panel</button>
+              <span id="inventarioStatus" class="form-status" aria-live="polite"></span>
+            </div>
+          </form>
+
           <table>
             <thead>
               <tr>
-                <th>Proyecto</th>
-                <th>Ubicación</th>
-                <th>Potencia</th>
-                <th>Estado</th>
+                <th>Panel</th>
+                <th>Cantidad</th>
+                <th>Precio</th>
+                <th>Fecha</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="inventarioBody">
               <tr>
-                <td>Valledupar Norte</td>
-                <td>Valledupar</td>
-                <td>180 kW</td>
-                <td><span class="tag ok">Operando</span></td>
-              </tr>
-              <tr>
-                <td>La Jagua Sur</td>
-                <td>La Jagua</td>
-                <td>120 kW</td>
-                <td><span class="tag ok">Operando</span></td>
-              </tr>
-              <tr>
-                <td>Aguachica Este</td>
-                <td>Aguachica</td>
-                <td>98 kW</td>
-                <td><span class="tag warn">Revisión</span></td>
+                <td colspan="4" style="text-align: center; color: #64748b; padding: 20px;">No hay inventario asociado a esta empresa.</td>
               </tr>
             </tbody>
           </table>
         </section>
       </main>
     </div>
+    <script>
+      const storedEmpresa = JSON.parse(localStorage.getItem('adminEmpresa') || 'null');
+
+      if (!storedEmpresa || !storedEmpresa.id_empresa) {
+        window.location.href = '/admin-login';
+      } else {
+        const empresaId = storedEmpresa.id_empresa;
+        const badge = document.getElementById('sidebarBadge');
+        const metric = document.getElementById('sidebarMetric');
+        const label = document.getElementById('sidebarMetricLabel');
+        const panelesTotal = document.getElementById('panelesTotal');
+        const rendimientoTotal = document.getElementById('rendimientoTotal');
+        const fallasTotal = document.getElementById('fallasTotal');
+        const produccionTotal = document.getElementById('produccionTotal');
+        const inventarioSection = document.getElementById('inventarioSection');
+        const inventarioBody = document.getElementById('inventarioBody');
+        const inventarioForm = document.getElementById('inventarioForm');
+        const inventarioStatus = document.getElementById('inventarioStatus');
+        const btnVerInventario = document.getElementById('btnVerInventario');
+
+        badge.textContent = 'Paneles';
+        label.textContent = 'Instalados';
+
+        const renderInventario = (items) => {
+          if (!inventarioBody) return;
+
+          if (!items.length) {
+            inventarioBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #64748b; padding: 20px;">No hay inventario asociado a esta empresa.</td></tr>';
+            return;
+          }
+
+          inventarioBody.innerHTML = items.map((item) => {
+            const fecha = item.fecha_agregado ? new Date(item.fecha_agregado).toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Sin fecha';
+            return `
+              <tr>
+                <td>${item.nombre_panel}</td>
+                <td>${item.cantidad}</td>
+                <td>$${Number(item.precio_empresa || 0).toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
+                <td>${fecha}</td>
+              </tr>
+            `;
+          }).join('');
+        };
+
+        const cargarDashboard = async () => {
+          try {
+            const response = await fetch(`/api/admin/dashboard/${empresaId}`);
+            const data = await response.json();
+            if (!data.exito) throw new Error(data.mensaje || 'No se pudo cargar la información.');
+
+            const totalPaneles = Number(data.metrics?.total_paneles || 0);
+            metric.textContent = totalPaneles;
+            panelesTotal.textContent = totalPaneles;
+            rendimientoTotal.textContent = '0%';
+            fallasTotal.textContent = '0';
+            produccionTotal.textContent = '0 MWh';
+          } catch (error) {
+            console.error(error);
+            metric.textContent = '0';
+            panelesTotal.textContent = '0';
+            rendimientoTotal.textContent = '0%';
+            fallasTotal.textContent = '0';
+            produccionTotal.textContent = '0 MWh';
+          }
+        };
+
+        const cargarInventario = async () => {
+          try {
+            const response = await fetch(`/api/admin/inventario/${empresaId}`);
+            const data = await response.json();
+            if (!data.exito) throw new Error(data.mensaje || 'No se pudo cargar el inventario.');
+
+            const items = Array.isArray(data.datos) ? data.datos : [];
+            renderInventario(items);
+            if (metric) metric.textContent = data.total ?? 0;
+            if (panelesTotal) panelesTotal.textContent = data.total ?? 0;
+          } catch (error) {
+            console.error(error);
+            renderInventario([]);
+            if (metric) metric.textContent = '0';
+            if (panelesTotal) panelesTotal.textContent = '0';
+          }
+        };
+
+        btnVerInventario.addEventListener('click', () => {
+          if (!inventarioSection) return;
+          inventarioSection.style.display = inventarioSection.style.display === 'none' ? 'block' : 'none';
+          if (inventarioSection.style.display !== 'none') {
+            cargarInventario();
+          }
+        });
+
+        inventarioForm.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          const nombre = document.getElementById('inventarioNombre').value.trim();
+          const cantidad = Number(document.getElementById('inventarioCantidad').value);
+          const precio = Number(document.getElementById('inventarioPrecio').value);
+
+          if (!nombre || !Number.isFinite(cantidad) || cantidad <= 0 || !Number.isFinite(precio) || precio < 0) {
+            inventarioStatus.textContent = 'Completa nombre, cantidad y precio válidos.';
+            inventarioStatus.style.color = '#b91c1c';
+            return;
+          }
+
+          try {
+            const response = await fetch(`/api/admin/inventario/${empresaId}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ nombre_panel: nombre, cantidad, precio_empresa: precio })
+            });
+            const data = await response.json();
+            if (!response.ok || !data.exito) {
+              throw new Error(data.mensaje || 'No se pudo guardar el panel.');
+            }
+
+            inventarioStatus.textContent = 'Panel guardado en la base de datos.';
+            inventarioStatus.style.color = '#15803d';
+            inventarioForm.reset();
+            await cargarDashboard();
+            await cargarInventario();
+          } catch (error) {
+            console.error(error);
+            inventarioStatus.textContent = error.message || 'No se pudo guardar el panel.';
+            inventarioStatus.style.color = '#b91c1c';
+          }
+        });
+
+        cargarDashboard();
+        cargarInventario();
+      }
+    </script>
   </body>
 </html>

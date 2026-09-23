@@ -30,9 +30,9 @@
         </nav>
 
         <div class="sidebar-card">
-          <span class="badge">Usuarios</span>
-          <strong>1248</strong>
-          <small>Registrados</small>
+          <span class="badge" id="sidebarBadge">Usuarios</span>
+          <strong id="sidebarMetric">0</strong>
+          <small id="sidebarMetricLabel">Registrados</small>
         </div>
       </aside>
 
@@ -64,33 +64,37 @@
             </thead>
             <tbody>
               <tr>
-                <td>María Pérez</td>
-                <td>maria@correo.com</td>
-                <td>Usuario</td>
-                <td><span class="tag ok">Activo</span></td>
-              </tr>
-              <tr>
-                <td>Andrés López</td>
-                <td>andres@correo.com</td>
-                <td>Usuario</td>
-                <td><span class="tag ok">Activo</span></td>
-              </tr>
-              <tr>
-                <td>Laura Gutiérrez</td>
-                <td>laura@correo.com</td>
-                <td>Administrador</td>
-                <td><span class="tag ok">Activo</span></td>
-              </tr>
-              <tr>
-                <td>Pedro Ramos</td>
-                <td>pedro@correo.com</td>
-                <td>Usuario</td>
-                <td><span class="tag warn">Pendiente</span></td>
+                <td colspan="4" style="text-align: center; color: #64748b; padding: 20px;">No hay usuarios asociados a esta empresa en la base de datos.</td>
               </tr>
             </tbody>
           </table>
         </section>
       </main>
     </div>
+    <script>
+      const storedEmpresa = JSON.parse(localStorage.getItem('adminEmpresa') || 'null');
+
+      if (!storedEmpresa || !storedEmpresa.id_empresa) {
+        window.location.href = '/admin-login';
+      } else {
+        const badge = document.getElementById('sidebarBadge');
+        const metric = document.getElementById('sidebarMetric');
+        const label = document.getElementById('sidebarMetricLabel');
+
+        badge.textContent = 'Usuarios';
+        label.textContent = 'Registrados';
+
+        fetch(`/api/admin/dashboard/${storedEmpresa.id_empresa}`)
+          .then((response) => response.json())
+          .then((data) => {
+            if (!data.exito) throw new Error(data.mensaje || 'No se pudo cargar la información.');
+            metric.textContent = data.metrics?.usuarios ?? 0;
+          })
+          .catch((error) => {
+            console.error(error);
+            metric.textContent = '0';
+          });
+      }
+    </script>
   </body>
 </html>

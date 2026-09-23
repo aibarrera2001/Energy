@@ -31,7 +31,7 @@
 
         <div class="sidebar-card">
           <span class="badge">Citas</span>
-          <strong>42</strong>
+          <strong id="totalCitas">0</strong>
           <small>Este mes</small>
         </div>
       </aside>
@@ -63,29 +63,13 @@
             </thead>
             <tbody>
               <tr>
-                <td>María Pérez</td>
-                <td>Mantenimiento</td>
-                <td>12 Ago</td>
-                <td><span class="tag ok">Confirmada</span></td>
-              </tr>
-              <tr>
-                <td>Andrés López</td>
-                <td>Revisión</td>
-                <td>18 Ago</td>
-                <td><span class="tag warn">Pendiente</span></td>
-              </tr>
-              <tr>
-                <td>Fernanda Ruiz</td>
-                <td>Instalación</td>
-                <td>25 Ago</td>
-                <td><span class="tag ok">Programada</span></td>
+                <td colspan="4" style="text-align: center; color: #64748b; padding: 20px;">No hay citas asociadas a esta empresa.</td>
               </tr>
             </tbody>
           </table>
         </section>
       </main>
     </div>
-    <!-- Script dinámico para conectar con la API de administración -->
     <script src="../../Logica/adminCitas.js"></script>
   </body>
 </html>

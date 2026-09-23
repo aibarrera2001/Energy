@@ -972,6 +972,57 @@ body::before {
 
 .dashboard-body {
   background: #eef3fb;
+  color: #0f172a;
+}
+
+.dashboard-body .dashboard-main,
+.dashboard-body .topbar,
+.dashboard-body .topbar h2,
+.dashboard-body .eyebrow,
+.dashboard-body .actions,
+.dashboard-body .stat-card,
+.dashboard-body .stat-card span,
+.dashboard-body .stat-card strong,
+.dashboard-body .stat-card small,
+.dashboard-body .panel,
+.dashboard-body .panel-head,
+.dashboard-body .panel-head h3,
+.dashboard-body .panel-head span,
+.dashboard-body .panel-head a,
+.dashboard-body .status-list,
+.dashboard-body .status-list li,
+.dashboard-body .table-panel th,
+.dashboard-body .table-panel td,
+.dashboard-body .property-card,
+.dashboard-body .property-card h3,
+.dashboard-body .property-card p,
+.dashboard-body .property-card ul,
+.dashboard-body .property-card li,
+.dashboard-body .property-card .property-code,
+.dashboard-body .ghost-btn,
+.dashboard-body .tag {
+  color: #0f172a;
+}
+
+.dashboard-body .panel-head span,
+.dashboard-body .panel-head a,
+.dashboard-body .stat-card span,
+.dashboard-body .table-panel th,
+.dashboard-body .property-code,
+.dashboard-body .property-card p,
+.dashboard-body .property-card .property-code,
+.dashboard-body .dashboard-main .eyebrow {
+  color: #64748b;
+}
+
+.dashboard-body .stat-card small,
+.dashboard-body .tag.ok {
+  color: #15803d;
+}
+
+.dashboard-body .ghost-btn {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.12);
 }
 
 .dashboard-shell {
@@ -1705,7 +1756,7 @@ body::before {
   .content-grid {
     grid-template-columns: 1fr 1fr;
   }
-}
+
 
 @media (max-width: 600px) {
   .page-shell,

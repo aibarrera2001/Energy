@@ -31,7 +31,7 @@
 
         <div class="sidebar-card">
           <span class="badge">Mantenimiento</span>
-          <strong>12</strong>
+          <strong id="totalMantenimiento">0</strong>
           <small>Pendientes</small>
         </div>
       </aside>
@@ -63,27 +63,26 @@
             </thead>
             <tbody>
               <tr>
-                <td>Inversor 02</td>
-                <td>Valledupar</td>
-                <td>Alta</td>
-                <td><span class="tag warn">Pendiente</span></td>
-              </tr>
-              <tr>
-                <td>Banco de baterías</td>
-                <td>La Jagua</td>
-                <td>Media</td>
-                <td><span class="tag ok">En proceso</span></td>
-              </tr>
-              <tr>
-                <td>Control solar</td>
-                <td>Aguachica</td>
-                <td>Media</td>
-                <td><span class="tag ok">Revisado</span></td>
+                <td colspan="4" style="text-align: center; color: #64748b; padding: 20px;">No hay mantenimientos asociados a esta empresa.</td>
               </tr>
             </tbody>
           </table>
         </section>
       </main>
     </div>
+    <script>
+      const storedEmpresa = JSON.parse(localStorage.getItem('adminEmpresa') || 'null');
+      const totalMantenimiento = document.getElementById('totalMantenimiento');
+      const tabla = document.querySelector('tbody');
+
+      if (!storedEmpresa || !storedEmpresa.id_empresa) {
+        window.location.href = '/admin-login';
+      } else {
+        if (totalMantenimiento) totalMantenimiento.textContent = '0';
+        if (tabla) {
+          tabla.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #64748b; padding: 20px;">No hay mantenimientos asociados a esta empresa.</td></tr>';
+        }
+      }
+    </script>
   </body>
 </html>

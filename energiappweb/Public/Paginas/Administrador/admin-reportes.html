@@ -31,8 +31,8 @@
 
         <div class="sidebar-card">
           <span class="badge">Reportes</span>
-          <strong>$89K</strong>
-          <small>Ingresos total</small>
+          <strong id="totalReportes">0</strong>
+          <small>Resumen</small>
         </div>
       </aside>
 
@@ -51,22 +51,22 @@
         <section class="stats-grid">
           <article class="stat-card accent">
             <span>Ingresos</span>
-            <strong>$89K</strong>
-            <small>Este trimestre</small>
+            <strong id="ingresosReporte">$0</strong>
+            <small>Empresa</small>
           </article>
           <article class="stat-card">
             <span>Ahorrado</span>
-            <strong>$46K</strong>
+            <strong id="ahorroReporte">$0</strong>
             <small>Clientes</small>
           </article>
           <article class="stat-card">
             <span>Consumo</span>
-            <strong>14.8 MWh</strong>
+            <strong id="consumoReporte">0 MWh</strong>
             <small>Total</small>
           </article>
           <article class="stat-card">
             <span>ROI</span>
-            <strong>4.8 años</strong>
+            <strong id="roiReporte">0 años</strong>
             <small>Retorno</small>
           </article>
         </section>
@@ -85,24 +85,25 @@
             </thead>
             <tbody>
               <tr>
-                <td>Generación total</td>
-                <td>14.8 MWh</td>
-                <td>15.0 MWh</td>
-              </tr>
-              <tr>
-                <td>Eficiencia</td>
-                <td>91.2%</td>
-                <td>92%</td>
-              </tr>
-              <tr>
-                <td>Clientes activos</td>
-                <td>1.248</td>
-                <td>1.300</td>
+                <td colspan="3" style="text-align: center; color: #64748b; padding: 20px;">No hay reportes asociados a esta empresa.</td>
               </tr>
             </tbody>
           </table>
         </section>
       </main>
     </div>
+    <script>
+      const storedEmpresa = JSON.parse(localStorage.getItem('adminEmpresa') || 'null');
+      if (!storedEmpresa || !storedEmpresa.id_empresa) {
+        window.location.href = '/admin-login';
+      } else {
+        document.getElementById('totalReportes').textContent = '0';
+        document.getElementById('ingresosReporte').textContent = '$0';
+        document.getElementById('ahorroReporte').textContent = '$0';
+        document.getElementById('consumoReporte').textContent = '0 MWh';
+        document.getElementById('roiReporte').textContent = '0 años';
+        document.querySelector('tbody').innerHTML = '<tr><td colspan="3" style="text-align: center; color: #64748b; padding: 20px;">No hay reportes asociados a esta empresa.</td></tr>';
+      }
+    </script>
   </body>
 </html>

@@ -160,26 +160,135 @@ app.get('/api/admin/dashboard/:id', async (req, res) => {
       [empresaId]
     );
 
-    const usuariosCount = await db.query('SELECT COUNT(*) AS total FROM usuarios');
-    const casasCount = await db.query('SELECT COUNT(*) AS total FROM casas');
-    const citasCount = await db.query("SELECT COUNT(*) AS total FROM citas WHERE estado = 'PENDIENTE'");
+    const empresaMetricsQuery = await db.query(
+      `
+        SELECT
+          COALESCE((
+            SELECT COUNT(DISTINCT u.id_usuario)
+            FROM usuarios u
+            INNER JOIN citas c ON c.id_usuario = u.id_usuario
+            WHERE c.empresa_id = $1
+          ), 0) AS usuarios,
+          COALESCE((
+            SELECT COUNT(DISTINCT ca.id_casa)
+            FROM casas ca
+            INNER JOIN citas c ON c.id_casa = ca.id_casa
+            WHERE c.empresa_id = $1 AND ca.id_casa IS NOT NULL
+          ), 0) AS casas,
+          COALESCE((
+            SELECT COUNT(*)
+            FROM citas
+            WHERE empresa_id = $1 AND estado = 'PENDIENTE'
+          ), 0) AS citas_pendientes
+      `,
+      [empresaId]
+    );
 
     const empresa = empresaQuery.rows[0] || null;
     const inventario = inventarioQuery.rows[0] || { total_paneles: 0, valor_inventario: 0 };
+    const metricas = empresaMetricsQuery.rows[0] || { usuarios: 0, casas: 0, citas_pendientes: 0 };
 
     return res.json({
       exito: true,
       empresa,
       metrics: {
-        usuarios: Number(usuariosCount.rows[0]?.total || 0),
-        casas: Number(casasCount.rows[0]?.total || 0),
-        citas_pendientes: Number(citasCount.rows[0]?.total || 0),
+        usuarios: Number(metricas.usuarios || 0),
+        casas: Number(metricas.casas || 0),
+        citas_pendientes: Number(metricas.citas_pendientes || 0),
         total_paneles: Number(inventario.total_paneles || 0),
         valor_inventario: Number(inventario.valor_inventario || 0)
       }
     });
   } catch (error) {
     console.error('Error al obtener dashboard admin:', error);
+    return res.status(500).json({ exito: false, mensaje: error.message });
+  }
+});
+
+app.get('/api/admin/inventario/:id', async (req, res) => {
+  try {
+    const empresaId = Number(req.params.id);
+    if (!Number.isFinite(empresaId)) {
+      return res.status(400).json({ exito: false, mensaje: 'ID de empresa inválido.' });
+    }
+
+    const inventarioQuery = await db.query(
+      `SELECT id_inventario, empresa_id, nombre_panel, cantidad, precio_empresa, fecha_agregado
+       FROM inventario_empresa
+       WHERE empresa_id = $1
+       ORDER BY nombre_panel ASC`,
+      [empresaId]
+    );
+
+    const total = inventarioQuery.rows.reduce((sum, item) => sum + Number(item.cantidad || 0), 0);
+
+    return res.json({
+      exito: true,
+      empresa_id: empresaId,
+      total,
+      datos: inventarioQuery.rows.map((item) => ({
+        id_inventario: item.id_inventario,
+        nombre_panel: item.nombre_panel,
+        cantidad: Number(item.cantidad || 0),
+        precio_empresa: Number(item.precio_empresa || 0),
+        fecha_agregado: item.fecha_agregado
+      }))
+    });
+  } catch (error) {
+    console.error('Error al consultar inventario de empresa:', error);
+    return res.status(500).json({ exito: false, mensaje: error.message });
+  }
+});
+
+app.post('/api/admin/inventario/:id', async (req, res) => {
+  try {
+    const empresaId = Number(req.params.id);
+    const body = req.body || {};
+
+    if (!Number.isFinite(empresaId)) {
+      return res.status(400).json({ exito: false, mensaje: 'ID de empresa inválido.' });
+    }
+
+    const nombrePanel = String(body.nombre_panel || body.nombre || '').trim();
+    const cantidad = Number(body.cantidad);
+    const precioEmpresa = Number(body.precio_empresa || body.precio || 0);
+
+    if (!nombrePanel) {
+      return res.status(400).json({ exito: false, mensaje: 'El nombre del panel es obligatorio.' });
+    }
+
+    if (!Number.isFinite(cantidad) || cantidad < 0) {
+      return res.status(400).json({ exito: false, mensaje: 'La cantidad debe ser un número válido.' });
+    }
+
+    if (!Number.isFinite(precioEmpresa) || precioEmpresa < 0) {
+      return res.status(400).json({ exito: false, mensaje: 'El precio debe ser válido.' });
+    }
+
+    const insertQuery = `
+      INSERT INTO inventario_empresa (empresa_id, nombre_panel, cantidad, precio_empresa)
+      VALUES ($1, $2, $3, $4)
+      ON CONFLICT (empresa_id, nombre_panel)
+      DO UPDATE SET cantidad = inventario_empresa.cantidad + EXCLUDED.cantidad,
+                    precio_empresa = EXCLUDED.precio_empresa
+      RETURNING *
+    `;
+
+    const result = await db.query(insertQuery, [empresaId, nombrePanel, Math.max(0, Math.round(cantidad)), precioEmpresa]);
+
+    return res.status(201).json({
+      exito: true,
+      mensaje: 'Panel agregado al inventario de la empresa.',
+      dato: {
+        id_inventario: result.rows[0].id_inventario,
+        empresa_id: result.rows[0].empresa_id,
+        nombre_panel: result.rows[0].nombre_panel,
+        cantidad: Number(result.rows[0].cantidad || 0),
+        precio_empresa: Number(result.rows[0].precio_empresa || 0)
+      }
+    });
+  } catch (error) {
+    console.error('Error al guardar inventario del panel admin:', error);
     return res.status(500).json({ exito: false, mensaje: error.message });
   }
 });
