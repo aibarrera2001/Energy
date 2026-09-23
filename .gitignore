@@ -10,3 +10,6 @@ node_modules/
 jdk-21.0.12.1/
 apache-maven-3.9.16/
 .env
+jdk-21_linux-aarch64_bin.tar.gz
+apache-maven-3.9.16/
+node_modules/
