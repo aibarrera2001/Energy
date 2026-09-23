@@ -8,9 +8,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="../../estilo/indexStyles.css" />
+    <link rel="stylesheet" href="../../estilo/pages.css" />
   </head>
   <body class="dashboard-body">
     <div class="dashboard-shell">
+      <!-- Barra lateral de navegación -->
       <aside class="sidebar">
         <div class="sidebar-brand">
           <div class="brand-mark">⚡</div>
@@ -37,14 +39,15 @@
         <div class="sidebar-card">
           <span class="badge">Paneles</span>
           <strong id="panelesBadge">0</strong>
-          <small id="panelesBadgeLabel">Sin paneles</small>
+          <small id="panelesBadgeLabel">Modelos disponibles</small>
         </div>
       </aside>
 
+      <!-- Contenido Principal -->
       <main class="dashboard-main">
         <header class="topbar">
           <div>
-            <p class="eyebrow">Energia</p>
+            <p class="eyebrow">Energía</p>
             <h2>Paneles solares</h2>
           </div>
           <div class="actions">
@@ -53,6 +56,7 @@
           </div>
         </header>
 
+        <!-- Tarjetas de estadísticas de resumen -->
         <section class="stats-grid">
           <article class="stat-card accent">
             <span>Producción</span>
@@ -76,54 +80,51 @@
           </article>
         </section>
 
+        <!-- Formulario para solicitar cita/instalación (Remplaza el registro de inventario) -->
         <section class="panel">
           <div class="panel-head">
-            <h3>Registrar panel</h3>
+            <h3>Solicitar Paneles Solares</h3>
           </div>
-          <form id="panelInventoryForm" class="booking-form panel-inventory-form">
+          <form id="solicitudPanelForm" class="booking-form panel-inventory-form">
             <div class="inventory-grid">
               <label>
-                <span>Nombre del modelo</span>
-                <input type="text" id="panelNombre" placeholder="Panel X200" maxlength="80" required />
+                <span>Modelo de Panel</span>
+                <select id="selectPanelModelo" required>
+                  <option value="" disabled selected>Cargando catálogo...</option>
+                </select>
               </label>
+              
               <label>
-                <span>Tipo</span>
-                <input type="text" id="panelTipo" placeholder="Monocristalino" maxlength="50" required />
+                <span>Stock disponible</span>
+                <input type="text" id="panelStockDisponible" placeholder="0" readonly />
               </label>
+
               <label>
-                <span>Potencia (W)</span>
-                <input type="number" id="panelPotencia" placeholder="450" min="0" step="0.01" required />
-              </label>
-              <label>
-                <span>Eficiencia (%)</span>
-                <input type="number" id="panelEficiencia" placeholder="22" min="0" max="100" step="0.01" required />
-              </label>
-              <label>
-                <span>Stock</span>
-                <input type="number" id="panelStock" placeholder="12" min="0" step="1" required />
-              </label>
-              <label>
-                <span>Precio</span>
-                <input type="number" id="panelPrecio" placeholder="450000" min="0" step="0.01" required />
+                <span>Cantidad deseada</span>
+                <input type="number" id="panelCantidad" placeholder="1" min="1" step="1" required />
               </label>
             </div>
-            <div class="inline-form-actions">
-              <button type="submit" class="primary-btn">Guardar en inventario</button>
-              <span id="panelInventoryStatus" class="form-status" aria-live="polite"></span>
+
+            <div class="inline-form-actions" style="margin-top: 15px;">
+              <button type="submit" class="primary-btn">Solicitar Cita de Instalación</button>
+              <span id="solicitudStatus" class="form-status" aria-live="polite"></span>
             </div>
           </form>
         </section>
 
+        <!-- Catálogo de paneles habilitados -->
         <section class="panel">
           <div class="panel-head">
-            <h3>Inventario de paneles</h3>
+            <h3>Catálogo de Paneles Disponibles</h3>
           </div>
           <div id="panelesContainer">
-            <p style="padding:15px;color:#666;">Cargando paneles disponibles...</p>
+            <p style="padding:15px;color:#666;">Cargando paneles disponibles desde el catálogo...</p>
           </div>
         </section>
       </main>
     </div>
+
+    <!-- Scripts de lógica de la app -->
     <script src="../../Logica/verificacionInicioseccion.js"></script>
     <script src="../../Logica/panelesUsuario.js"></script>
   </body>

@@ -1,4 +1,4 @@
-const db = require('../config/db');
+const db = require('../Configuracion/config.db');
 
 const PYTHON_SERVICE_URL = process.env.PYTHON_SERVICE_URL || 'http://localhost:8001';
 

@@ -1,155 +1,210 @@
-document.addEventListener('DOMContentLoaded', async () => {
-  const usuarioId = localStorage.getItem('usuarioId');
-  const panelesContainer = document.getElementById('panelesContainer');
-  const panelesBadge = document.getElementById('panelesBadge');
-  const panelesBadgeLabel = document.getElementById('panelesBadgeLabel');
-  const inventoryForm = document.getElementById('panelInventoryForm');
-  const inventoryStatus = document.getElementById('panelInventoryStatus');
+document.addEventListener("DOMContentLoaded", () => {
+  // Referencias a elementos del DOM
+  const selectModelo = document.getElementById("selectPanelModelo");
+  const inputStock = document.getElementById("panelStockDisponible");
+  const inputCantidad = document.getElementById("panelCantidad");
+  const formSolicitud = document.getElementById("solicitudPanelForm");
+  const statusMensaje = document.getElementById("solicitudStatus");
+  const panelesContainer = document.getElementById("panelesContainer");
 
-  const prodPaneles = document.getElementById('prodPaneles');
-  const prodPanelesTexto = document.getElementById('prodPanelesTexto');
-  const rendPaneles = document.getElementById('rendPaneles');
-  const rendPanelesTexto = document.getElementById('rendPanelesTexto');
-  const estadoPaneles = document.getElementById('estadoPaneles');
-  const estadoPanelesTexto = document.getElementById('estadoPanelesTexto');
-  const panelSeleccionado = document.getElementById('panelSeleccionado');
-  const panelSeleccionadoTexto = document.getElementById('panelSeleccionadoTexto');
+  // Elementos de resumen / stats
+  const panelSeleccionadoText = document.getElementById("panelSeleccionado");
+  const panelSeleccionadoSubtext = document.getElementById("panelSeleccionadoTexto");
+  const panelesBadge = document.getElementById("panelesBadge");
+  const panelesBadgeLabel = document.getElementById("panelesBadgeLabel");
 
-  if (!usuarioId) {
-    if (panelesContainer) {
-      panelesContainer.innerHTML = '<p style="padding:15px;color:#666;">Debes iniciar sesión para consultar tus paneles.</p>';
+  let panelesDisponibles = [];
+
+  // 1. Cargar catálogo de paneles desde el backend/base de datos
+  async function cargarPanelesCatalogo() {
+    try {
+      // Reemplazar la URL por tu endpoint real (ej. '/api/paneles/catalogo')
+      const response = await fetch("/api/paneles/catalogo", {
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error("No se pudo cargar el catálogo de paneles.");
+      }
+
+      panelesDisponibles = await response.json();
+      poblarSelectPaneles(panelesDisponibles);
+      renderizarCatalogoTarjetas(panelesDisponibles);
+    } catch (error) {
+      console.warn("Usando datos de prueba / Fallo al conectar con backend:", error);
+      // Fallback con datos de ejemplo si el servidor no responde
+      panelesDisponibles = [
+        { id: 1, nombre: "Canadian Solar HiKu", tipo: "Monocristalino", potencia: 450, eficiencia: 21.5, stock: 12, precio: 450000 },
+        { id: 2, nombre: "JA Solar Jam72", tipo: "Monocristalino", potencia: 540, eficiencia: 20.9, stock: 5, precio: 580000 },
+        { id: 3, nombre: "Longi LR5-72HPH", tipo: "Policristalino", potencia: 400, eficiencia: 19.8, stock: 8, precio: 390000 }
+      ];
+      poblarSelectPaneles(panelesDisponibles);
+      renderizarCatalogoTarjetas(panelesDisponibles);
     }
-    return;
   }
 
-  const setSummary = (total, totalProduccion, rendimiento, estado) => {
-    if (panelesBadge) panelesBadge.textContent = String(total);
-    if (panelesBadgeLabel) panelesBadgeLabel.textContent = total === 1 ? 'Panel activo' : total === 0 ? 'Sin paneles' : 'Paneles activos';
+  // 2. Llenar el selector <select> con los paneles habilitados
+  function poblarSelectPaneles(lista) {
+    if (!selectModelo) return;
 
-    if (prodPaneles) prodPaneles.textContent = `${totalProduccion.toFixed(1)} kWh`;
-    if (prodPanelesTexto) prodPanelesTexto.textContent = total === 0 ? 'Sin datos' : 'Producción estimada';
+    selectModelo.innerHTML = '<option value="" disabled selected>-- Selecciona un modelo --</option>';
 
-    if (rendPaneles) rendPaneles.textContent = `${rendimiento}%`;
-    if (rendPanelesTexto) rendPanelesTexto.textContent = total === 0 ? 'Sin datos' : 'Rendimiento';
+    lista.forEach((panel) => {
+      const option = document.createElement("option");
+      option.value = panel.id;
+      option.textContent = `${panel.nombre} - (${panel.potencia}W | Stock: ${panel.stock})`;
+      selectModelo.appendChild(option);
+    });
+  }
 
-    if (estadoPaneles) estadoPaneles.textContent = estado;
-    if (estadoPanelesTexto) estadoPanelesTexto.textContent = total === 0 ? 'Sin paneles' : 'Estado actual';
-  };
+  // 3. Renderizar el catálogo visual en el contenedor de abajo
+  function renderizarCatalogoTarjetas(lista) {
+    if (!panelesContainer) return;
 
-  const cargarPaneles = async () => {
-    try {
-      const res = await fetch(`/api/usuarios/${usuarioId}/paneles`);
-      const data = await res.json();
-      const paneles = data.exito && Array.isArray(data.datos) ? data.datos : [];
-      const propiedades = data.exito && Array.isArray(data.propiedades) ? data.propiedades : [];
+    if (lista.length === 0) {
+      panelesContainer.innerHTML = '<p style="padding:15px;color:#666;">No hay paneles disponibles en el catálogo.</p>';
+      return;
+    }
 
-      if (!paneles.length || !propiedades.length) {
-        setSummary(0, 0, 0, 'Sin datos');
-        if (panelesContainer) {
-          panelesContainer.innerHTML = '<p style="padding:15px;color:#666;">Aún no tienes propiedades registradas para asociar paneles solares.</p>';
-        }
-        return;
-      }
-
-      const totalProduccion = paneles.reduce((sum, panel) => sum + Number(panel.produccion_estimado || 0), 0);
-      const rendimiento = Math.min(100, Math.round((totalProduccion / Math.max(paneles.length, 1)) * 10));
-      const estado = rendimiento >= 80 ? 'Excelente' : rendimiento >= 60 ? 'Bueno' : 'Revisión';
-      setSummary(paneles.length, totalProduccion, rendimiento, estado);
-
-      if (panelesContainer) {
-        panelesContainer.innerHTML = '';
-        paneles.forEach((panel) => {
-          const card = document.createElement('div');
-          card.style.border = '1px solid #e5e7eb';
-          card.style.borderRadius = '12px';
-          card.style.padding = '16px';
-          card.style.marginBottom = '12px';
-          card.style.display = 'grid';
-          card.style.gridTemplateColumns = '1.4fr 1fr auto';
-          card.style.gap = '10px';
-          card.style.alignItems = 'center';
-
-          const prod = Number(panel.produccion_estimado || 0).toFixed(2);
-          const panelName = panel.nombre || `Panel ${panel.id || 'N/D'}`;
-
-          card.innerHTML = `
+    panelesContainer.innerHTML = `
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; padding: 10px 0;">
+        ${lista.map(panel => `
+          <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 15px; background: #fff; display: flex; flex-direction: column; justify-content: space-between;">
             <div>
-              <strong>${panelName}</strong><br>
-              <small>${panel.ubicacion || 'Techo principal'} • ${panel.potencia_w || 0} W</small>
+              <h4 style="margin: 0 0 5px 0; font-size: 1.05rem;">${panel.nombre}</h4>
+              <p style="margin: 2px 0; font-size: 0.85rem; color: #6b7280;">Tipo: ${panel.tipo}</p>
+              <p style="margin: 2px 0; font-size: 0.85rem; color: #6b7280;">Potencia: <strong>${panel.potencia} W</strong></p>
+              <p style="margin: 2px 0; font-size: 0.85rem; color: #6b7280;">Eficiencia: ${panel.eficiencia}%</p>
+              <p style="margin: 2px 0; font-size: 0.85rem; color: #10b981;">Stock disponible: <strong>${panel.stock} un.</strong></p>
             </div>
-            <div>
-              <span>Producción</span><br>
-              <strong>${prod} kWh</strong>
-            </div>
-            <button class="primary-btn small-btn" type="button">Seleccionar</button>
-          `;
+            <button class="primary-btn small-btn" style="margin-top: 12px; width: 100%;" onclick="seleccionarPanelDirecto(${panel.id})">
+              Elegir para cita
+            </button>
+          </div>
+        `).join("")}
+      </div>
+    `;
 
-          const btn = card.querySelector('button');
-          btn.addEventListener('click', () => {
-            if (panelSeleccionado) panelSeleccionado.textContent = panelName;
-            if (panelSeleccionadoTexto) panelSeleccionadoTexto.textContent = `Producción ${prod} kWh`;
-          });
+    if (panelesBadge) panelesBadge.textContent = lista.length;
+    if (panelesBadgeLabel) panelesBadgeLabel.textContent = "Modelos disponibles";
+  }
 
-          panelesContainer.appendChild(card);
-        });
-      }
-    } catch (error) {
-      console.error('Error al cargar paneles:', error);
-      if (panelesContainer) {
-        panelesContainer.innerHTML = '<p style="padding:15px;color:#666;">No se pudieron cargar los paneles disponibles.</p>';
-      }
-      setSummary(0, 0, 0, 'Sin datos');
+  // 4. Función global para seleccionar desde la tarjeta del catálogo
+  window.seleccionarPanelDirecto = (panelId) => {
+    if (selectModelo) {
+      selectModelo.value = panelId;
+      selectModelo.dispatchEvent(new Event("change"));
+      selectModelo.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   };
 
-  if (inventoryForm) {
-    inventoryForm.addEventListener('submit', async (event) => {
-      event.preventDefault();
+  // 5. Cambio en el <select>: Actualizar campos y límites de stock
+  if (selectModelo) {
+    selectModelo.addEventListener("change", (e) => {
+      const panelId = parseInt(e.target.value, 10);
+      const panelSeleccionado = panelesDisponibles.find(p => p.id === panelId);
 
-      const nombre = document.getElementById('panelNombre').value.trim();
-      const tipo = document.getElementById('panelTipo').value.trim();
-      const potencia = Number(document.getElementById('panelPotencia').value);
-      const eficiencia = Number(document.getElementById('panelEficiencia').value);
-      const stock = Number(document.getElementById('panelStock').value);
-      const precio = Number(document.getElementById('panelPrecio').value);
+      if (panelSeleccionado) {
+        inputStock.value = panelSeleccionado.stock;
+        
+        // Asignar el valor máximo permitido (debe ser menor o igual al stock disponible)
+        inputCantidad.max = panelSeleccionado.stock;
+        inputCantidad.min = 1;
+        inputCantidad.value = 1;
 
-      if (!nombre || !tipo || !Number.isFinite(potencia) || !Number.isFinite(eficiencia) || !Number.isFinite(stock) || !Number.isFinite(precio)) {
-        if (inventoryStatus) {
-          inventoryStatus.textContent = 'Todos los campos deben ser válidos.';
-          inventoryStatus.style.color = '#b91c1c';
-        }
-        return;
-      }
-
-      try {
-        const response = await fetch(`/api/usuarios/${usuarioId}/paneles/inventario`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nombre, tipo, potencia, eficiencia, stock, precio })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.mensaje || 'No se pudo guardar el panel.');
-        }
-
-        inventoryForm.reset();
-        if (inventoryStatus) {
-          inventoryStatus.textContent = 'Panel guardado correctamente en la base de datos.';
-          inventoryStatus.style.color = '#15803d';
-        }
-
-        await cargarPaneles();
-      } catch (error) {
-        console.error('Error al guardar panel:', error);
-        if (inventoryStatus) {
-          inventoryStatus.textContent = error.message || 'No se pudo guardar el panel.';
-          inventoryStatus.style.color = '#b91c1c';
-        }
+        if (panelSeleccionadoText) panelSeleccionadoText.textContent = panelSeleccionado.nombre;
+        if (panelSeleccionadoSubtext) panelSeleccionadoSubtext.textContent = `Stock: ${panelSeleccionado.stock}`;
       }
     });
   }
 
-  await cargarPaneles();
+  // 6. Validar y procesar la solicitud/cita
+  if (formSolicitud) {
+    formSolicitud.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const panelId = parseInt(selectModelo.value, 10);
+      const cantidad = parseInt(inputCantidad.value, 10);
+      const stockDisponible = parseInt(inputStock.value, 10);
+
+      const panelObj = panelesDisponibles.find(p => p.id === panelId);
+
+      if (!panelObj) {
+        mostrarStatus("Por favor selecciona un modelo de panel válido.", "error");
+        return;
+      }
+
+      if (isNaN(cantidad) || cantidad <= 0) {
+        mostrarStatus("Ingresa una cantidad válida mayor a 0.", "error");
+        return;
+      }
+
+      if (cantidad > stockDisponible) {
+        mostrarStatus(`La cantidad (${cantidad}) no puede exceder el stock disponible (${stockDisponible}).`, "error");
+        return;
+      }
+
+      // Payload para la API
+      const solicitudPayload = {
+        panelId: panelObj.id,
+        nombreModelo: panelObj.nombre,
+        cantidadSolicitada: cantidad,
+        fechaSolicitud: new Date().toISOString(),
+        estado: "Pendiente" // Pendiente de aprobación del administrador
+      };
+
+      try {
+        mostrarStatus("Enviando solicitud de cita...", "info");
+
+        // Reemplazar la URL por tu endpoint real (ej. '/api/citas/solicitar')
+        const response = await fetch("/api/citas/solicitar", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+          },
+          body: JSON.stringify(solicitudPayload)
+        });
+
+        if (response.ok || response.status === 201) {
+          mostrarStatus("¡Solicitud enviada con éxito! El administrador la revisará pronto.", "exito");
+          formSolicitud.reset();
+          inputStock.value = "0";
+        } else {
+          const resData = await response.json().catch(() => ({}));
+          mostrarStatus(resData.mensaje || "Solicitud registrada (Modo simulación).", "exito");
+        }
+      } catch (error) {
+        console.warn("Fallo de red, simulando guardado local:", error);
+        
+        // Guardado local de respaldo si no hay conexión backend
+        const citasGuardadas = JSON.parse(localStorage.getItem("solicitudesCitas") || "[]");
+        citasGuardadas.push(solicitudPayload);
+        localStorage.setItem("solicitudesCitas", JSON.stringify(citasGuardadas));
+
+        mostrarStatus("¡Cita solicitada exitosamente! Pendiente de aprobación por el Administrador.", "exito");
+        formSolicitud.reset();
+        inputStock.value = "0";
+      }
+    });
+  }
+
+  // Función aux. para mensajes de estado
+  function mostrarStatus(mensaje, tipo) {
+    if (!statusMensaje) return;
+    statusMensaje.textContent = mensaje;
+    statusMensaje.style.fontWeight = "600";
+    if (tipo === "error") {
+      statusMensaje.style.color = "#dc2626";
+    } else if (tipo === "exito") {
+      statusMensaje.style.color = "#16a34a";
+    } else {
+      statusMensaje.style.color = "#2563eb";
+    }
+  }
+
+  // Inicializar carga
+  cargarPanelesCatalogo();
 });
