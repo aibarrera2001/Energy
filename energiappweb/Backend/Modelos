@@ -1,0 +1,45 @@
+"""
+Modelos de entrada/salida del microservicio, alineados al esquema real de
+energiappweb (tablas `casas` y `usuarios` documentadas en el backend Node).
+"""
+
+from typing import Literal, Optional
+from pydantic import BaseModel, Field
+
+TipoPropiedad = Literal["CASA", "APARTAMENTO", "EDIFICIO"]
+
+
+class CasaInput(BaseModel):
+    """Coincide con los campos reales de la tabla `casas`."""
+    id_casa: Optional[int] = None
+    tipo_propiedad: TipoPropiedad = "CASA"
+    numero_pisos: int = Field(default=1, ge=1)
+    area_techo_m2: float = Field(gt=0)
+    consumo_mensual: float = Field(ge=0, description="kWh/mes, ya existente en la tabla `casas`")
+
+
+class ParametrosProduccion(BaseModel):
+    eficiencia_panel: float = Field(default=0.18, gt=0, lt=1, description="Eficiencia de conversión del panel")
+    horas_sol_pico: float = Field(default=5.0, gt=0, description="Horas sol pico/día (Caribe colombiano ~5-5.5)")
+    factor_perdidas: float = Field(default=0.85, gt=0, le=1, description="Pérdidas por inversor, cableado, suciedad")
+
+
+class BalanceRequest(BaseModel):
+    casa: CasaInput
+    parametros: ParametrosProduccion = ParametrosProduccion()
+
+
+class PrediccionRequest(BaseModel):
+    casa: CasaInput
+    parametros: ParametrosProduccion = ParametrosProduccion()
+    tarifa_kwh: float = Field(gt=0, description="Tarifa actual $/kWh")
+    tarifa_excedente_kwh: Optional[float] = Field(default=None, description="Tarifa de venta de excedentes; si no se da, se asume 50% de la tarifa")
+    costo_instalacion: float = Field(gt=0, description="Costo total de instalación fotovoltaica")
+    anios_proyeccion: int = Field(default=10, ge=1, le=30)
+    incremento_tarifa_anual: float = Field(default=0.05, ge=0, lt=1, description="Incremento anual esperado de la tarifa eléctrica")
+
+
+class Escena3DRequest(BaseModel):
+    casa: CasaInput
+    parametros: ParametrosProduccion = ParametrosProduccion()
+    numero_paneles: Optional[int] = Field(default=None, description="Si no se da, se calcula a partir del área de techo disponible")

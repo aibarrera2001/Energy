@@ -1,0 +1,105 @@
+"""
+Microservicio Python para EnergiApp.
+
+El backend Node.js (energiappweb) consulta estos endpoints vía HTTP y
+reenvía las respuestas (o las inserta directo) a las páginas del usuario.
+
+Arrancar en desarrollo:
+    uvicorn main:app --reload --port 8001
+"""
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from modelos import BalanceRequest, PrediccionRequest, Escena3DRequest
+from calculos_financieros import calcular_produccion_mensual, calcular_balance_energetico, calcular_prediccion_economica
+from graficos import generar_grafico_balance, generar_grafico_prediccion
+from visualizacion_3d import generar_escena_3d
+
+app = FastAPI(title="EnergiApp — Motor de cálculo fotovoltaico", version="0.1.0")
+
+# En producción, restringir a la URL real del backend Node en vez de "*"
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/health")
+def health():
+    return {"exito": True, "mensaje": "energiapp-python activo"}
+
+
+@app.post("/api/calculos/balance")
+def balance_energetico(payload: BalanceRequest):
+    produccion = calcular_produccion_mensual(
+        area_techo_m2=payload.casa.area_techo_m2,
+        tipo_propiedad=payload.casa.tipo_propiedad,
+        eficiencia_panel=payload.parametros.eficiencia_panel,
+        horas_sol_pico=payload.parametros.horas_sol_pico,
+        factor_perdidas=payload.parametros.factor_perdidas,
+    )
+    balance = calcular_balance_energetico(
+        consumo_mensual_kwh=payload.casa.consumo_mensual,
+        produccion_mensual_kwh=produccion["produccion_mensual_kwh"],
+    )
+    grafico_base64 = generar_grafico_balance(
+        consumo_mensual_kwh=balance["consumo_mensual_kwh"],
+        produccion_mensual_kwh=balance["produccion_mensual_kwh"],
+    )
+
+    return {
+        "exito": True,
+        "datos": {
+            "produccion": produccion,
+            "balance": balance,
+            "grafico_balance_png_base64": grafico_base64,
+        },
+    }
+
+
+@app.post("/api/calculos/prediccion")
+def prediccion_economica(payload: PrediccionRequest):
+    produccion = calcular_produccion_mensual(
+        area_techo_m2=payload.casa.area_techo_m2,
+        tipo_propiedad=payload.casa.tipo_propiedad,
+        eficiencia_panel=payload.parametros.eficiencia_panel,
+        horas_sol_pico=payload.parametros.horas_sol_pico,
+        factor_perdidas=payload.parametros.factor_perdidas,
+    )
+    prediccion = calcular_prediccion_economica(
+        consumo_mensual_kwh=payload.casa.consumo_mensual,
+        produccion_mensual_kwh=produccion["produccion_mensual_kwh"],
+        tarifa_kwh=payload.tarifa_kwh,
+        tarifa_excedente_kwh=payload.tarifa_excedente_kwh,
+        costo_instalacion=payload.costo_instalacion,
+        anios_proyeccion=payload.anios_proyeccion,
+        incremento_tarifa_anual=payload.incremento_tarifa_anual,
+    )
+    grafico_base64 = generar_grafico_prediccion(
+        proyeccion=prediccion["proyeccion"],
+        payback_estimado_anios=prediccion["payback_estimado_anios"],
+    )
+
+    return {
+        "exito": True,
+        "datos": {
+            "produccion": produccion,
+            "prediccion": prediccion,
+            "grafico_prediccion_png_base64": grafico_base64,
+        },
+    }
+
+
+@app.post("/api/visualizacion/3d")
+def visualizacion_3d(payload: Escena3DRequest):
+    escena = generar_escena_3d(
+        area_techo_m2=payload.casa.area_techo_m2,
+        tipo_propiedad=payload.casa.tipo_propiedad,
+        numero_pisos=payload.casa.numero_pisos,
+        eficiencia_panel=payload.parametros.eficiencia_panel,
+        numero_paneles=payload.numero_paneles,
+    )
+    return {"exito": True, "datos": escena}

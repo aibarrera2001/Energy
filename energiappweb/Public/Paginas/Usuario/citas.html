@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="../../estilo/indexStyles.css" />
+    <link rel="stylesheet" href="../../estilo/pages.css" />
   </head>
   <body class="dashboard-body">
     <div class="dashboard-shell">
@@ -20,13 +21,18 @@
           </div>
         </div>
 
-        <nav class="nav-menu">
-          <a href="dashboard.html">🏠 Dashboard</a>
-          <a href="propiedades.html">🏡 Propiedades</a>
-          <a href="paneles.html">🔋 Paneles</a>
-          <a class="active" href="citas.html">📅 Citas</a>
-          <a href="reportes.html">📊 Reportes</a>
-          <a href="asistente.html">🤖 Asistente IA</a>
+        <nav class="nav-menu" aria-label="Menú principal">
+          <div class="nav-home-wrap">
+            <button class="nav-home-trigger active" type="button" aria-expanded="false">🏠 Inicio <span>▾</span></button>
+            <div class="nav-submenu open">
+              <a href="/dashboard">📊 Dashboard</a>
+              <a href="/Paginas/Usuario/propiedades.html">🏡 Propiedades</a>
+              <a href="/Paginas/Usuario/paneles.html">🔋 Paneles</a>
+              <a class="active" href="/Paginas/Usuario/citas.html">📅 Citas</a>
+              <a href="/Paginas/Usuario/reportes.html">📊 Reportes</a>
+              <a href="/Paginas/Usuario/asistente.html">🤖 Asistente IA</a>
+            </div>
+          </div>
         </nav>
 
         <div class="sidebar-card">
@@ -44,7 +50,7 @@
           </div>
           <div class="actions">
             <button class="ghost-btn" onclick="document.getElementById('fechaCita').focus()">Agendar</button>
-            <a href="index.html" onclick="localStorage.clear()" class="primary-btn small-btn">Salir</a>
+            <a href="/usuario-login" onclick="localStorage.clear()" class="primary-btn small-btn">Salir</a>
           </div>
         </header>
 
@@ -53,30 +59,51 @@
             <div class="panel-head">
               <h3>Solicitar cita</h3>
             </div>
-            <!-- SE AGREGÓ EL ID AL FORMULARIO -->
+            
             <form class="booking-form" id="formCita">
               <label>
+                <span>Empresa proveedora</span>
+                <select id="empresaCita" required>
+                  <option value="" disabled selected>Cargando empresas...</option>
+                </select>
+              </label>
+
+              <!-- Sección de tarjetas de paneles de la empresa -->
+              <div style="margin: 10px 0;">
+                <span style="font-size:0.9rem; font-weight:600; color:#374151;">Paneles disponibles de la empresa:</span>
+                <div id="contenedorPanelesEmpresa" style="margin-top: 8px;">
+                  <p style="font-size:0.85rem; color:#6b7280;">Selecciona una empresa para ver sus paneles.</p>
+                </div>
+              </div>
+
+              <!-- Insumo oculto para guardar el ID del panel elegido opcionalmente -->
+              <input type="hidden" id="panelIdSeleccionado" name="panelIdSeleccionado" value="" />
+
+              <label>
                 <span>Tipo de servicio</span>
-                <select id="tiposervicio">
-                  <option value="MANTENIMIENTO">Mantenimiento preventivo</option>
+                <select id="tiposervicio" required>
                   <option value="INSTALACION">Instalación</option>
+                  <option value="MANTENIMIENTO">Mantenimiento preventivo</option>
                   <option value="INSPECCION">Revisión técnica</option>
                   <option value="COTIZACION">Cotización</option>
                 </select>
               </label>
+              
               <label>
                 <span>Fecha</span>
                 <input type="date" id="fechaCita" required />
               </label>
+
               <label>
                 <span>Hora</span>
                 <input type="time" id="horaCita" required />
               </label>
+
               <label>
                 <span>Comentario</span>
-                <textarea id="comentarioCita" rows="4" placeholder="Describa la necesidad..."></textarea>
+                <textarea id="comentarioCita" rows="3" placeholder="Describa la necesidad o detalles adicionales..."></textarea>
               </label>
-              <!-- CAMBIADO DE type="button" A type="submit" -->
+
               <button type="submit" class="primary-btn">Guardar cita</button>
             </form>
           </div>
@@ -85,7 +112,6 @@
             <div class="panel-head">
               <h3>Próximas</h3>
             </div>
-            <!-- CONTENEDOR DONDE SE CARGARÁN LAS CITAS DINÁMICAMENTE -->
             <div class="timeline" id="contenedorCitas">
               <p style="padding: 15px; color: #666;">Cargando citas...</p>
             </div>
@@ -94,8 +120,7 @@
       </main>
     </div>
 
-    <!-- VINCULACIÓN DE ARCHIVOS JAVASCRIPT -->
-    <script src="../../Paginas/Principal/verificacionInicioseccion.js"></script>
+    <script src="../../Logica/verificacionInicioseccion.js"></script>
     <script src="../../Logica/Cita.js"></script>
   </body>
 </html>

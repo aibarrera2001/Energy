@@ -1,4 +1,4 @@
-const db = require('../config/db');
+const db = require('../Configuracion/config.db');
 
 // Obtener estadísticas del Admin Dashboard (admin-dashboard.html)
 exports.obtenerEstadisticasDashboard = async (req, res) => {

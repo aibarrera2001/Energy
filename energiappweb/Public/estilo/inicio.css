@@ -1,0 +1,185 @@
+/* ==========================================
+   SECCIONES: IMPORTANCIA, USO Y BENEFICIOS
+   ========================================== */
+
+/* Layout general de secciones */
+.info-section,
+.process-section,
+.benefit-section {
+  margin-top: 64px;
+  padding-top: 10px;
+}
+
+.section-heading {
+  margin-bottom: 32px;
+}
+
+.section-heading .eyebrow {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted, #64748b);
+  margin-bottom: 8px;
+}
+
+.section-heading h2 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--text, #0f172a);
+}
+
+/* ------------------------------------------
+   1. TARJETAS DE IMPORTANCIA (.feature-grid)
+   ------------------------------------------ */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.info-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  padding: 28px 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+}
+
+.info-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  background: rgba(28, 214, 99, 0.12); /* Tono verde suave */
+  border: 1px solid rgba(28, 214, 99, 0.25);
+  margin-bottom: 18px;
+}
+
+.info-card h3 {
+  margin: 0 0 10px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text, #0f172a);
+}
+
+.info-card p {
+  margin: 0;
+  color: var(--text-soft, #475569);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* ------------------------------------------
+   2. PASOS DE PASO A PASO / FLUJO (.steps-grid)
+   ------------------------------------------ */
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.step-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  padding: 28px 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  position: relative;
+}
+
+/* Indicador con número del paso (01, 02, 03) */
+.step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(255, 152, 0, 0.12); /* Tono naranja suave */
+  color: #f57c00;
+  font-weight: 800;
+  font-size: 1.1rem;
+  margin-bottom: 18px;
+}
+
+.step-card h3 {
+  margin: 0 0 10px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text, #0f172a);
+}
+
+.step-card p {
+  margin: 0;
+  color: var(--text-soft, #475569);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* ------------------------------------------
+   3. LISTA DE BENEFICIOS (.benefit-list)
+   ------------------------------------------ */
+.benefit-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+}
+
+/* Icono del Check (✓) */
+.benefit-item span {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #1cd663;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+.benefit-item p {
+  margin: 0;
+  color: var(--text, #0f172a);
+  font-weight: 600;
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+
+/* ------------------------------------------
+   RESPONSIVE / ADAPTABILIDAD EN MÓVILES
+   ------------------------------------------ */
+@media (max-width: 900px) {
+  .feature-grid,
+  .steps-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .benefit-list {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,57 +1,51 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const tablaCitasBody = document.getElementById('tablaCitasBody');
-  const badgeTotalCitas = document.getElementById('badgeTotalCitas');
+  const tablaCitasBody = document.querySelector('tbody');
+  const badgeTotalCitas = document.getElementById('totalCitas');
+  const storedEmpresa = JSON.parse(localStorage.getItem('adminEmpresa') || 'null');
 
-  cargarCitasAdmin();
+  if (!storedEmpresa || !storedEmpresa.id_empresa) {
+    window.location.href = '/admin-login';
+    return;
+  }
 
-  async function cargarCitasAdmin() {
-    try {
-      const respuesta = await fetch('/api/admin/citas');
-      const resultado = await respuesta.json();
+  if (badgeTotalCitas) badgeTotalCitas.textContent = '0';
 
-      if (resultado.exito && resultado.datos.length > 0) {
-        tablaCitasBody.innerHTML = '';
+  if (tablaCitasBody) {
+    tablaCitasBody.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align: center; color: #64748b; padding: 20px;">No hay citas asociadas a esta empresa.</td>
+      </tr>
+    `;
+  }
 
-        if (badgeTotalCitas) {
-          badgeTotalCitas.textContent = resultado.datos.length;
+  try {
+    fetch(`/api/admin/dashboard/${storedEmpresa.id_empresa}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data?.exito && Number(data.metrics?.citas_pendientes || 0) > 0) {
+          if (badgeTotalCitas) badgeTotalCitas.textContent = data.metrics.citas_pendientes;
+        } else {
+          if (badgeTotalCitas) badgeTotalCitas.textContent = '0';
+          if (tablaCitasBody) {
+            tablaCitasBody.innerHTML = `
+              <tr>
+                <td colspan="4" style="text-align: center; color: #64748b; padding: 20px;">No hay citas asociadas a esta empresa.</td>
+              </tr>
+            `;
+          }
         }
-
-        resultado.datos.forEach(cita => {
-          const fechaObj = new Date(cita.fecha);
-          const fechaFormateada = fechaObj.toLocaleDateString('es-CO', {
-            day: '2-digit',
-            month: 'short'
-          });
-
-          const nombreCliente = cita.nombre_cliente || `${cita.usuario_nombre || ''} ${cita.usuario_apellido || ''}`.trim() || 'Cliente';
-          const tipoServicio = cita.tipo_servicio || 'Mantenimiento';
-          const estado = cita.estado || 'Pendiente';
-
-          const filaHtml = `
+      })
+      .catch(() => {
+        if (badgeTotalCitas) badgeTotalCitas.textContent = '0';
+        if (tablaCitasBody) {
+          tablaCitasBody.innerHTML = `
             <tr>
-              <td>${nombreCliente}</td>
-              <td>${tipoServicio}</td>
-              <td>${fechaFormateada}</td>
-              <td><span>${estado}</span></td>
+              <td colspan="4" style="text-align: center; color: #64748b; padding: 20px;">No hay citas asociadas a esta empresa.</td>
             </tr>
           `;
-          tablaCitasBody.innerHTML += filaHtml;
-        });
-      } else {
-        tablaCitasBody.innerHTML = `
-          <tr>
-            <td colspan="4">No hay citas programadas en el sistema.</td>
-          </tr>
-        `;
-        if (badgeTotalCitas) badgeTotalCitas.textContent = '0';
-      }
-    } catch (error) {
-      console.error('Error al cargar las citas del administrador:', error);
-      tablaCitasBody.innerHTML = `
-        <tr>
-          <td colspan="4">Error al conectar con el servidor.</td>
-        </tr>
-      `;
-    }
+        }
+      });
+  } catch (error) {
+    console.error('Error al preparar datos de citas:', error);
   }
 });

@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="target\Paginas\HojasStyles\Administrador\Style\registroAdminStyle.css" />
+    <link rel="stylesheet" href="../../estilo/registroAdminStyle.css" />
   </head>
   <body>
     <div class="registration-container">
@@ -60,13 +60,16 @@
         <div class="form-section">
           <div class="section-title">Inventario de Paneles Solares</div>
           <div class="info-box">
-            📋 Agregue los modelos de paneles que su empresa maneja. Especifique cantidad, tipo y precio.
+            📋 Agregue los modelos de paneles que su empresa maneja. Especifique tipo, potencia, eficiencia, stock y precio.
           </div>
 
           <div id="panelesList">
             <div class="panel-item">
               <input type="text" placeholder="Nombre del modelo" class="panel-nombre" />
-              <input type="number" placeholder="Cantidad" class="panel-cantidad" min="1" />
+              <input type="text" placeholder="Tipo" class="panel-tipo" />
+              <input type="number" placeholder="Potencia (W)" class="panel-potencia" step="0.01" min="0" />
+              <input type="number" placeholder="Eficiencia (%)" class="panel-eficiencia" step="0.01" min="0" max="100" />
+              <input type="number" placeholder="Stock" class="panel-stock" min="0" step="1" />
               <input type="number" placeholder="Precio ($)" class="panel-precio" step="0.01" min="0" />
               <button type="button" class="btn-remove" onclick="removerPanel(this)">Eliminar</button>
             </div>
@@ -104,8 +107,8 @@
           <div class="form-row full">
             <div class="form-group required">
               <label for="correoAdmin">Email del administrador</label>
-              <input type="email" id="correoAdmin" name="correoAdmin" placeholder="admin@energiapp.com" pattern=".*@energiapp\.com$" required />
-              <small style="color: #999; margin-top: 4px;">Debe terminar en @energiapp.com</small>
+              <input type="email" id="correoAdmin" name="correoAdmin" placeholder="admin@gmail.com" required />
+              <small style="color: #999; margin-top: 4px;">Usa un correo válido para iniciar sesión</small>
             </div>
           </div>
 
@@ -135,7 +138,7 @@
 
         <!-- ACCIONES -->
         <div class="form-actions">
-          <button type="button" class="btn-cancel" onclick="window.location.href='admin-login.html'">
+          <button type="button" class="btn-cancel" onclick="window.location.href='/admin-login'">
             Cancelar
           </button>
           <button type="submit" class="btn-submit">Registrar Empresa</button>
@@ -150,7 +153,10 @@
         newPanel.className = 'panel-item';
         newPanel.innerHTML = `
           <input type="text" placeholder="Nombre del modelo" class="panel-nombre" />
-          <input type="number" placeholder="Cantidad" class="panel-cantidad" min="1" />
+          <input type="text" placeholder="Tipo" class="panel-tipo" />
+          <input type="number" placeholder="Potencia (W)" class="panel-potencia" step="0.01" min="0" />
+          <input type="number" placeholder="Eficiencia (%)" class="panel-eficiencia" step="0.01" min="0" max="100" />
+          <input type="number" placeholder="Stock" class="panel-stock" min="0" step="1" />
           <input type="number" placeholder="Precio ($)" class="panel-precio" step="0.01" min="0" />
           <button type="button" class="btn-remove" onclick="removerPanel(this)">Eliminar</button>
         `;
@@ -161,39 +167,48 @@
         button.parentElement.remove();
       }
 
-      document.getElementById('registroForm').addEventListener('submit', function(e) {
+      document.getElementById('registroForm').addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        // Validar que las contraseñas coincidan
         if (document.getElementById('contrasena').value !== document.getElementById('contrasenaConf').value) {
           alert('Las contraseñas no coinciden');
           return;
         }
 
-        // Validar email admin
-        const correoAdmin = document.getElementById('correoAdmin').value;
-        if (!correoAdmin.endsWith('@energiapp.com')) {
-          alert('El correo del administrador debe terminar en @energiapp.com');
+        const correoAdmin = document.getElementById('correoAdmin').value.trim();
+        const correoAdminInput = document.getElementById('correoAdmin');
+        if (!correoAdmin || !correoAdminInput.checkValidity()) {
+          alert('Ingresa un correo del administrador válido');
+          correoAdminInput.focus();
           return;
         }
 
-        // Recolectar paneles
         const paneles = [];
         document.querySelectorAll('.panel-item').forEach(item => {
-          const nombre = item.querySelector('.panel-nombre').value;
-          const cantidad = item.querySelector('.panel-cantidad').value;
-          const precio = item.querySelector('.panel-precio').value;
+          const nombre = item.querySelector('.panel-nombre').value.trim();
+          const tipo = item.querySelector('.panel-tipo').value.trim();
+          const potencia = Number(item.querySelector('.panel-potencia').value);
+          const eficiencia = Number(item.querySelector('.panel-eficiencia').value);
+          const stock = Number(item.querySelector('.panel-stock').value);
+          const precio = Number(item.querySelector('.panel-precio').value);
 
-          if (nombre && cantidad && precio) {
+          if (nombre && tipo && Number.isFinite(potencia) && Number.isFinite(eficiencia) && Number.isFinite(stock) && Number.isFinite(precio)) {
             paneles.push({
               nombre: nombre,
-              cantidad: parseInt(cantidad),
-              precio: parseFloat(precio)
+              tipo: tipo,
+              potencia: Number(potencia),
+              eficiencia: Number(eficiencia),
+              stock: Number(stock),
+              precio: Number(precio)
             });
           }
         });
 
-        // Crear objeto con todos los datos
+        if (!paneles.length) {
+          alert('Debes agregar al menos un panel con tipo, potencia, eficiencia, stock y precio válidos.');
+          return;
+        }
+
         const datosRegistro = {
           nombre: document.getElementById('nombre').value,
           nit: document.getElementById('nit').value,
@@ -211,10 +226,33 @@
           region: 'COSTA_CARIBEÑA'
         };
 
-        // Aquí se enviarían los datos al servidor
-        console.log('Datos a registrar:', datosRegistro);
-        alert('Empresa registrada exitosamente. (Esto es un formulario demo - se necesita backend)');
-        // window.location.href = 'admin-login.html';
+        try {
+          const response = await fetch('/api/admin/registro', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datosRegistro)
+          });
+
+          const contentType = response.headers.get('content-type') || '';
+          let result;
+
+          if (contentType.includes('application/json')) {
+            result = await response.json();
+          } else {
+            const text = await response.text();
+            throw new Error(text || 'La respuesta del servidor no fue JSON. Revisa si el backend está activo.');
+          }
+
+          if (!response.ok) {
+            throw new Error(result.mensaje || 'No se pudo guardar la empresa y el inventario.');
+          }
+
+          alert(result.mensaje || 'Empresa registrada correctamente.');
+          window.location.href = '/admin-login';
+        } catch (error) {
+          console.error('Error:', error);
+          alert(error.message || 'Hubo un problema al registrar la empresa.');
+        }
       });
     </script>
   </body>

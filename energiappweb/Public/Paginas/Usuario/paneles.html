@@ -8,9 +8,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="../../estilo/indexStyles.css" />
+    <link rel="stylesheet" href="../../estilo/pages.css" />
   </head>
   <body class="dashboard-body">
     <div class="dashboard-shell">
+      <!-- Barra lateral de navegación -->
       <aside class="sidebar">
         <div class="sidebar-brand">
           <div class="brand-mark">⚡</div>
@@ -20,93 +22,110 @@
           </div>
         </div>
 
-        <nav class="nav-menu">
-          <a href="dashboard.html">🏠 Dashboard</a>
-          <a href="propiedades.html">🏡 Propiedades</a>
-          <a class="active" href="paneles.html">🔋 Paneles</a>
-          <a href="citas.html">📅 Citas</a>
-          <a href="reportes.html">📊 Reportes</a>
-          <a href="asistente.html">🤖 Asistente IA</a>
+        <nav class="nav-menu" aria-label="Menú principal">
+          <div class="nav-home-wrap">
+            <button class="nav-home-trigger active" type="button" aria-expanded="false">🏠 Inicio <span>▾</span></button>
+            <div class="nav-submenu open">
+              <a href="/dashboard">📊 Dashboard</a>
+              <a href="/Paginas/Usuario/propiedades.html">🏡 Propiedades</a>
+              <a class="active" href="/Paginas/Usuario/paneles.html">🔋 Paneles</a>
+              <a href="/Paginas/Usuario/citas.html">📅 Citas</a>
+              <a href="/Paginas/Usuario/reportes.html">📊 Reportes</a>
+              <a href="/Paginas/Usuario/asistente.html">🤖 Asistente IA</a>
+            </div>
+          </div>
         </nav>
 
         <div class="sidebar-card">
           <span class="badge">Paneles</span>
-          <strong>26</strong>
-          <small>Activos</small>
+          <strong id="panelesBadge">0</strong>
+          <small id="panelesBadgeLabel">Modelos disponibles</small>
         </div>
       </aside>
 
+      <!-- Contenido Principal -->
       <main class="dashboard-main">
         <header class="topbar">
           <div>
-            <p class="eyebrow">Energia</p>
+            <p class="eyebrow">Energía</p>
             <h2>Paneles solares</h2>
           </div>
           <div class="actions">
             <button class="ghost-btn">Calcular desempeño</button>
-            <a href="index.html" class="primary-btn small-btn">Salir</a>
+            <a href="/usuario-login" class="primary-btn small-btn" onclick="localStorage.clear()">Salir</a>
           </div>
         </header>
 
+        <!-- Tarjetas de estadísticas de resumen -->
         <section class="stats-grid">
           <article class="stat-card accent">
             <span>Producción</span>
-            <strong>18.4 kWh</strong>
-            <small>Hoy</small>
+            <strong id="prodPaneles">0 kWh</strong>
+            <small id="prodPanelesTexto">Sin datos</small>
           </article>
           <article class="stat-card">
             <span>Rendimiento</span>
-            <strong>87.5%</strong>
-            <small>Óptimo</small>
-          </article>
-          <article class="stat-card">
-            <span>Ahorrado</span>
-            <strong>$540</strong>
-            <small>Mes actual</small>
+            <strong id="rendPaneles">0%</strong>
+            <small id="rendPanelesTexto">Sin datos</small>
           </article>
           <article class="stat-card">
             <span>Estado</span>
-            <strong>Normal</strong>
-            <small>Sin fallas</small>
+            <strong id="estadoPaneles">Sin datos</strong>
+            <small id="estadoPanelesTexto">Sin paneles</small>
+          </article>
+          <article class="stat-card">
+            <span>Selección</span>
+            <strong id="panelSeleccionado">-</strong>
+            <small id="panelSeleccionadoTexto">Sin elegir</small>
           </article>
         </section>
 
+        <!-- Formulario para solicitar cita/instalación (Remplaza el registro de inventario) -->
         <section class="panel">
           <div class="panel-head">
-            <h3>Inventario de paneles</h3>
+            <h3>Solicitar Paneles Solares</h3>
           </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Panel</th>
-                <th>Ubicación</th>
-                <th>Producción</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Panel 01</td>
-                <td>Techo norte</td>
-                <td>2.4 kWh</td>
-                <td><span class="tag ok">Excelente</span></td>
-              </tr>
-              <tr>
-                <td>Panel 07</td>
-                <td>Techo sur</td>
-                <td>2.1 kWh</td>
-                <td><span class="tag ok">Excelente</span></td>
-              </tr>
-              <tr>
-                <td>Panel 12</td>
-                <td>Patio</td>
-                <td>1.7 kWh</td>
-                <td><span class="tag warn">Revisión</span></td>
-              </tr>
-            </tbody>
-          </table>
+          <form id="solicitudPanelForm" class="booking-form panel-inventory-form">
+            <div class="inventory-grid">
+              <label>
+                <span>Modelo de Panel</span>
+                <select id="selectPanelModelo" required>
+                  <option value="" disabled selected>Cargando catálogo...</option>
+                </select>
+              </label>
+              
+              <label>
+                <span>Stock disponible</span>
+                <input type="text" id="panelStockDisponible" placeholder="0" readonly />
+              </label>
+
+              <label>
+                <span>Cantidad deseada</span>
+                <input type="number" id="panelCantidad" placeholder="1" min="1" step="1" required />
+              </label>
+            </div>
+
+            <div class="inline-form-actions" style="margin-top: 15px;">
+              <button type="submit" class="primary-btn">Solicitar Cita de Instalación</button>
+              <span id="solicitudStatus" class="form-status" aria-live="polite"></span>
+            </div>
+          </form>
+        </section>
+
+        <!-- Catálogo de paneles habilitados -->
+        <section class="panel">
+          <div class="panel-head">
+            <h3>Catálogo de Paneles Disponibles</h3>
+          </div>
+          <div id="panelesContainer">
+            <p style="padding:15px;color:#666;">Cargando paneles disponibles desde el catálogo...</p>
+          </div>
         </section>
       </main>
     </div>
+
+    <!-- Scripts de lógica de la app -->
+    <script src="../../Logica/verificacionInicioseccion.js"></script>
+    <script src="../../Logica/panelesUsuario.js"></script>
   </body>
 </html>

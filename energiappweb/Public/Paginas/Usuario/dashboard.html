@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="../../estilo/indexStyles.css" />
+    <link rel="stylesheet" href="../../estilo/pages.css" />
   </head>
   <body class="dashboard-body">
     <div class="dashboard-shell">
@@ -20,13 +21,17 @@
           </div>
         </div>
 
-        <nav class="nav-menu">
-          <a class="active" href="dashboard.html">🏠 Dashboard</a>
-          <a href="propiedades.html">🏡 Propiedades</a>
-          <a href="paneles.html">🔋 Paneles</a>
-          <a href="citas.html">📅 Citas</a>
-          <a href="reportes.html">📊 Reportes</a>
-          <a href="asistente.html">🤖 Asistente IA</a>
+        <nav class="nav-menu" aria-label="Menú principal">
+          <div class="nav-home-wrap">
+            <button class="nav-home-trigger active" type="button" aria-expanded="false">🏠 Inicio <span>▾</span></button>
+            <div class="nav-submenu open">
+              <a href="/Paginas/Usuario/propiedades.html">🏡 Propiedades</a>
+              <a href="/Paginas/Usuario/paneles.html">🔋 Paneles</a>
+              <a href="/Paginas/Usuario/citas.html">📅 Citas</a>
+              <a href="/Paginas/Usuario/reportes.html">📊 Reportes</a>
+              <a href="/Paginas/Usuario/asistente.html">🤖 Asistente IA</a>
+            </div>
+          </div>
         </nav>
 
         <div class="sidebar-card">
@@ -40,67 +45,100 @@
         <header class="topbar">
           <div>
             <p class="eyebrow">Panel del usuario</p>
-            <h2>Resumen de energía</h2>
+            <h2 id="usuarioNombreHeader">Resumen de energía</h2>
           </div>
           <div class="actions">
             <button class="ghost-btn">Exportar</button>
-            <a href="../Principal/index.html" class="primary-btn small-btn">Salir</a>
+            <a href="/usuario-login" class="primary-btn small-btn" onclick="localStorage.clear()">Salir</a>
           </div>
         </header>
 
-        <section class="stats-grid">
-          <article class="stat-card accent">
-            <span>Producción</span>
-            <strong>0.0 kWh</strong>
-            <small>Sin datos</small>
-          </article>
-          <article class="stat-card">
-            <span>Consumo</span>
-            <strong>0.0 kWh</strong>
-            <small>Sin datos</small>
-          </article>
-          <article class="stat-card">
-            <span>Ahorro</span>
-            <strong>+0%</strong>
-            <small>Inicia sesión</small>
-          </article>
-          <article class="stat-card">
-            <span>Paneles</span>
-            <strong>0</strong>
-            <small>Activos</small>
-          </article>
+        <!-- SECCIÓN 1: PREDICCIONES EXISTENTES DEL USUARIO (Se muestra si tiene predicciones) -->
+        <section id="secMisPredicciones" class="panel" style="display: none;">
+          <div class="panel-head" style="display: flex; justify-content: space-between; align-items: center;">
+            <h3>Mis Predicciones Solares</h3>
+            <button id="btnNuevaPrediccion" class="primary-btn small-btn">+ Nueva predicción</button>
+          </div>
+          <div id="contenedorPredicciones" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 15px;">
+            <!-- Se llena dinámicamente con las tarjetas de predicciones -->
+          </div>
         </section>
 
-        <section class="content-grid">
+        <!-- SECCIÓN 2: FORMULARIO DE NUEVA PREDICCIÓN (Se muestra si NO tiene predicciones) -->
+        <section id="secFormNuevaPrediccion" class="panel" style="display: none;">
+          <div class="panel-head">
+            <h3>Generar Nueva Predicción Energética</h3>
+            <p style="font-size: 0.88rem; color: #6b7280; margin-top: 4px;">
+              Selecciona tu propiedad y el sistema solar para realizar la estimación.
+            </p>
+          </div>
+
+          <form id="formPrediccion" class="booking-form" style="margin-top: 15px;">
+            <!-- Selector de Casa / Propiedad -->
+            <label>
+              <span>Casa / Propiedad</span>
+              <select id="selectCasaPrediccion" required>
+                <option value="" disabled selected>Cargando mis propiedades...</option>
+              </select>
+            </label>
+
+            <!-- Selector de Empresa Proveedora -->
+            <label>
+              <span>Empresa Solar</span>
+              <select id="selectEmpresaPrediccion" required>
+                <option value="" disabled selected>-- Selecciona una empresa --</option>
+              </select>
+            </label>
+
+            <!-- Selector de Panel Solar de la Empresa -->
+            <label>
+              <span>Modelo de Panel Solar</span>
+              <select id="selectPanelPrediccion" required disabled>
+                <option value="" disabled selected>-- Selecciona primero una empresa --</option>
+              </select>
+            </label>
+
+            <!-- Cantidad de Paneles -->
+            <label>
+              <span>Cantidad de Paneles Deseada</span>
+              <input type="number" id="cantidadPanelesPrediccion" placeholder="Ej. 6" min="1" required />
+            </label>
+
+            <div style="margin-top: 15px;">
+              <button type="submit" class="primary-btn">Calcular Predicción</button>
+              <span id="prediccionStatus" class="form-status" aria-live="polite" style="margin-left: 10px;"></span>
+            </div>
+          </form>
+        </section>
+
+        <!-- Gráficos y visualización 3D habituales -->
+        <section class="content-grid" style="margin-top: 20px;">
           <div class="panel large-panel">
             <div class="panel-head">
-              <h3>Producción diaria</h3>
-              <span>Últimos 7 días</span>
+              <h3>Balance energético</h3>
+              <span>Producción vs consumo</span>
             </div>
-            <div class="chart-bars">
-              <div><span style="height: 38%"></span></div>
-              <div><span style="height: 52%"></span></div>
-              <div><span style="height: 62%"></span></div>
-              <div><span style="height: 70%"></span></div>
-              <div><span style="height: 84%"></span></div>
-              <div><span style="height: 92%"></span></div>
-              <div><span style="height: 100%"></span></div>
+            <div class="chart-panel" style="display: flex; justify-content: center; align-items: center; min-height: 260px;">
+              <img id="graficoBalance" alt="Gráfico de balance energético" style="display: none; max-width: 100%; border-radius: 12px;" />
+              <p id="balanceEmpty" style="margin: 0; color: #6b7280; font-size: 0.95rem;">Cargando balance de la propiedad…</p>
             </div>
           </div>
 
-          <div class="panel">
+          <div class="panel large-panel">
             <div class="panel-head">
-              <h3>Alertas</h3>
+              <h3>Escena 3D</h3>
+              <span>Vista interactiva del techo solar</span>
             </div>
-            <ul class="status-list">
-              <li><span class="dot ok"></span> Sistema funcionando normalmente</li>
-              <li><span class="dot warn"></span> Revisión recomendada en 2 días</li>
-              <li><span class="dot ok"></span> Cobertura solar estable</li>
-            </ul>
+            <div id="escena3d" style="width: 100%; height: 350px; background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%); border-radius: 14px; overflow: hidden;"></div>
           </div>
         </section>
       </main>
     </div>
+    <!-- Scripts de Lógica y Cálculo Solar -->
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script src="../../Logica/verificacionInicioseccion.js"></script>
+    <script src="../../Logica/datoSolar.js"></script>
+    <script src="../../Logica/calculadoraSolar.js"></script>
     <script src="../../Logica/dashboard.js"></script>
   </body>
 </html>

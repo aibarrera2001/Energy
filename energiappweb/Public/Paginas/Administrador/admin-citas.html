@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="../../estilo/indexStyles.css" />
   </head>
   <body class="dashboard-body">
     <div class="dashboard-shell">
@@ -21,17 +21,17 @@
         </div>
 
         <nav class="nav-menu">
-          <a href="admin-dashboard.html">🏠 Dashboard</a>
-          <a href="admin-usuarios.html">👥 Usuarios</a>
-          <a href="admin-paneles.html">🔋 Paneles</a>
-          <a class="active" href="admin-citas.html">📅 Citas</a>
-          <a href="admin-mantenimiento.html">🛠️ Mantenimiento</a>
-          <a href="admin-reportes.html">📊 Reportes</a>
+          <a href="/admin-dashboard">🏠 Dashboard</a>
+          <a href="/Paginas/Administrador/admin-usuarios.html">👥 Usuarios</a>
+          <a href="/Paginas/Administrador/admin-paneles.html">🔋 Paneles</a>
+          <a class="active" href="/Paginas/Administrador/admin-citas.html">📅 Citas</a>
+          <a href="/Paginas/Administrador/admin-mantenimiento.html">🛠️ Mantenimiento</a>
+          <a href="/Paginas/Administrador/admin-reportes.html">📊 Reportes</a>
         </nav>
 
         <div class="sidebar-card">
           <span class="badge">Citas</span>
-          <strong>42</strong>
+          <strong id="totalCitas">0</strong>
           <small>Este mes</small>
         </div>
       </aside>
@@ -63,29 +63,13 @@
             </thead>
             <tbody>
               <tr>
-                <td>María Pérez</td>
-                <td>Mantenimiento</td>
-                <td>12 Ago</td>
-                <td><span class="tag ok">Confirmada</span></td>
-              </tr>
-              <tr>
-                <td>Andrés López</td>
-                <td>Revisión</td>
-                <td>18 Ago</td>
-                <td><span class="tag warn">Pendiente</span></td>
-              </tr>
-              <tr>
-                <td>Fernanda Ruiz</td>
-                <td>Instalación</td>
-                <td>25 Ago</td>
-                <td><span class="tag ok">Programada</span></td>
+                <td colspan="4" style="text-align: center; color: #64748b; padding: 20px;">No hay citas asociadas a esta empresa.</td>
               </tr>
             </tbody>
           </table>
         </section>
       </main>
     </div>
-    <!-- Script dinámico para conectar con la API de administración -->
     <script src="../../Logica/adminCitas.js"></script>
   </body>
 </html>

@@ -3,301 +3,106 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EnergiApp | Login Usuario</title>
+    <title>EnergiApp | Usuario</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      body {
-        font-family: 'Inter', sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-      }
-
-      .login-container {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        overflow: hidden;
-        max-width: 450px;
-        width: 100%;
-      }
-
-      .login-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 40px 30px;
-        text-align: center;
-      }
-
-      .login-header .logo {
-        font-size: 40px;
-        margin-bottom: 10px;
-      }
-
-      .login-header h1 {
-        font-size: 24px;
-        margin-bottom: 5px;
-      }
-
-      .login-header p {
-        font-size: 14px;
-        opacity: 0.9;
-      }
-
-      .login-form {
-        padding: 40px;
-      }
-
-      .form-group {
-        margin-bottom: 20px;
-      }
-
-      .form-group label {
-        display: block;
-        font-size: 13px;
-        font-weight: 500;
-        color: #555;
-        margin-bottom: 8px;
-      }
-
-      .form-group input {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        font-family: 'Inter', sans-serif;
-        font-size: 14px;
-        transition: all 0.3s;
-      }
-
-      .form-group input:focus {
-        outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-      }
-
-      .remember-forgot {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 25px;
-        font-size: 13px;
-      }
-
-      .remember-forgot a {
-        color: #667eea;
-        text-decoration: none;
-        transition: color 0.3s;
-      }
-
-      .remember-forgot a:hover {
-        color: #764ba2;
-      }
-
-      .checkbox-row {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        cursor: pointer;
-      }
-
-      .checkbox-row input {
-        width: auto;
-        margin: 0;
-      }
-
-      .btn-login {
-        width: 100%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        padding: 14px;
-        border-radius: 6px;
-        font-size: 15px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s;
-        margin-bottom: 15px;
-      }
-
-      .btn-login:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-      }
-
-      .separator {
-        text-align: center;
-        margin: 20px 0;
-        font-size: 13px;
-        color: #999;
-      }
-
-      .separator span {
-        background: white;
-        padding: 0 10px;
-      }
-
-      .btn-register {
-        width: 100%;
-        background: #f0f0f0;
-        color: #333;
-        border: 1px solid #ddd;
-        padding: 12px;
-        border-radius: 6px;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s;
-        text-decoration: none;
-        display: inline-block;
-        text-align: center;
-      }
-
-      .btn-register:hover {
-        background: #e8e8e8;
-        border-color: #ccc;
-      }
-
-      .btn-back {
-        width: 100%;
-        background: white;
-        color: #667eea;
-        border: 1px solid #667eea;
-        padding: 12px;
-        border-radius: 6px;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s;
-        text-decoration: none;
-        display: inline-block;
-        text-align: center;
-        margin-top: 10px;
-      }
-
-      .btn-back:hover {
-        background: #e8f0f7;
-      }
-
-      .error-message {
-        background: #ffebee;
-        color: #c62828;
-        padding: 12px;
-        border-radius: 6px;
-        margin-bottom: 20px;
-        font-size: 13px;
-        display: none;
-      }
-
-      .error-message.show {
-        display: block;
-      }
-
-      @media (max-width: 600px) {
-        .login-header {
-          padding: 30px 20px;
-        }
-
-        .login-form {
-          padding: 25px;
-        }
-      }
-    </style>
+    <link rel="stylesheet" href="../../estilo/pages.css" >
+    <link rel="stylesheet" href="../../estilo/indexStyles.css" >
+    <link rel="stylesheet" href="../../estilo/registrostyle.css">
   </head>
   <body>
-    <div class="login-container">
-      <div class="login-header">
-        <div class="logo">⚡</div>
-        <h1>EnergiApp</h1>
-        <p>Inicia sesión como usuario</p>
-      </div>
+    <div class="auth-shell">
+      <div class="auth-card">
+        <aside class="auth-hero">
+          <div class="brand-logo">⚡</div>
+          <h1>EnergiApp</h1>
+          <p>Potencia tu futuro con energía solar inteligente</p>
+          <ul class="mini-features">
+            <li>Monitoreo de consumo</li>
+            <li>Gestión de viviendas</li>
+            <li>Reportes energéticos</li>
+          </ul>
+        </aside>
 
-      <form class="login-form" id="loginForm">
-        <div class="error-message" id="errorMessage"></div>
+        <main class="auth-form-panel">
+          <div class="topbar-inline">
+            <a href="/" class="back-link">← Volver</a>
+          </div>
 
-        <div class="form-group">
-          <label for="correo">Correo Electrónico</label>
-          <input 
-            type="email" 
-            id="correo" 
-            name="correo" 
-            placeholder="tu@email.com" 
-            required 
-          />
-        </div>
+          <div class="form-header">
+            <h2>Bienvenido de nuevo</h2>
+            <p>Ingresa tus credenciales para continuar</p>
+          </div>
 
-        <div class="form-group">
-          <label for="contrasena">Contraseña</label>
-          <input 
-            type="password" 
-            id="contrasena" 
-            name="contrasena" 
-            placeholder="••••••••" 
-            required 
-          />
-        </div>
+          <!-- CORREGIDO: id agregado para poder engancharlo con JS -->
+          <div class="error-message" id="errorMessage" style="display:none; background:#ffebee; color:#c62828; padding:12px; border-radius:6px; margin-bottom:16px; font-size:13px;"></div>
 
-        <div class="remember-forgot">
-          <label class="checkbox-row">
-            <input type="checkbox" name="recordarme" />
-            <span>Recuérdame</span>
-          </label>
-          <a href="#">¿Olvidaste tu contraseña?</a>
-        </div>
+          <form class="form-box" id="loginForm">
+            <label>
+              <span>Correo electrónico</span>
+              <!-- CORREGIDO: id agregado -->
+              <input type="email" id="correo" placeholder="usuario@energiapp.com" required />
+            </label>
 
-        <button type="submit" class="btn-login">Ingresar</button>
-      </form>
+            <label>
+              <span>Contraseña</span>
+              <!-- CORREGIDO: id agregado -->
+              <input type="password" id="contrasena" placeholder="••••••••" required />
+            </label>
 
-      <div style="padding: 0 40px 30px;">
-        <div class="separator"><span>o</span></div>
+            <div class="row-between">
+              <label class="checkbox-row">
+                <input type="checkbox" />
+                <span>Recordarme</span>
+              </label>
+              <a href="#">¿Olvidaste tu contraseña?</a>
+            </div>
 
-        <a href="usuario-registro.html" class="btn-register">
-          Crear una cuenta
-        </a>
+            <button type="submit" class="primary-btn" id="btnIngresar">Iniciar Sesión</button>
+          </form>
 
-        <a href="../index.html" class="btn-back">
-          ← Volver al inicio
-        </a>
+          <div class="separator"><span>o</span></div>
+
+          <a href="/usuario-registro" class="secondary-btn">Crear una cuenta</a>
+        </main>
       </div>
     </div>
 
+    <!-- CORREGIDO: antes no había NINGÚN script en esta página, por eso el botón
+         no hacía nada: el form hacía un submit nativo (recarga vacía) en vez de
+         llamar a /api/usuarios/login -->
     <script>
+      const form = document.getElementById('loginForm');
+      const btnIngresar = document.getElementById('btnIngresar');
+      const errorDiv = document.getElementById('errorMessage');
+
+      function mostrarError(mensaje) {
+        if (!mensaje) {
+          errorDiv.style.display = 'none';
+          return;
+        }
+        errorDiv.textContent = mensaje;
+        errorDiv.style.display = 'block';
+      }
+
       async function parseJsonSeguro(response) {
         const contentType = response.headers.get('content-type') || '';
-
         if (contentType.includes('application/json')) {
           return response.json();
         }
-
         const text = await response.text();
-
-        if (!text) {
-          return {};
-        }
-
+        if (!text) return {};
         try {
           return JSON.parse(text);
-        } catch (error) {
-          return {
-            exito: false,
-            mensaje: text || 'Error de conexión con el servidor'
-          };
+        } catch {
+          return { exito: false, mensaje: text || 'Error de conexión con el servidor' };
         }
       }
 
-      document.getElementById('loginForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        mostrarError('');
 
         const correo = document.getElementById('correo').value.trim();
         const contrasena = document.getElementById('contrasena').value;
@@ -307,18 +112,14 @@
           return;
         }
 
-        const datosLogin = {
-          correo: correo,
-          contrasena: contrasena
-        };
+        btnIngresar.disabled = true;
+        btnIngresar.textContent = 'Ingresando...';
 
         try {
           const response = await fetch('/api/usuarios/login', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(datosLogin)
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ correo, contrasena })
           });
 
           const data = await parseJsonSeguro(response);
@@ -327,27 +128,18 @@
             throw new Error(data.mensaje || 'Error al iniciar sesión');
           }
 
-          mostrarError('');
           localStorage.setItem('usuarioId', data.datos.id);
           localStorage.setItem('usuarioNombre', data.datos.nombre);
           localStorage.setItem('usuarioCorreo', data.datos.correo);
 
-          window.location.href = 'dashboard.html';
+          window.location.href = '/dashboard';
         } catch (error) {
           console.error('Error:', error);
           mostrarError(error.message || 'Error de conexión con el servidor');
+          btnIngresar.disabled = false;
+          btnIngresar.textContent = 'Iniciar Sesión';
         }
       });
-
-      function mostrarError(mensaje) {
-        const errorDiv = document.getElementById('errorMessage');
-        if (mensaje) {
-          errorDiv.textContent = mensaje;
-          errorDiv.classList.add('show');
-        } else {
-          errorDiv.classList.remove('show');
-        }
-      }
     </script>
   </body>
 </html>
