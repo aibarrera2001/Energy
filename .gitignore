@@ -1,0 +1,18 @@
+# Maven / Java
+**/target/
+*.class
+
+# Node / React
+**/node_modules/
+
+# IDE
+.vscode/
+
+# Variables de entorno
+.env
+.env.*
+
+# Logs
+*.log
+# Configuración local de base de datos
+Backend/src/main/resources/conexionbd.properties

@@ -1,0 +1,96 @@
+/* Sidebar General */
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  background-color: #1e293b;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid #334155;
+  min-height: 100vh;
+}
+
+/* Header de la Sidebar */
+.sidebar-brand {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.brand-icon {
+  font-size: 2rem;
+  display: block;
+}
+
+.sidebar-brand h2 {
+  color: #f8fafc;
+  font-size: 1.25rem;
+  margin: 0.5rem 0 0.25rem 0;
+}
+
+.role-badge {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Menú de Navegación */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sidebar-nav a {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: #94a3b8;
+  text-decoration: none;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.sidebar-nav a:hover {
+  background-color: #334155;
+  color: #ffffff;
+}
+
+.sidebar-nav a.active {
+  background-color: #2563eb;
+  color: #ffffff;
+}
+
+/* Indicador de Estado al final de la Sidebar */
+.sidebar-status {
+  background-color: #0f172a;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border: 1px solid #334155;
+  margin-top: auto;
+}
+
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+}
+
+.status-label {
+  color: #64748b;
+}
+
+.status-value {
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+.status-value.online {
+  color: #22c55e;
+}

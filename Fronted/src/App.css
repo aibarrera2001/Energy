@@ -1,0 +1,177 @@
+/* --- LAYOUT DEL DASHBOARD --- */
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+  font-family: system-ui, -apple-system, sans-serif;
+  color: #1e293b;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+/* --- SIDEBAR DE LA LANDING --- */
+.custom-sidebar {
+  width: 260px;
+  min-width: 260px;
+  background-color: #4b5563; /* Gris pizarra oscuro idéntico al header de la landing */
+  border-radius: 1.25rem;
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  color: #ffffff;
+}
+
+.sidebar-brand-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.brand-icon {
+  font-size: 1.4rem;
+  color: #f59e0b;
+}
+
+.brand-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.sidebar-nav-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  color: #d1d5db;
+  text-decoration: none;
+  font-size: 0.95rem;
+  border-radius: 0.85rem;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.nav-link.active {
+  background-color: #10b981; /* Verde vibrante 'Comenzar ahora' */
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.sidebar-footer-card {
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 1rem;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.badge-online {
+  background-color: #10b981;
+  color: #ffffff;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.footer-value {
+  font-weight: 600;
+}
+
+/* --- ÁREA PRINCIPAL --- */
+.dashboard-main-content {
+  flex: 1;
+  margin-left: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* HEADER PRINCIPAL */
+.dashboard-header-card {
+  background-color: #ffffff;
+  border-radius: 1.25rem;
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.header-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.header-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.05em;
+}
+
+.dashboard-header-card h1 {
+  margin: 0.3rem 0;
+  font-size: 1.8rem;
+  color: #0f172a;
+}
+
+.user-welcome {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-secondary {
+  background-color: #6b7280;
+  color: #ffffff;
+  border: none;
+  padding: 0.65rem 1.25rem;
+  border-radius: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-accent-orange {
+  background-color: #f59e0b; /* Naranja 'Conocer más' */
+  color: #ffffff;
+  border: none;
+  padding: 0.65rem 1.25rem;
+  border-radius: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
