@@ -28,8 +28,7 @@ export default function App() {
         {/* Portales de Administrador */}
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/admin-registro" element={<AdminRegistro />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-
+<Route path="/admin/dashboard" element={<AdminDashboard />} />
         {/* Redirección de respaldo en caso de ruta inexistente */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

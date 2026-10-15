@@ -8,7 +8,11 @@ public class RegistroEmpresaAdminDTO {
     private String direccionEmpresa;
     private String telefonoEmpresa;
     private String emailEmpresa;
-    
+    private String tipoRegistro;          // "CREAR" o "UNIR"
+    private Integer idEmpresaExistente;
+    private String aportes;
+    private String diferenciadores;
+        
     // Datos del Administrador
     private String nombreAdmin;
     private String apellidoAdmin;
@@ -28,6 +32,14 @@ public class RegistroEmpresaAdminDTO {
     public String getTelefonoEmpresa() { return telefonoEmpresa; }
     public void setTelefonoEmpresa(String telefonoEmpresa) { this.telefonoEmpresa = telefonoEmpresa; }
     public String getEmailEmpresa() { return emailEmpresa; }
+    public String getTipoRegistro() { return tipoRegistro; }
+    public void setTipoRegistro(String tipoRegistro) { this.tipoRegistro = tipoRegistro; }
+    public Integer getIdEmpresaExistente() { return idEmpresaExistente; }
+    public void setIdEmpresaExistente(Integer idEmpresaExistente) { this.idEmpresaExistente = idEmpresaExistente; }
+    public String getAportes() { return aportes; }
+    public void setAportes(String aportes) { this.aportes = aportes; }
+    public String getDiferenciadores() { return diferenciadores; }
+    public void setDiferenciadores(String diferenciadores) { this.diferenciadores = diferenciadores; }
     public void setEmailEmpresa(String emailEmpresa) { this.emailEmpresa = emailEmpresa; }
     public String getNombreAdmin() { return nombreAdmin; }
     public void setNombreAdmin(String nombreAdmin) { this.nombreAdmin = nombreAdmin; }

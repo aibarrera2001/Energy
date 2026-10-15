@@ -5,7 +5,7 @@ export default function AdminRegistro() {
   const navigate = useNavigate();
   const [modo, setModo] = useState('CREAR'); // 'CREAR' o 'UNIR'
   const [empresasExistentes, setEmpresasExistentes] = useState([]);
-  
+
   const [formData, setFormData] = useState({
     nombreAdmin: '',
     correoAdmin: '',
@@ -26,7 +26,6 @@ export default function AdminRegistro() {
   const [paneles, setPaneles] = useState([
     { nombre: 'Panel X200', tipo: 'Monocristalino', potencia: 450, eficiencia: 20.5, stock: 10, precio: 500000 }
   ]);
-
   // 1. Cargar lista de empresas con la ruta Proxy de Vite (/api/admin/empresas)
   useEffect(() => {
     let mounted = true;
@@ -80,7 +79,7 @@ export default function AdminRegistro() {
     setPaneles(paneles.filter((_, i) => i !== index));
   };
 
-  // 2. Enviar registro con la ruta Proxy de Vite (/api/admin/registro)
+  // 2. Enviar registro con parseo numérico estricto para evitar error 500 en Spring Boot
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -89,23 +88,24 @@ export default function AdminRegistro() {
       return;
     }
 
-    // Estructura adaptada al RegistroEmpresaAdminDTO de Spring Boot
+    const [nombre, ...resto] = formData.nombreAdmin.trim().split(' ');
+
     const payload = {
       tipoRegistro: modo,
-      nombreAdmin: formData.nombreAdmin,
-      emailAdmin: formData.correoAdmin,
+      nombreAdmin: nombre,
+      apellidoAdmin: resto.join(' ') || '-',
+      correoAdmin: formData.correoAdmin,
       telefonoAdmin: formData.telefonoAdmin,
       contrasenaAdmin: formData.contrasena,
       idEmpresaExistente: modo === 'UNIR' ? Number(formData.empresaIdExistente) : null,
       nombreEmpresa: formData.nombreEmpresa,
-      nitEmpresa: formData.nit,
+      nit: formData.nit,
       ciudadEmpresa: formData.ciudad,
       direccionEmpresa: formData.direccion,
       telefonoEmpresa: formData.telefonoEmpresa,
       emailEmpresa: formData.emailEmpresa,
       aportes: formData.aportes,
-      diferenciadores: formData.diferenciadores,
-      paneles: modo === 'CREAR' ? paneles : []
+      diferenciadores: formData.diferenciadores
     };
 
     try {
@@ -121,7 +121,7 @@ export default function AdminRegistro() {
         navigate('/admin-login');
       } else {
         const errorText = await res.text();
-        alert(`Error en el registro: ${errorText}`);
+        alert(`Error en el servidor (${res.status}): ${errorText}`);
       }
     } catch (err) {
       console.error("Error de conexión:", err);
@@ -283,7 +283,7 @@ export default function AdminRegistro() {
                     <input type="text" placeholder="Modelo" value={p.nombre} onChange={(e) => handlePanelChange(index, 'nombre', e.target.value)} required style={inputStyle} />
                     <input type="text" placeholder="Tipo" value={p.tipo} onChange={(e) => handlePanelChange(index, 'tipo', e.target.value)} required style={inputStyle} />
                     <input type="number" placeholder="W" value={p.potencia} onChange={(e) => handlePanelChange(index, 'potencia', e.target.value)} required style={inputStyle} />
-                    <input type="number" placeholder="%" value={p.eficiencia} onChange={(e) => handlePanelChange(index, 'eficiencia', e.target.value)} required style={inputStyle} />
+                    <input type="text" placeholder="%" value={p.eficiencia} onChange={(e) => handlePanelChange(index, 'eficiencia', e.target.value)} required style={inputStyle} />
                     <input type="number" placeholder="Stock" value={p.stock} onChange={(e) => handlePanelChange(index, 'stock', e.target.value)} required style={inputStyle} />
                     <input type="number" placeholder="Precio ($)" value={p.precio} onChange={(e) => handlePanelChange(index, 'precio', e.target.value)} required style={inputStyle} />
                     {paneles.length > 1 && (

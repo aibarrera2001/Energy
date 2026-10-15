@@ -1,129 +1,99 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export default function AdminLogin() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    correo: '',
+    contrasena: ''
+  });
+  const [cargando, setCargando] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setCargando(true);
 
-    if (!email || !password) {
-      alert('Ingresa correo y contraseña de administrador.');
-      return;
-    }
+    // Las claves deben coincidir exactamente con AdminLoginDTO.java (correo, contrasena)
+    const payload = {
+      correo: formData.correo.trim(),
+      contrasena: formData.contrasena
+    };
 
     try {
-      const res = await fetch('http://localhost:8080/api/admin/login', {
+      const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify(payload)
       });
 
-      const data = await res.json();
-
-      if (res.ok && data.exito) {
-        localStorage.setItem('adminEmpresa', JSON.stringify(data.empresa));
+      if (res.ok) {
+        const data = await res.json();
+        
+        // Guardar la sesión devuelta por el backend
+        localStorage.setItem('idEmpresa', data.idEmpresa || 1);
+        localStorage.setItem('adminNombre', data.nombreAdmin || 'Administrador');
+        localStorage.setItem('nombreEmpresa', data.nombreEmpresa || 'Empresa Solar');
+        
+        alert(`¡Bienvenido/a, ${data.nombreAdmin || 'Administrador'}!`);
         navigate('/admin/dashboard');
       } else {
-        alert(data.mensaje || 'Credenciales inválidas.');
+        const errorText = await res.text();
+        alert(`Error: ${errorText || 'Credenciales inválidas.'}`);
       }
     } catch (err) {
-      console.warn("Backend no disponible. Entrando con sesión simulada.", err);
-      localStorage.setItem('adminEmpresa', JSON.stringify({
-        id_empresa: 1,
-        nombre: 'Empresa Demo EnergiApp'
-      }));
-      navigate('/admin/dashboard');
+      console.error("Error de autenticación:", err);
+      alert('Error de conexión con el servidor backend.');
+    } finally {
+      setCargando(false);
     }
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#0F172A',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '1.5rem',
-      color: '#F8FAFC',
-      fontFamily: "'Segoe UI', system-ui, sans-serif"
-    }}>
-      <div style={{
-        maxWidth: '420px',
-        width: '100%',
-        backgroundColor: '#1E293B',
-        border: '1px solid #334155',
-        borderRadius: '1rem',
-        padding: '2.5rem 2rem',
-        boxSizing: 'border-box'
-      }}>
-        {/* Header */}
+    <div style={{ backgroundColor: '#0F172A', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', fontFamily: 'Inter, sans-serif' }}>
+      <div style={{ maxWidth: '420px', width: '100%', backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '1rem', padding: '2.5rem 2rem', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.5)' }}>
+        
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <span style={{ fontSize: '2.5rem', display: 'inline-block', marginBottom: '0.25rem' }}>⚡</span>
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
-            Acceso Administrativo
-          </h2>
-          <p style={{ color: '#94A3B8', fontSize: '0.9rem', marginTop: '0.5rem' }}>
-            Ingresa a la consola de gestión de EnergiApp
-          </p>
+          <span style={{ fontSize: '3rem' }}>⚡</span>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#FFFFFF', margin: '0.5rem 0' }}>Acceso Administrativo</h1>
+          <p style={{ color: '#94A3B8', fontSize: '0.9rem', margin: 0 }}>Ingresa a la consola de gestión de EnergiApp</p>
         </div>
 
-        {/* Formulario */}
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div>
-            <label style={{ fontSize: '0.85rem', color: '#94A3B8', fontWeight: 600, display: 'block', marginBottom: '0.4rem' }}>
-              Correo de Administrador
-            </label>
+            <label style={{ fontSize: '0.85rem', color: '#94A3B8', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Correo Electrónico *</label>
             <input
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@empresa.com"
+              name="correo"
+              value={formData.correo}
+              onChange={handleChange}
               required
-              style={{
-                width: '100%',
-                padding: '0.75rem 1rem',
-                backgroundColor: '#0F172A',
-                border: '1px solid #334155',
-                borderRadius: '0.5rem',
-                color: '#FFFFFF',
-                fontSize: '0.95rem',
-                boxSizing: 'border-box',
-                outline: 'none'
-              }}
+              placeholder="planetarenovable@gmail.com"
+              style={inputStyle}
             />
           </div>
 
           <div>
-            <label style={{ fontSize: '0.85rem', color: '#94A3B8', fontWeight: 600, display: 'block', marginBottom: '0.4rem' }}>
-              Contraseña
-            </label>
+            <label style={{ fontSize: '0.85rem', color: '#94A3B8', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Contraseña *</label>
             <input
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              name="contrasena"
+              value={formData.contrasena}
+              onChange={handleChange}
               required
-              style={{
-                width: '100%',
-                padding: '0.75rem 1rem',
-                backgroundColor: '#0F172A',
-                border: '1px solid #334155',
-                borderRadius: '0.5rem',
-                color: '#FFFFFF',
-                fontSize: '0.95rem',
-                boxSizing: 'border-box',
-                outline: 'none'
-              }}
+              placeholder="••••••••"
+              style={inputStyle}
             />
           </div>
 
           <button
             type="submit"
+            disabled={cargando}
             style={{
-              width: '100%',
+              marginTop: '0.5rem',
               padding: '0.85rem',
               backgroundColor: '#6366F1',
               color: '#FFFFFF',
@@ -131,27 +101,45 @@ export default function AdminLogin() {
               borderRadius: '0.5rem',
               fontWeight: 700,
               fontSize: '1rem',
-              cursor: 'pointer',
-              marginTop: '0.5rem'
+              cursor: cargando ? 'not-allowed' : 'pointer',
+              opacity: cargando ? 0.7 : 1
             }}
           >
-            Iniciar Sesión
+            {cargando ? 'Verificando...' : 'Iniciar Sesión'}
           </button>
         </form>
 
-        {/* Enlaces inferiores */}
-        <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #334155', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          <p style={{ margin: 0, fontSize: '0.875rem', color: '#94A3B8' }}>
+        <div style={{ textAlign: 'center', marginTop: '2rem', borderTop: '1px solid #334155', paddingTop: '1.5rem' }}>
+          <p style={{ fontSize: '0.85rem', color: '#94A3B8', margin: '0 0 0.5rem 0' }}>
             ¿Nueva empresa?{' '}
-            <Link to="/admin-registro" style={{ color: '#818CF8', fontWeight: 600, textDecoration: 'none' }}>
+            <span
+              onClick={() => navigate('/admin-registro')}
+              style={{ color: '#818CF8', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}
+            >
               Registrar Empresa
-            </Link>
+            </span>
           </p>
-          <Link to="/" style={{ color: '#64748B', fontSize: '0.85rem', textDecoration: 'none' }}>
+          <button
+            onClick={() => navigate('/')}
+            style={{ background: 'none', border: 'none', color: '#64748B', fontSize: '0.8rem', cursor: 'pointer', marginTop: '0.5rem' }}
+          >
             ← Volver a la selección de portal
-          </Link>
+          </button>
         </div>
+
       </div>
     </div>
   );
 }
+
+const inputStyle = {
+  width: '100%',
+  padding: '0.75rem',
+  backgroundColor: '#0F172A',
+  border: '1px solid #334155',
+  borderRadius: '0.5rem',
+  color: '#FFFFFF',
+  fontSize: '0.95rem',
+  boxSizing: 'border-box',
+  outline: 'none'
+};

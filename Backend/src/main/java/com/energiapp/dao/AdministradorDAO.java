@@ -26,15 +26,21 @@ public class AdministradorDAO {
             conn.setAutoCommit(false);
             try {
                 int idEmpresa = 0;
-                try (PreparedStatement psE = conn.prepareStatement(sqlEmpresa)) {
-                    psE.setString(1, dto.getNombreEmpresa());
-                    psE.setString(2, dto.getNit());
-                    psE.setString(3, dto.getCiudadEmpresa());
-                    psE.setString(4, dto.getDireccionEmpresa());
-                    psE.setString(5, dto.getTelefonoEmpresa());
-                    psE.setString(6, dto.getEmailEmpresa());
-                    try (ResultSet rs = psE.executeQuery()) {
-                        if (rs.next()) idEmpresa = rs.getInt("id_empresa");
+                if ("UNIR".equals(dto.getTipoRegistro())) {
+                    if (dto.getIdEmpresaExistente() == null)
+                        throw new IllegalArgumentException("Debe seleccionar una empresa.");
+                    idEmpresa = dto.getIdEmpresaExistente();
+                } else {
+                    try (PreparedStatement psE = conn.prepareStatement(sqlEmpresa)) {
+                        psE.setString(1, dto.getNombreEmpresa());
+                        psE.setString(2, dto.getNit());
+                        psE.setString(3, dto.getCiudadEmpresa());
+                        psE.setString(4, dto.getDireccionEmpresa());
+                        psE.setString(5, dto.getTelefonoEmpresa());
+                        psE.setString(6, dto.getEmailEmpresa());
+                        try (ResultSet rs = psE.executeQuery()) {
+                            if (rs.next()) idEmpresa = rs.getInt("id_empresa");
+                        }
                     }
                 }
 
