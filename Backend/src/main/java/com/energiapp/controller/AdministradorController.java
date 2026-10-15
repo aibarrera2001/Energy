@@ -70,4 +70,9 @@ public class AdministradorController {
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró el artículo o no pertenece a la empresa.");
     }
+
+    @GetMapping("/empresas")
+    public ResponseEntity<List<java.util.Map<String, Object>>> obtenerEmpresas() throws Exception {
+        return ResponseEntity.ok(adminService.obtenerTodasLasEmpresas());
+    }
 }

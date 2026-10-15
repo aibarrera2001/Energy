@@ -2,10 +2,11 @@ package com.energiapp.service;
 
 import com.energiapp.dao.AdministradorDAO;
 import com.energiapp.dto.*;
+
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class AdministradorService {
@@ -46,5 +47,22 @@ public class AdministradorService {
 
     public boolean eliminarArticuloCatalogo(int idPanel, int idEmpresa) throws SQLException {
         return adminDAO.eliminarPanelDelCatalogo(idPanel, idEmpresa);
+    }
+
+    // 8. Obtener lista de empresas registradas
+    public List<Map<String, Object>> obtenerTodasLasEmpresas() throws Exception {
+        // Cuando tengas el método en tu DAO puedes reemplazarlo por:
+        // return adminDAO.obtenerEmpresas();
+
+        List<Map<String, Object>> lista = new ArrayList<>();
+        
+        Map<String, Object> emp1 = new HashMap<>();
+        emp1.put("idEmpresa", 1);
+        emp1.put("nombre", "Solar Caribe SAS");
+        emp1.put("nit", "900123456-1");
+        emp1.put("ciudad", "Valledupar");
+        lista.add(emp1);
+
+        return lista;
     }
 }
