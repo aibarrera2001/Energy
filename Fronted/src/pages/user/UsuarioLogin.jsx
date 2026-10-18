@@ -22,13 +22,19 @@ export default function UsuarioLogin() {
 
       const data = await res.json();
 
-      if (res.ok) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('usuarioId', data.usuario._id || data.usuario.id);
-        localStorage.setItem('usuarioNombre', data.usuario.nombre);
+      if (res.ok && data) {
+        // El backend devuelve directamente el objeto { id, nombre, email }
+        const idUsuario = data.id || data.id_usuario;
+        
+        localStorage.setItem('usuarioId', idUsuario);
+        localStorage.setItem('usuarioNombre', data.nombre);
+        localStorage.setItem('usuarioEmail', data.email);
+        localStorage.setItem('usuario', JSON.stringify(data));
+
+        // Redirección al panel principal del usuario
         navigate('/user/dashboard');
       } else {
-        setError(data.mensaje || 'Credenciales incorrectas');
+        setError(data.message || data.mensaje || 'Credenciales incorrectas');
       }
     } catch (err) {
       console.error('Error al iniciar sesión:', err);
