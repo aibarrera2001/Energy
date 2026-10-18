@@ -1,26 +1,28 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
+// 1. IMPORTAR EL COMPONENTE (Revisa si se llama RolSelector o RoleSelector):
+import RolSelector from './pages/RolSelector'; 
+
 // Páginas de Usuario
 import UsuarioLogin from './pages/user/UsuarioLogin';
 import UserDashboard from './pages/user/UserDashboard';
 import UserPropiedades from './pages/user/UserPropiedades';
 
 // Páginas de Administrador
-import AdminLogin from './pages/admin/AdminLogin';
-import AdminRegistro from './pages/admin/AdminRegistro';
-import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminLogin from './pages/admin/Login/AdminLogin';
+import AdminRegistro from './pages/admin/Login/AdminRegistro';
+import AdminDashboard from './pages/admin/Inicio/AdminDashboard';
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Redirección por defecto */}
-        <Route path="/" element={<Navigate to="/usuario-login" replace />} />
+        {/* Ruta Principal */}
+        <Route path="/" element={<RolSelector />} />
 
         {/* Rutas de Usuario */}
         <Route path="/usuario-login" element={<UsuarioLogin />} />
         <Route path="/user/dashboard" element={<UserDashboard />} />
-        {/* Redirecciona /dashboard automáticamente a /user/dashboard */}
         <Route path="/dashboard" element={<Navigate to="/user/dashboard" replace />} />
         <Route path="/propiedades" element={<UserPropiedades />} />
 
