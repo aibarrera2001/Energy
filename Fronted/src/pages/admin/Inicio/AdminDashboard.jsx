@@ -8,14 +8,14 @@ export default function AdminDashboard() {
   // Datos de la empresa desde localStorage
   const idEmpresa = localStorage.getItem('idEmpresa') || 1;
   const adminNombre = localStorage.getItem('adminNombre') || 'Administrador';
-  const nombreEmpresa = localStorage.getItem('nombreEmpresa') || 'Solar Caribe SAS';
+  const nombreEmpresa = localStorage.getItem('nombreEmpresa') || 'Planeta Renovabble';
 
-  // 1. Estados iniciales limpios (Sin datos falsos)
+  // Estados iniciales limpios
   const [citas, setCitas] = useState([]);
   const [clientesCasas, setClientesCasas] = useState([]);
   const [catalogo, setCatalogo] = useState([]);
   const [reporteFinanciero, setReporteFinanciero] = useState([]);
-  
+
   const [stats, setStats] = useState({
     citasPendientes: 0,
     clientesTotales: 0,
@@ -23,14 +23,16 @@ export default function AdminDashboard() {
     mantenimientosAnio: 0
   });
 
-  // Estado para nuevo panel en catálogo
+  // Estado alineado con las columnas reales de paneles_solares y PanelCatalogoDTO.java
   const [nuevoPanel, setNuevoPanel] = useState({
     nombre: '',
     tipo: 'Monocristalino',
-    potencia: 400,
-    eficiencia: 20.0,
-    stock: 10,
-    precio: 450000
+    potenciaW: 550,
+    eficiencia: 21.5,
+    precio: 480000,
+    costoInstalacion: 150000,
+    garantiaAnios: '25 años',
+    descripcion: ''
   });
 
   // Estado para consulta de finanzas
@@ -46,14 +48,24 @@ export default function AdminDashboard() {
   });
 
   // --- CONSULTA DINÁMICA A POSTGRESQL ---
+  const cargarCatalogo = () => {
+    fetch(`/api/admin/empresa/${idEmpresa}/catalogo/paneles`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => {
+        if (Array.isArray(data)) setCatalogo(data);
+      })
+      .catch(() => setCatalogo([]));
+  };
+
   useEffect(() => {
-    // Cargar Citas reales
+    // Cargar Citas reales (solo de esta empresa o de sus clientes)
     fetch(`/api/admin/empresa/${idEmpresa}/citas`)
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
         if (Array.isArray(data)) {
           setCitas(data);
-          setStats((prev) => ({ ...prev, citasPendientes: data.length }));
+          const pendientes = data.filter((c) => (c.estado || 'PENDIENTE').toUpperCase() === 'PENDIENTE').length;
+          setStats((prev) => ({ ...prev, citasPendientes: pendientes }));
         }
       })
       .catch(() => setCitas([]));
@@ -64,7 +76,7 @@ export default function AdminDashboard() {
       .then((data) => {
         if (Array.isArray(data)) {
           setClientesCasas(data);
-          const totalKw = data.reduce((acc, item) => acc + (Number(item.potenciaKwp) || 0), 0);
+          const totalKw = data.reduce((acc, item) => acc + (Number(item.consumoMensualKwh) || 0), 0);
           setStats((prev) => ({
             ...prev,
             clientesTotales: data.length,
@@ -75,12 +87,7 @@ export default function AdminDashboard() {
       .catch(() => setClientesCasas([]));
 
     // Cargar Catálogo de Paneles
-    fetch(`/api/admin/empresa/${idEmpresa}/catalogo`)
-      .then((res) => (res.ok ? res.json() : []))
-      .then((data) => {
-        if (Array.isArray(data)) setCatalogo(data);
-      })
-      .catch(() => setCatalogo([]));
+    cargarCatalogo();
   }, [idEmpresa]);
 
   // --- ACCIONES DE GESTIÓN ---
@@ -95,26 +102,68 @@ export default function AdminDashboard() {
       });
       if (res.ok) {
         alert('Panel agregado correctamente al catálogo.');
-        const dataActualizada = await res.json();
-        setCatalogo(Array.isArray(dataActualizada) ? dataActualizada : [...catalogo, nuevoPanel]);
+        cargarCatalogo();
+        setNuevoPanel({
+          nombre: '',
+          tipo: 'Monocristalino',
+          potenciaW: 550,
+          eficiencia: 21.5,
+          precio: 480000,
+          costoInstalacion: 150000,
+          garantiaAnios: '25 años',
+          descripcion: ''
+        });
       } else {
-        setCatalogo([...catalogo, { ...nuevoPanel, idPanel: Date.now() }]);
-        alert('Panel registrado localmente.');
+        const errorText = await res.text();
+        alert('Error al guardar el panel: ' + errorText);
       }
-      setNuevoPanel({ nombre: '', tipo: 'Monocristalino', potencia: 400, eficiencia: 20.0, stock: 10, precio: 450000 });
-    } catch {
-      setCatalogo([...catalogo, { ...nuevoPanel, idPanel: Date.now() }]);
-      setNuevoPanel({ nombre: '', tipo: 'Monocristalino', potencia: 400, eficiencia: 20.0, stock: 10, precio: 450000 });
+    } catch (err) {
+      alert('Error de conexión con el servidor: ' + err.message);
     }
   };
 
   const handleEliminarPanel = async (idPanel) => {
     if (!window.confirm('¿Deseas eliminar este artículo del catálogo?')) return;
     try {
-      await fetch(`/api/admin/empresa/${idEmpresa}/catalogo/panel/${idPanel}`, { method: 'DELETE' });
-      setCatalogo(catalogo.filter((p) => p.idPanel !== idPanel));
-    } catch {
-      setCatalogo(catalogo.filter((p) => p.idPanel !== idPanel));
+      const res = await fetch(`/api/admin/empresa/${idEmpresa}/catalogo/panel/${idPanel}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        setCatalogo(catalogo.filter((p) => p.id !== idPanel));
+      } else {
+        const msg = await res.text();
+        alert('No se pudo eliminar: ' + msg);
+      }
+    } catch (err) {
+      alert('Error de conexión: ' + err.message);
+    }
+  };
+
+  const handleCambiarEstadoCita = async (idCita, nuevoEstado) => {
+    try {
+      const res = await fetch(`/api/admin/empresa/${idEmpresa}/cita/${idCita}/estado`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estado: nuevoEstado })
+      });
+
+      if (res.ok) {
+        const citasActualizadas = citas.map((c) =>
+          c.idCita === idCita ? { ...c, estado: nuevoEstado } : c
+        );
+        setCitas(citasActualizadas);
+        setStats((prev) => ({
+          ...prev,
+          citasPendientes: citasActualizadas.filter(
+            (c) => (c.estado || 'PENDIENTE').toUpperCase() === 'PENDIENTE'
+          ).length
+        }));
+      } else {
+        const msg = await res.text();
+        alert('No se pudo actualizar el estado: ' + msg);
+      }
+    } catch (err) {
+      alert('Error de conexión: ' + err.message);
     }
   };
 
@@ -136,17 +185,17 @@ export default function AdminDashboard() {
       const res = await fetch('/api/admin/factura', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...facturaData, idEmpresa })
+        body: JSON.stringify({ ...facturaData, empresaId: Number(idEmpresa) })
       });
       if (res.ok) {
         alert('Factura emitida correctamente.');
+        setFacturaData({ clienteNombre: '', nitCliente: '', concepto: 'Instalación Fotovoltaica', montoTotal: '', observaciones: '' });
       } else {
-        alert('Factura registrada en el sistema.');
+        const msg = await res.text();
+        alert('Error al emitir factura: ' + msg);
       }
-      setFacturaData({ clienteNombre: '', nitCliente: '', concepto: 'Instalación Fotovoltaica', montoTotal: '', observaciones: '' });
-    } catch {
-      alert('Factura registrada.');
-      setFacturaData({ clienteNombre: '', nitCliente: '', concepto: 'Instalación Fotovoltaica', montoTotal: '', observaciones: '' });
+    } catch (err) {
+      alert('Error de conexión: ' + err.message);
     }
   };
 
@@ -221,8 +270,8 @@ export default function AdminDashboard() {
               <div style={cardStatStyle}>
                 <span style={{ fontSize: '2rem' }}>☀️</span>
                 <div>
-                  <small style={{ color: '#6B7280', fontWeight: 600 }}>Capacidad Instalada</small>
-                  <h2 style={{ fontSize: '1.8rem', margin: 0, color: '#F2B705' }}>{stats.capacidadInstaladaKwp} kWp</h2>
+                  <small style={{ color: '#6B7280', fontWeight: 600 }}>Consumo Clientes</small>
+                  <h2 style={{ fontSize: '1.8rem', margin: 0, color: '#F2B705' }}>{stats.capacidadInstaladaKwp} kWh</h2>
                 </div>
               </div>
 
@@ -245,22 +294,54 @@ export default function AdminDashboard() {
                       <th style={thTdStyle}>Cliente</th>
                       <th style={thTdStyle}>Fecha</th>
                       <th style={thTdStyle}>Tipo</th>
+                      <th style={thTdStyle}>Notas / Solicitud</th>
                       <th style={thTdStyle}>Estado</th>
                     </tr>
                   </thead>
                   <tbody>
                     {citas.length === 0 ? (
-                      <tr><td colSpan="4" style={{ textAlign: 'center', padding: '1.5rem', color: '#6B7280' }}>No hay citas registradas en PostgreSQL.</td></tr>
+                      <tr><td colSpan="5" style={{ textAlign: 'center', padding: '1.5rem', color: '#6B7280' }}>No hay citas registradas para esta empresa.</td></tr>
                     ) : (
                       citas.map((c) => (
-                        <tr key={c.id || c.id_cita} style={{ borderBottom: '1px solid #E6F2EC' }}>
-                          <td style={{ ...thTdStyle, color: '#123B4F', fontWeight: 600 }}>{c.cliente || c.nombre_cliente}</td>
+                        <tr key={c.idCita} style={{ borderBottom: '1px solid #E6F2EC' }}>
+                          <td style={{ ...thTdStyle, color: '#123B4F', fontWeight: 600 }}>{c.nombreCliente}</td>
                           <td style={{ ...thTdStyle, color: '#6B7280' }}>{c.fecha}</td>
-                          <td style={{ ...thTdStyle, color: '#6B7280' }}>{c.tipo}</td>
+                          <td style={{ ...thTdStyle, color: '#6B7280' }}>{c.tipoServicio}</td>
+                          <td style={{ ...thTdStyle, color: '#6B7280', fontSize: '0.82rem' }}>{c.notas || '—'}</td>
                           <td style={thTdStyle}>
-                            <span style={{ padding: '0.2rem 0.5rem', borderRadius: '0.25rem', fontSize: '0.8rem', fontWeight: 700, backgroundColor: c.estado === 'Confirmada' ? '#E6F2EC' : 'rgba(242, 183, 5, 0.16)', color: c.estado === 'Confirmada' ? '#2E7D5B' : '#123B4F' }}>
-                              {c.estado}
-                            </span>
+                            <select
+                              value={(c.estado || 'PENDIENTE').toUpperCase()}
+                              onChange={(e) => handleCambiarEstadoCita(c.idCita, e.target.value)}
+                              style={{
+                                padding: '0.35rem 0.6rem',
+                                borderRadius: '0.35rem',
+                                fontSize: '0.8rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                border: '1px solid #DCE6E0',
+                                backgroundColor:
+                                  c.estado === 'CONFIRMADA'
+                                    ? '#E6F2EC'
+                                    : c.estado === 'COMPLETADA'
+                                    ? '#DBEAFE'
+                                    : c.estado === 'CANCELADA'
+                                    ? '#FEE2E2'
+                                    : 'rgba(242, 183, 5, 0.18)',
+                                color:
+                                  c.estado === 'CONFIRMADA'
+                                    ? '#2E7D5B'
+                                    : c.estado === 'COMPLETADA'
+                                    ? '#1E40AF'
+                                    : c.estado === 'CANCELADA'
+                                    ? '#991B1B'
+                                    : '#123B4F'
+                              }}
+                            >
+                              <option value="PENDIENTE">PENDIENTE</option>
+                              <option value="CONFIRMADA">CONFIRMADA</option>
+                              <option value="COMPLETADA">COMPLETADA</option>
+                              <option value="CANCELADA">CANCELADA</option>
+                            </select>
                           </td>
                         </tr>
                       ))
@@ -274,22 +355,22 @@ export default function AdminDashboard() {
                 <table style={tableStyle}>
                   <thead>
                     <tr style={tableHeaderRowStyle}>
-                      <th style={thTdStyle}>Nombre / Razón</th>
+                      <th style={thTdStyle}>Cliente</th>
                       <th style={thTdStyle}>Ciudad</th>
-                      <th style={thTdStyle}>Paneles</th>
-                      <th style={thTdStyle}>Potencia</th>
+                      <th style={thTdStyle}>Propiedad</th>
+                      <th style={thTdStyle}>Consumo</th>
                     </tr>
                   </thead>
                   <tbody>
                     {clientesCasas.length === 0 ? (
-                      <tr><td colSpan="4" style={{ textAlign: 'center', padding: '1.5rem', color: '#6B7280' }}>No hay propiedades registradas en PostgreSQL.</td></tr>
+                      <tr><td colSpan="4" style={{ textAlign: 'center', padding: '1.5rem', color: '#6B7280' }}>No hay clientes vinculados a esta empresa aún.</td></tr>
                     ) : (
                       clientesCasas.map((cl) => (
-                        <tr key={cl.id || cl.id_casa} style={{ borderBottom: '1px solid #E6F2EC' }}>
-                          <td style={{ ...thTdStyle, color: '#123B4F', fontWeight: 600 }}>{cl.nombre || cl.nombre_usuario}</td>
-                          <td style={{ ...thTdStyle, color: '#6B7280' }}>{cl.ciudad}</td>
-                          <td style={{ ...thTdStyle, color: '#2E7D5B', fontWeight: 700 }}>{cl.panelesInstalados || 0} unid.</td>
-                          <td style={{ ...thTdStyle, color: '#F2B705', fontWeight: 700 }}>{cl.potenciaKwp || 0} kWp</td>
+                        <tr key={`${cl.idUsuario}-${cl.idCasa}`} style={{ borderBottom: '1px solid #E6F2EC' }}>
+                          <td style={{ ...thTdStyle, color: '#123B4F', fontWeight: 600 }}>{cl.nombreCliente}</td>
+                          <td style={{ ...thTdStyle, color: '#6B7280' }}>{cl.ciudadCasa}</td>
+                          <td style={{ ...thTdStyle, color: '#2E7D5B', fontWeight: 700 }}>{cl.tipoPropiedad}</td>
+                          <td style={{ ...thTdStyle, color: '#F2B705', fontWeight: 700 }}>{cl.consumoMensualKwh || 0} kWh</td>
                         </tr>
                       ))
                     )}
@@ -307,8 +388,8 @@ export default function AdminDashboard() {
               <h3 style={sectionHeaderStyle}>➕ Agregar Artículo al Catálogo</h3>
               <form onSubmit={handleAgregarPanel} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
                 <div>
-                  <label style={labelStyle}>Modelo / Nombre</label>
-                  <input type="text" value={nuevoPanel.nombre} onChange={(e) => setNuevoPanel({ ...nuevoPanel, nombre: e.target.value })} required style={inputStyle} placeholder="Canadian Solar 450W" />
+                  <label style={labelStyle}>Nombre / Modelo</label>
+                  <input type="text" value={nuevoPanel.nombre} onChange={(e) => setNuevoPanel({ ...nuevoPanel, nombre: e.target.value })} required style={inputStyle} placeholder="JA Solar DeepBlue 550W" />
                 </div>
                 <div>
                   <label style={labelStyle}>Tipo</label>
@@ -316,19 +397,27 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <label style={labelStyle}>Potencia (W)</label>
-                  <input type="number" value={nuevoPanel.potencia} onChange={(e) => setNuevoPanel({ ...nuevoPanel, potencia: Number(e.target.value) })} required style={inputStyle} />
+                  <input type="number" value={nuevoPanel.potenciaW} onChange={(e) => setNuevoPanel({ ...nuevoPanel, potenciaW: Number(e.target.value) })} required style={inputStyle} />
                 </div>
                 <div>
                   <label style={labelStyle}>Eficiencia (%)</label>
                   <input type="number" step="0.1" value={nuevoPanel.eficiencia} onChange={(e) => setNuevoPanel({ ...nuevoPanel, eficiencia: Number(e.target.value) })} required style={inputStyle} />
                 </div>
                 <div>
-                  <label style={labelStyle}>Stock</label>
-                  <input type="number" value={nuevoPanel.stock} onChange={(e) => setNuevoPanel({ ...nuevoPanel, stock: Number(e.target.value) })} required style={inputStyle} />
+                  <label style={labelStyle}>Precio Panel ($)</label>
+                  <input type="number" value={nuevoPanel.precio} onChange={(e) => setNuevoPanel({ ...nuevoPanel, precio: Number(e.target.value) })} required style={inputStyle} />
                 </div>
                 <div>
-                  <label style={labelStyle}>Precio ($)</label>
-                  <input type="number" value={nuevoPanel.precio} onChange={(e) => setNuevoPanel({ ...nuevoPanel, precio: Number(e.target.value) })} required style={inputStyle} />
+                  <label style={labelStyle}>Costo Instalación ($)</label>
+                  <input type="number" value={nuevoPanel.costoInstalacion} onChange={(e) => setNuevoPanel({ ...nuevoPanel, costoInstalacion: Number(e.target.value) })} required style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Garantía</label>
+                  <input type="text" value={nuevoPanel.garantiaAnios} onChange={(e) => setNuevoPanel({ ...nuevoPanel, garantiaAnios: e.target.value })} required style={inputStyle} placeholder="25 años" />
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={labelStyle}>Descripción</label>
+                  <input type="text" value={nuevoPanel.descripcion} onChange={(e) => setNuevoPanel({ ...nuevoPanel, descripcion: e.target.value })} style={inputStyle} placeholder="Panel monocristalino de alta eficiencia ideal para techos residenciales y comerciales" />
                 </div>
                 <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
                   <button type="submit" style={{ backgroundColor: '#2E7D5B', color: '#FFFFFF', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '0.375rem', fontWeight: 700, cursor: 'pointer' }}>
@@ -343,29 +432,31 @@ export default function AdminDashboard() {
               <table style={tableStyle}>
                 <thead>
                   <tr style={tableHeaderRowStyle}>
-                    <th style={thTdStyle}>Modelo</th>
+                    <th style={thTdStyle}>Nombre</th>
                     <th style={thTdStyle}>Tipo</th>
                     <th style={thTdStyle}>Potencia</th>
                     <th style={thTdStyle}>Eficiencia</th>
-                    <th style={thTdStyle}>Stock</th>
+                    <th style={thTdStyle}>Garantía</th>
                     <th style={thTdStyle}>Precio</th>
+                    <th style={thTdStyle}>Instalación</th>
                     <th style={thTdStyle}>Acción</th>
                   </tr>
                 </thead>
                 <tbody>
                   {catalogo.length === 0 ? (
-                    <tr><td colSpan="7" style={{ textAlign: 'center', padding: '1.5rem', color: '#6B7280' }}>El catálogo está vacío.</td></tr>
+                    <tr><td colSpan="8" style={{ textAlign: 'center', padding: '1.5rem', color: '#6B7280' }}>El catálogo está vacío.</td></tr>
                   ) : (
                     catalogo.map((p) => (
-                      <tr key={p.idPanel || p.id_panel} style={{ borderBottom: '1px solid #E6F2EC' }}>
+                      <tr key={p.id} style={{ borderBottom: '1px solid #E6F2EC' }}>
                         <td style={{ ...thTdStyle, color: '#123B4F', fontWeight: 600 }}>{p.nombre}</td>
                         <td style={{ ...thTdStyle, color: '#6B7280' }}>{p.tipo}</td>
-                        <td style={{ ...thTdStyle, color: '#123B4F' }}>{p.potencia} W</td>
+                        <td style={{ ...thTdStyle, color: '#123B4F' }}>{p.potenciaW} W</td>
                         <td style={{ ...thTdStyle, color: '#F2B705' }}>{p.eficiencia}%</td>
-                        <td style={{ ...thTdStyle, color: '#2E7D5B', fontWeight: 700 }}>{p.stock} unid.</td>
+                        <td style={{ ...thTdStyle, color: '#2E7D5B', fontWeight: 700 }}>{p.garantiaAnios}</td>
                         <td style={{ ...thTdStyle, color: '#123B4F', fontWeight: 700 }}>${Number(p.precio).toLocaleString()} COP</td>
+                        <td style={{ ...thTdStyle, color: '#6B7280' }}>${Number(p.costoInstalacion).toLocaleString()} COP</td>
                         <td style={thTdStyle}>
-                          <button onClick={() => handleEliminarPanel(p.idPanel || p.id_panel)} style={{ backgroundColor: '#F2B705', color: '#123B4F', border: 'none', padding: '0.35rem 0.75rem', borderRadius: '0.25rem', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>
+                          <button onClick={() => handleEliminarPanel(p.id)} style={{ backgroundColor: '#F2B705', color: '#123B4F', border: 'none', padding: '0.35rem 0.75rem', borderRadius: '0.25rem', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>
                             Eliminar
                           </button>
                         </td>
@@ -396,8 +487,8 @@ export default function AdminDashboard() {
               <thead>
                 <tr style={tableHeaderRowStyle}>
                   <th style={thTdStyle}>Mes</th>
-                  <th style={thTdStyle}>Ingresos Mantenimiento</th>
-                  <th style={thTdStyle}>Ingresos Instalación</th>
+                  <th style={thTdStyle}>Tipo Servicio</th>
+                  <th style={thTdStyle}>Cantidad</th>
                   <th style={thTdStyle}>Total</th>
                 </tr>
               </thead>
@@ -408,9 +499,9 @@ export default function AdminDashboard() {
                   reporteFinanciero.map((f, idx) => (
                     <tr key={idx} style={{ borderBottom: '1px solid #E6F2EC' }}>
                       <td style={{ ...thTdStyle, color: '#123B4F', fontWeight: 600 }}>{f.mes}</td>
-                      <td style={{ ...thTdStyle, color: '#6B7280' }}>${Number(f.ingresosMantenimiento).toLocaleString()} COP</td>
-                      <td style={{ ...thTdStyle, color: '#6B7280' }}>${Number(f.ingresosInstalacion).toLocaleString()} COP</td>
-                      <td style={{ ...thTdStyle, color: '#2E7D5B', fontWeight: 800 }}>${Number(f.total).toLocaleString()} COP</td>
+                      <td style={{ ...thTdStyle, color: '#6B7280' }}>{f.tipoServicio}</td>
+                      <td style={{ ...thTdStyle, color: '#6B7280' }}>{f.cantidadServicios}</td>
+                      <td style={{ ...thTdStyle, color: '#2E7D5B', fontWeight: 800 }}>${Number(f.totalIngresos).toLocaleString()} COP</td>
                     </tr>
                   ))
                 )}

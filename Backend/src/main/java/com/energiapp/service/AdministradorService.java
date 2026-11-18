@@ -20,10 +20,13 @@ public class AdministradorService {
         return adminDAO.registrarEmpresaYAdmin(dto);
     }
 
-    public AdminAuthResponseDTO login(AdminLoginDTO dto) throws Exception {
+    public AdminAuthResponseDTO login(AdminLoginDTO dto) throws SQLException {
+        if (dto == null || dto.getCorreo() == null || dto.getContrasena() == null) {
+            throw new IllegalArgumentException("Debe ingresar correo y contraseña.");
+        }
         AdminAuthResponseDTO response = adminDAO.loginAdmin(dto.getCorreo(), dto.getContrasena());
         if (response == null) {
-            throw new Exception("Credenciales inválidas de administrador.");
+            throw new IllegalArgumentException("Credenciales inválidas de administrador.");
         }
         return response;
     }
@@ -47,4 +50,23 @@ public class AdministradorService {
     public boolean eliminarArticuloCatalogo(int idPanel, int idEmpresa) throws SQLException {
         return adminDAO.eliminarPanelDelCatalogo(idPanel, idEmpresa);
     }
+
+    public List<PanelCatalogoDTO> obtenerCatalogoPaneles(int idEmpresa) throws SQLException {
+        return adminDAO.obtenerPanelesPorEmpresa(idEmpresa);
+    }
+
+    public PanelCatalogoDTO agregarArticuloCatalogo(PanelCatalogoDTO panel) throws SQLException {
+        return adminDAO.agregarPanelAlCatalogo(panel);
+    }
+    public boolean cambiarEstadoCita(int idCita, int idEmpresa, String nuevoEstado) throws SQLException {
+    if (nuevoEstado == null || nuevoEstado.trim().isEmpty()) {
+        throw new IllegalArgumentException("El nuevo estado no puede estar vacío.");
+    }
+    String estadoNormalizado = nuevoEstado.trim().toUpperCase();
+    if (!List.of("PENDIENTE", "CONFIRMADA", "COMPLETADA", "CANCELADA").contains(estadoNormalizado)) {
+        throw new IllegalArgumentException("Estado no válido: " + nuevoEstado);
+    }
+    return adminDAO.actualizarEstadoCita(idCita, idEmpresa, estadoNormalizado);
+        }
+        
 }

@@ -57,13 +57,13 @@ public class AdministradorDAO {
         }
     }
 
-    // 2. Login traendo datos del Admin y su Empresa
+    // 2. Login trayendo datos del Admin y su Empresa
     public AdminAuthResponseDTO loginAdmin(String correo, String contrasena) throws SQLException {
         String sql = "SELECT a.id, a.nombre as admin_nombre, a.correo, a.rol, " +
                      "e.id_empresa, e.nombre as empresa_nombre, e.nit, e.ciudad, e.direccion, e.telefono, e.email " +
                      "FROM administrativos a " +
-                     "JOIN empresas e ON a.empresa_id = e.id_empresa " +
-                     "WHERE a.correo = ? AND a.contrasena = ?";
+                     "LEFT JOIN empresas e ON a.empresa_id = e.id_empresa " +
+                     "WHERE LOWER(TRIM(a.correo)) = LOWER(TRIM(?)) AND TRIM(a.contrasena) = TRIM(?)";
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -76,7 +76,10 @@ public class AdministradorDAO {
                     dto.setNombreAdmin(rs.getString("admin_nombre"));
                     dto.setCorreoAdmin(rs.getString("correo"));
                     dto.setRol(rs.getString("rol"));
-                    dto.setIdEmpresa(rs.getInt("id_empresa"));
+
+                    int idEmpresa = rs.getInt("id_empresa");
+                    dto.setIdEmpresa(rs.wasNull() ? 0 : idEmpresa);
+
                     dto.setNombreEmpresa(rs.getString("empresa_nombre"));
                     dto.setNitEmpresa(rs.getString("nit"));
                     dto.setCiudadEmpresa(rs.getString("ciudad"));
@@ -92,85 +95,89 @@ public class AdministradorDAO {
 
     // 3. Consultar Citas agendadas para la empresa
     public List<CitaDTO> obtenerCitasPorEmpresa(int idEmpresa) throws SQLException {
-        List<CitaDTO> citas = new ArrayList<>();
-        String sql = "SELECT c.id_cita, c.empresa_id, c.id_usuario, c.id_casa, c.tipo_servicio, " +
-                     "c.id_factura, c.articulo_danado, c.descripcion_danio, c.fecha, c.hora, " +
-                     "c.estado, c.tecnico_asignado, c.notas, c.fecha_creacion, " +
-                     "u.nombre || ' ' || u.apellido as nombre_cliente, u.telefono as telefono_cliente, " +
-                     "ca.direccion, ca.tipo_propiedad " +
-                     "FROM citas c " +
-                     "JOIN usuarios u ON c.id_usuario = u.id_usuario " +
-                     "JOIN casas ca ON c.id_casa = ca.id_casa " +
-                     "WHERE c.empresa_id = ? ORDER BY c.fecha DESC, c.hora DESC";
+    List<CitaDTO> citas = new ArrayList<>();
+    String sql = "SELECT DISTINCT c.id_cita, c.empresa_id, c.id_usuario, c.id_casa, c.tipo_servicio, " +
+                 "c.id_factura, c.articulo_danado, c.descripcion_danio, c.fecha, c.hora, " +
+                 "c.estado, c.tecnico_asignado, c.notas, c.fecha_creacion, " +
+                 "u.nombre || ' ' || u.apellido AS nombre_cliente, u.telefono AS telefono_cliente, " +
+                 "ca.direccion, ca.tipo_propiedad " +
+                 "FROM citas c " +
+                 "JOIN usuarios u ON c.id_usuario = u.id_usuario " +
+                 "JOIN casas ca ON c.id_casa = ca.id_casa " +
+                 "LEFT JOIN facturas f ON c.id_factura = f.id_factura " +
+                 "WHERE c.empresa_id = ? OR f.empresa_id = ? " +
+                 "ORDER BY c.fecha DESC, c.hora DESC";
 
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, idEmpresa);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    CitaDTO c = new CitaDTO();
-                    c.setIdCita(rs.getInt("id_cita"));
-                    c.setEmpresaId(rs.getInt("empresa_id"));
-                    c.setIdUsuario(rs.getInt("id_usuario"));
-                    c.setIdCasa(rs.getInt("id_casa"));
-                    c.setTipoServicio(rs.getString("tipo_servicio"));
+    try (Connection conn = dataSource.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, idEmpresa);
+        ps.setInt(2, idEmpresa);
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                CitaDTO c = new CitaDTO();
+                c.setIdCita(rs.getInt("id_cita"));
+                c.setEmpresaId(rs.getInt("empresa_id"));
+                c.setIdUsuario(rs.getInt("id_usuario"));
+                c.setIdCasa(rs.getInt("id_casa"));
+                c.setTipoServicio(rs.getString("tipo_servicio"));
 
-                    int idFactura = rs.getInt("id_factura");
-                    c.setIdFactura(rs.wasNull() ? null : idFactura);
+                int idFactura = rs.getInt("id_factura");
+                c.setIdFactura(rs.wasNull() ? null : idFactura);
 
-                    c.setArticuloDanado(rs.getString("articulo_danado"));
-                    c.setDescripcionDanio(rs.getString("descripcion_danio"));
-                    c.setFecha(rs.getDate("fecha").toLocalDate());
-                    c.setHora(rs.getTime("hora").toLocalTime());
-                    c.setEstado(rs.getString("estado"));
-                    c.setTecnicoAsignado(rs.getString("tecnico_asignado"));
-                    c.setNotas(rs.getString("notas"));
-                    c.setFechaCreacion(rs.getTimestamp("fecha_creacion").toLocalDateTime());
+                c.setArticuloDanado(rs.getString("articulo_danado"));
+                c.setDescripcionDanio(rs.getString("descripcion_danio"));
+                c.setFecha(rs.getDate("fecha").toLocalDate());
+                c.setHora(rs.getTime("hora").toLocalTime());
+                c.setEstado(rs.getString("estado"));
+                c.setTecnicoAsignado(rs.getString("tecnico_asignado"));
+                c.setNotas(rs.getString("notas"));
+                c.setFechaCreacion(rs.getTimestamp("fecha_creacion").toLocalDateTime());
 
-                    c.setNombreCliente(rs.getString("nombre_cliente"));
-                    c.setTelefonoCliente(rs.getString("telefono_cliente"));
-                    c.setDireccionCasa(rs.getString("direccion"));
-                    c.setTipoPropiedad(rs.getString("tipo_propiedad"));
+                c.setNombreCliente(rs.getString("nombre_cliente"));
+                c.setTelefonoCliente(rs.getString("telefono_cliente"));
+                c.setDireccionCasa(rs.getString("direccion"));
+                c.setTipoPropiedad(rs.getString("tipo_propiedad"));
 
-                    citas.add(c);
-                }
+                citas.add(c);
             }
         }
-        return citas;
     }
+    return citas;
+}
 
     // 4. Clientes y Casas atendidas por la empresa
-    public List<ClienteCasaDTO> obtenerClientesYCasasAtendidas(int idEmpresa) throws SQLException {
-        List<ClienteCasaDTO> lista = new ArrayList<>();
-        String sql = "SELECT DISTINCT u.id_usuario, u.nombre || ' ' || u.apellido as cliente, u.correo, u.telefono, " +
-                     "ca.id_casa, ca.tipo_propiedad, ca.direccion, ca.ciudad, ca.consumo_mensual " +
-                     "FROM facturas f " +
-                     "JOIN usuarios u ON f.id_usuario = u.id_usuario " +
-                     "JOIN casas ca ON f.id_casa = ca.id_casa " +
-                     "WHERE f.empresa_id = ?";
+public List<ClienteCasaDTO> obtenerClientesYCasasAtendidas(int idEmpresa) throws SQLException {
+    List<ClienteCasaDTO> lista = new ArrayList<>();
+    String sql = "SELECT DISTINCT u.id_usuario, u.nombre || ' ' || u.apellido AS cliente, u.correo, u.telefono, " +
+                 "ca.id_casa, ca.tipo_propiedad, ca.direccion, ca.ciudad, ca.consumo_mensual " +
+                 "FROM usuarios u " +
+                 "JOIN casas ca ON ca.id_usuario = u.id_usuario " +
+                 "LEFT JOIN facturas f ON f.id_usuario = u.id_usuario AND f.id_casa = ca.id_casa " +
+                 "LEFT JOIN citas c ON c.id_usuario = u.id_usuario AND c.id_casa = ca.id_casa " +
+                 "WHERE f.empresa_id = ? OR c.empresa_id = ?";
 
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, idEmpresa);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    ClienteCasaDTO dto = new ClienteCasaDTO();
-                    dto.setIdUsuario(rs.getInt("id_usuario"));
-                    dto.setNombreCliente(rs.getString("cliente"));
-                    dto.setCorreoCliente(rs.getString("correo"));
-                    dto.setTelefonoCliente(rs.getString("telefono"));
-                    dto.setIdCasa(rs.getInt("id_casa"));
-                    dto.setTipoPropiedad(rs.getString("tipo_propiedad"));
-                    dto.setDireccionCasa(rs.getString("direccion"));
-                    dto.setCiudadCasa(rs.getString("ciudad"));
-                    dto.setConsumoMensualKwh(rs.getDouble("consumo_mensual"));
-                    lista.add(dto);
-                }
+    try (Connection conn = dataSource.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, idEmpresa);
+        ps.setInt(2, idEmpresa);
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                ClienteCasaDTO dto = new ClienteCasaDTO();
+                dto.setIdUsuario(rs.getInt("id_usuario"));
+                dto.setNombreCliente(rs.getString("cliente"));
+                dto.setCorreoCliente(rs.getString("correo"));
+                dto.setTelefonoCliente(rs.getString("telefono"));
+                dto.setIdCasa(rs.getInt("id_casa"));
+                dto.setTipoPropiedad(rs.getString("tipo_propiedad"));
+                dto.setDireccionCasa(rs.getString("direccion"));
+                dto.setCiudadCasa(rs.getString("ciudad"));
+                dto.setConsumoMensualKwh(rs.getDouble("consumo_mensual"));
+                lista.add(dto);
             }
         }
-        return lista;
     }
-
+    return lista;
+}
     // 5. Informe Económico Mensual/Anual de Mantenimientos e Instalaciones
     public List<ReporteFinancieroDTO> obtenerInformeFinanciero(int idEmpresa, int anio) throws SQLException {
         List<ReporteFinancieroDTO> reporte = new ArrayList<>();
@@ -237,4 +244,71 @@ public class AdministradorDAO {
             return ps.executeUpdate() > 0;
         }
     }
+
+   
+    // 8. Listar paneles de la empresa
+    public List<PanelCatalogoDTO> obtenerPanelesPorEmpresa(int idEmpresa) throws SQLException {
+        List<PanelCatalogoDTO> lista = new ArrayList<>();
+        String sql = "SELECT id, empresa_id, nombre, tipo, potencia_w, eficiencia, precio, costo_instalacion, garantia_anios, descripcion " +
+                    "FROM paneles_solares WHERE empresa_id = ? ORDER BY id DESC";
+
+        try (Connection conn = dataSource.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idEmpresa);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    PanelCatalogoDTO p = new PanelCatalogoDTO();
+                    p.setId(rs.getInt("id"));
+                    p.setEmpresaId(rs.getInt("empresa_id"));
+                    p.setNombre(rs.getString("nombre"));
+                    p.setTipo(rs.getString("tipo"));
+                    p.setPotenciaW(rs.getDouble("potencia_w"));
+                    p.setEficiencia(rs.getDouble("eficiencia"));
+                    p.setPrecio(rs.getDouble("precio"));
+                    p.setCostoInstalacion(rs.getDouble("costo_instalacion"));
+                    p.setGarantiaAnios(rs.getString("garantia_anios"));
+                    p.setDescripcion(rs.getString("descripcion"));
+                    lista.add(p);
+                }
+            }
+        }
+        return lista;
+    }
+
+    // 9. Agregar nuevo panel al catálogo
+    public PanelCatalogoDTO agregarPanelAlCatalogo(PanelCatalogoDTO p) throws SQLException {
+        String sql = "INSERT INTO paneles_solares (empresa_id, nombre, tipo, potencia_w, eficiencia, precio, costo_instalacion, garantia_anios, descripcion) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id";
+
+        try (Connection conn = dataSource.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, p.getEmpresaId());
+            ps.setString(2, p.getNombre());
+            ps.setString(3, p.getTipo());
+            ps.setDouble(4, p.getPotenciaW());
+            ps.setDouble(5, p.getEficiencia());
+            ps.setDouble(6, p.getPrecio());
+            ps.setDouble(7, p.getCostoInstalacion());
+            ps.setString(8, p.getGarantiaAnios());
+            ps.setString(9, p.getDescripcion());
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    p.setId(rs.getInt("id"));
+                }
+            }
+        }
+        return p;
+    }
+    // 10. Actualizar estado de una cita
+public boolean actualizarEstadoCita(int idCita, int idEmpresa, String nuevoEstado) throws SQLException {
+    String sql = "UPDATE citas SET estado = ? WHERE id_cita = ? AND empresa_id = ?";
+    try (Connection conn = dataSource.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setString(1, nuevoEstado);
+        ps.setInt(2, idCita);
+        ps.setInt(3, idEmpresa);
+        return ps.executeUpdate() > 0;
+    }
+}
 }
