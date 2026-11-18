@@ -253,4 +253,38 @@ CREATE INDEX IF NOT EXISTS idx_predicciones_usuario ON historial_predicciones(id
 CREATE INDEX IF NOT EXISTS idx_predicciones_casa    ON historial_predicciones(id_casa);
 CREATE INDEX IF NOT EXISTS idx_chat_usuario_empresa ON chat_mensajes(id_usuario, empresa_id);
 
+-- 1. Agregar bandera en la tabla casas para identificar si el consumo fue calculado por cuestionario
+ALTER TABLE casas 
+ADD COLUMN es_casa_nueva BOOLEAN DEFAULT FALSE;
+
+-- 2. Catálogo maestro de artículos/electrodomésticos y su consumo base mensual (kWh)
+CREATE TABLE catalogo_articulos (
+    id_articulo SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL UNIQUE,
+    categoria VARCHAR(50) NOT NULL, -- Ej: Climatización, Cocina, Iluminación, Entretenimiento
+    consumo_kwh_mes NUMERIC(10, 2) NOT NULL CHECK (consumo_kwh_mes >= 0)
+);
+
+-- 3. Relación N:M entre Casas y Artículos seleccionados en el cuestionario
+CREATE TABLE casa_articulos (
+    id_casa INT NOT NULL REFERENCES casas(id_casa) ON DELETE CASCADE,
+    id_articulo INT NOT NULL REFERENCES catalogo_articulos(id_articulo) ON DELETE RESTRICT,
+    cantidad INT NOT NULL CHECK (cantidad > 0),
+    subtotal_kwh_mes NUMERIC(10, 2) NOT NULL,
+    PRIMARY KEY (id_casa, id_articulo)
+);
+
+-- 4. Datos semilla (Valores promedio mensuales en kWh para hogares en la Región Caribe)
+INSERT INTO catalogo_articulos (nombre, categoria, consumo_kwh_mes) VALUES
+('Aire Acondicionado Inverter 12,000 BTU (8h/día)', 'Climatización', 180.00),
+('Aire Acondicionado Convencional 12,000 BTU (8h/día)', 'Climatización', 290.00),
+('Ventilador de Techo o Pedestal (10h/día)', 'Climatización', 21.00),
+('Nevera No-Frost Mediana (24h)', 'Cocina', 45.00),
+('Nevecón / Refrigerador Grande (24h)', 'Cocina', 75.00),
+('Televisor LED/Smart TV 50" (5h/día)', 'Entretenimiento', 15.00),
+('Lavadora Automática (4 ciclos/semana)', 'Lavandería', 16.00),
+('Computador de Escritorio / Portátil (8h/día)', 'Oficina', 24.00),
+('Bombillo LED 10W (6h/día)', 'Iluminación', 1.80),
+('Horno Microondas (15 min/día)', 'Cocina', 9.00),
+('Router Wi-Fi (24h)', 'Conectividad', 7.20);
 COMMIT;
