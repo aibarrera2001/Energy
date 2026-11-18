@@ -1,5 +1,7 @@
 package com.energiapp.dto;
 
+import java.util.List;
+
 public class CasaDTO {
 
     private Integer idCasa;
@@ -18,7 +20,10 @@ public class CasaDTO {
     private double consumoMensual;
     private String imagenUbicacionUrl;
     private String modelo3dUrl;
+    private boolean esCasaNueva;
+    private List<ItemCuestionarioDTO> articulosCuestionario;
 
+    
     // Constructores
     public CasaDTO() {}
 
@@ -26,6 +31,11 @@ public class CasaDTO {
     public Integer getIdCasa() { return idCasa; }
     public void setIdCasa(Integer idCasa) { this.idCasa = idCasa; }
 
+    public boolean isEsCasaNueva() { return esCasaNueva; }
+    public void setEsCasaNueva(boolean esCasaNueva) { this.esCasaNueva = esCasaNueva; }
+    public List<ItemCuestionarioDTO> getArticulosCuestionario() { return articulosCuestionario; }
+    public void setArticulosCuestionario(List<ItemCuestionarioDTO> articulosCuestionario) { this.articulosCuestionario = articulosCuestionario; }
+    
     public Integer getIdUsuario() { return idUsuario; }
     public void setIdUsuario(Integer idUsuario) { this.idUsuario = idUsuario; }
 

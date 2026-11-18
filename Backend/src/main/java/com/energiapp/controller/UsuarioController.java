@@ -1,31 +1,51 @@
 package com.energiapp.controller;
 
+import com.energiapp.dto.UsuarioDTO;
+import com.energiapp.service.UsuarioService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/usuarios")
-@CrossOrigin(origins = "http://localhost:5173")
 public class UsuarioController {
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
-        String email = credentials.get("email");
-        String password = credentials.get("password");
+    private final UsuarioService usuarioService;
 
-        if ("usuario@example.com".equals(email) && "123456".equals(password)) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("id", 1);
-            response.put("nombre", "Usuario Ejemplo");
-            response.put("email", email);
-            return ResponseEntity.ok(response);
+    public UsuarioController(UsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
+    }
+
+    @PostMapping("/registro")
+    public ResponseEntity<?> registrar(@RequestBody UsuarioDTO usuarioDTO) {
+        try {
+            UsuarioDTO nuevoUsuario = usuarioService.registrarUsuario(usuarioDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al registrar usuario: " + e.getMessage());
         }
+    }
 
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("message", "Credenciales incorrectas");
-        return ResponseEntity.status(401).body(errorResponse);
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody Map<String, String> credenciales) {
+        try {
+            String correo = credenciales.get("correo");
+            String contrasena = credenciales.get("contrasena");
+
+            UsuarioDTO usuario = usuarioService.login(correo, contrasena);
+            if (usuario == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Correo o contraseña incorrectos.");
+            }
+            return ResponseEntity.ok(usuario);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error en el inicio de sesión: " + e.getMessage());
+        }
     }
 }
