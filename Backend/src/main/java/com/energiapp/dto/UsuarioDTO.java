@@ -6,6 +6,7 @@ public class UsuarioDTO {
     private int idUsuario;
     private String nombre;
     private String apellido;
+    private String rol;
 
     @JsonAlias({"email", "correo"})
     private String correo;
@@ -31,4 +32,6 @@ public class UsuarioDTO {
     public void setContrasena(String contrasena) { this.contrasena = contrasena; }
     public String getCiudad() { return ciudad; }
     public void setCiudad(String ciudad) { this.ciudad = ciudad; }
+    public String getRol() { return rol; }
+    public void setRol(String rol) { this.rol = rol; }
 }

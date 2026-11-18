@@ -1,11 +1,13 @@
 package com.energiapp.dao;
 
-import javax.sql.DataSource;
+import com.energiapp.dto.UsuarioDTO;
 import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,22 +20,54 @@ public class UsuarioDAO {
         this.dataSource = dataSource;
     }
 
-    public Map<String, Object> validarLogin(String email, String password) throws Exception {
-        String sql = "SELECT id_usuario, nombre, apellido, correo FROM usuarios WHERE TRIM(correo) = TRIM(?) AND contrasena = ?";
-
+    public boolean registrarUsuario(UsuarioDTO usuario) throws SQLException {
+        String sql = "INSERT INTO usuarios (nombre, correo, contrasena, rol) VALUES (?, ?, ?, ?)";
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, usuario.getNombre());
+            ps.setString(2, usuario.getCorreo());
+            ps.setString(3, usuario.getContrasena());
+            ps.setString(4, usuario.getRol() != null ? usuario.getRol() : "USUARIO");
+            return ps.executeUpdate() > 0;
+        }
+    }
 
-            stmt.setString(1, email);
-            stmt.setString(2, password);
-
-            try (ResultSet rs = stmt.executeQuery()) {
+    public UsuarioDTO loginUsuario(String correo, String contrasena) throws SQLException {
+        String sql = "SELECT id_usuario, nombre, correo, rol FROM usuarios WHERE correo = ? AND contrasena = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, correo);
+            ps.setString(2, contrasena);
+            try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    Map<String, Object> usuario = new HashMap<>();
-                    usuario.put("id", rs.getObject("id_usuario"));
-                    usuario.put("nombre", rs.getString("nombre") + " " + rs.getString("apellido"));
-                    usuario.put("email", rs.getString("correo"));
-                    return usuario;
+                    UsuarioDTO dto = new UsuarioDTO();
+                    dto.setIdUsuario(rs.getInt("id_usuario"));
+                    dto.setNombre(rs.getString("nombre"));
+                    dto.setCorreo(rs.getString("correo"));
+                    dto.setRol(rs.getString("rol"));
+                    return dto;
+                }
+            }
+        }
+        return null;
+    }
+
+    public Map<String, Object> validarLogin(String email, String password) throws SQLException {
+        String sql = "SELECT id_usuario, nombre, correo, rol FROM usuarios WHERE correo = ? AND contrasena = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ps.setString(2, password);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Map<String, Object> user = new HashMap<>();
+                    user.put("idUsuario", rs.getInt("id_usuario"));
+                    user.put("usuarioId", rs.getInt("id_usuario"));
+                    user.put("nombre", rs.getString("nombre"));
+                    user.put("nombreUsuario", rs.getString("nombre"));
+                    user.put("correo", rs.getString("correo"));
+                    user.put("rol", rs.getString("rol"));
+                    return user;
                 }
             }
         }
