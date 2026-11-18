@@ -16,3 +16,16 @@
 *.log
 # Configuración local de base de datos
 Backend/src/main/resources/conexionbd.properties
+apache-maven-*/
+target/
+node_modules/
+# Archivos de configuración con credenciales de base de datos
+# Configuración local de base de datos
+Backend/src/main/resources/conexionbd.properties
+Backend/src/main/resources/application.properties
+Backend/src/main/resources/application.yml
+**/application.properties
+**/application.yml
+apache-maven-*/
+target/
+node_modules/

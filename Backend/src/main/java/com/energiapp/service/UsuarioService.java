@@ -10,11 +10,12 @@ import java.sql.SQLException;
 public class UsuarioService {
 
     private final UsuarioDAO usuarioDAO;
+  
 
     public UsuarioService(UsuarioDAO usuarioDAO) {
         this.usuarioDAO = usuarioDAO;
     }
-
+  
     public UsuarioDTO registrarUsuario(UsuarioDTO usuario) throws SQLException {
         if (usuario.getNombre() == null || usuario.getNombre().trim().isEmpty()) {
             throw new IllegalArgumentException("El nombre es obligatorio.");

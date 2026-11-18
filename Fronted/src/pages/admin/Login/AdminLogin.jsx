@@ -17,14 +17,14 @@ export default function AdminLogin() {
     e.preventDefault();
     setCargando(true);
 
-    // Las claves deben coincidir exactamente con AdminLoginDTO.java (correo, contrasena)
     const payload = {
       correo: formData.correo.trim(),
       contrasena: formData.contrasena
     };
 
     try {
-      const res = await fetch('/api/admin/login', {
+      // Se especifica la URL completa apuntando al backend Java
+      const res = await fetch('http://localhost:8080/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -33,10 +33,11 @@ export default function AdminLogin() {
       if (res.ok) {
         const data = await res.json();
         
-        // Guardar la sesión devuelta por el backend
+        // Almacenamiento de variables de sesión en localStorage
         localStorage.setItem('idEmpresa', data.idEmpresa || 1);
         localStorage.setItem('adminNombre', data.nombreAdmin || 'Administrador');
         localStorage.setItem('nombreEmpresa', data.nombreEmpresa || 'Empresa Solar');
+        localStorage.setItem('adminSession', JSON.stringify(data));
         
         alert(`¡Bienvenido/a, ${data.nombreAdmin || 'Administrador'}!`);
         navigate('/admin/dashboard');
@@ -71,7 +72,7 @@ export default function AdminLogin() {
               value={formData.correo}
               onChange={handleChange}
               required
-              placeholder="planetarenovable@gmail.com"
+              placeholder="admin@solarcaribe.com"
               style={inputStyle}
             />
           </div>
