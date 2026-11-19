@@ -1,147 +1,171 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import {
+  CARIBE_THEME,
+  CaribeAuthLayout,
+  LogoEnergiapp,
+  CaribeIcons,
+  caribeInputStyle,
+  caribeLabelStyle,
+  caribePrimaryButtonStyle,
+} from '../../components/CaribeSolarUI';
 
 export default function UsuarioLogin() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+
+  const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [cargando, setCargando] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setCargando(true);
 
     try {
-      setLoading(true);
-      const res = await fetch('http://localhost:8080/api/usuarios/login', {
+      const response = await fetch('http://localhost:8080/api/usuarios/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({
+          correo: correo.trim(),
+          password,
+        }),
       });
 
-      const data = await res.json();
+      const data = await response.json().catch(() => null);
 
-      if (res.ok && data) {
-        // El backend devuelve directamente el objeto { id, nombre, email }
-        const idUsuario = data.id || data.id_usuario;
-        
-        localStorage.setItem('usuarioId', idUsuario);
-        localStorage.setItem('usuarioNombre', data.nombre);
-        localStorage.setItem('usuarioEmail', data.email);
-        localStorage.setItem('usuario', JSON.stringify(data));
-
-        // Redirección al panel principal del usuario
-        navigate('/user/dashboard');
-      } else {
-        setError(data.message || data.mensaje || 'Credenciales incorrectas');
+      if (!response.ok) {
+        throw new Error(data?.mensaje || data?.error || 'Credenciales incorrectas. Verifica tu correo y contraseña.');
       }
+
+      // Guardar sesión del usuario en localStorage
+      localStorage.setItem('usuario', JSON.stringify(data));
+      if (data?.id) localStorage.setItem('usuarioId', data.id);
+      if (data?.rol) localStorage.setItem('rol', data.rol);
+    navigate('/user/dashboard');
     } catch (err) {
-      console.error('Error al iniciar sesión:', err);
-      setError('No se pudo conectar con el servidor.');
+      setError(err.message || 'No se pudo conectar con el servidor.');
     } finally {
-      setLoading(false);
+      setCargando(false);
     }
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: '#F8FAFC',
-      padding: '1rem'
-    }}>
-      <div className="panel-card" style={{ width: '100%', maxWidth: '400px', padding: '2.5rem' }}>
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <span className="header-badge" style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
-            EnergiApp
-          </span>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#0F172A', margin: 0 }}>
-            Iniciar Sesión
-          </h1>
-          <p style={{ color: '#64748B', fontSize: '0.9rem', marginTop: '0.25rem' }}>
-            Accede a tu panel de monitoreo energético
-          </p>
+    <CaribeAuthLayout
+      badge="Portal de Propietarios"
+      titulo="Ingresar a mi sistema"
+      subtitulo="Consulta el estado de tu sistema fotovoltaico, estimaciones y solicitudes de soporte técnico."
+      footerLinkText="¿Aún no tienes una cuenta registrada?"
+      footerActionText="Crear cuenta de propietario →"
+      onFooterAction={() => navigate('/user/registro')}
+    >
+      {/* Identificador visual de marca dentro de la tarjeta */}
+      <div
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.55rem',
+          padding: '0.45rem 0.75rem',
+          backgroundColor: CARIBE_THEME.marfil,
+          border: `1px solid ${CARIBE_THEME.borde}`,
+          borderRadius: '10px',
+          marginBottom: '1.35rem',
+        }}
+      >
+        <LogoEnergiapp size={22} />
+        <span
+          style={{
+            fontFamily: "'Sora', sans-serif",
+            fontWeight: 700,
+            fontSize: '0.95rem',
+            letterSpacing: '-0.02em',
+            color: CARIBE_THEME.petroleo,
+          }}
+        >
+          energiapp
+        </span>
+      </div>
+
+      {error && (
+        <div
+          role="alert"
+          style={{
+            backgroundColor: 'rgba(185, 45, 45, 0.08)',
+            border: '1px solid rgba(185, 45, 45, 0.28)',
+            color: '#8E1F1F',
+            padding: '0.8rem 1rem',
+            borderRadius: '12px',
+            fontSize: '0.88rem',
+            lineHeight: 1.5,
+            marginBottom: '1.25rem',
+          }}
+        >
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
+        <div>
+          <label htmlFor="correo-usuario" style={caribeLabelStyle}>
+            Correo electrónico
+          </label>
+          <input
+            id="correo-usuario"
+            type="email"
+            required
+            autoComplete="email"
+            placeholder="nombre@correo.com"
+            value={correo}
+            onChange={(e) => setCorreo(e.target.value)}
+            style={caribeInputStyle}
+            onFocus={(e) => (e.target.style.borderColor = CARIBE_THEME.turquesa)}
+            onBlur={(e) => (e.target.style.borderColor = 'rgba(9, 47, 53, 0.2)')}
+          />
         </div>
 
-        {error && (
-          <div style={{
-            backgroundColor: '#FEE2E2',
-            color: '#EF4444',
-            padding: '0.75rem',
-            borderRadius: '0.5rem',
-            fontSize: '0.875rem',
-            marginBottom: '1rem',
-            textAlign: 'center'
-          }}>
-            {error}
-          </div>
-        )}
+        <div>
+          <label htmlFor="password-usuario" style={caribeLabelStyle}>
+            Contraseña
+          </label>
+          <input
+            id="password-usuario"
+            type="password"
+            required
+            autoComplete="current-password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={caribeInputStyle}
+            onFocus={(e) => (e.target.style.borderColor = CARIBE_THEME.turquesa)}
+            onBlur={(e) => (e.target.style.borderColor = 'rgba(9, 47, 53, 0.2)')}
+          />
+        </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#0F172A', marginBottom: '0.35rem' }}>
-              Correo electrónico
-            </label>
-            <input
-              type="email"
-              placeholder="usuario@ejemplo.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              style={{
-                width: '100%',
-                padding: '0.75rem 1rem',
-                borderRadius: '0.5rem',
-                border: '1px solid #CBD5E1',
-                fontSize: '0.95rem',
-                outline: 'none',
-                boxSizing: 'border-box'
-              }}
-            />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#0F172A', marginBottom: '0.35rem' }}>
-              Contraseña
-            </label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              style={{
-                width: '100%',
-                padding: '0.75rem 1rem',
-                borderRadius: '0.5rem',
-                border: '1px solid #CBD5E1',
-                fontSize: '0.95rem',
-                outline: 'none',
-                boxSizing: 'border-box'
-              }}
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="btn-accent-green"
-            disabled={loading}
-            style={{ width: '100%', padding: '0.85rem', fontSize: '1rem', marginTop: '0.5rem' }}
-          >
-            {loading ? 'Ingresando...' : 'Ingresar'}
-          </button>
-        </form>
-
-        <p style={{ textAlign: 'center', fontSize: '0.875rem', color: '#64748B', marginTop: '1.5rem' }}>
-          ¿No tienes una cuenta?{' '}
-          <Link to="/usuario-registro" style={{ color: '#10B981', fontWeight: 600, textDecoration: 'none' }}>
-            Regístrate aquí
-          </Link>
-        </p>
-      </div>
-    </div>
+        <button
+          type="submit"
+          disabled={cargando}
+          style={{
+            ...caribePrimaryButtonStyle,
+            marginTop: '0.35rem',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            opacity: cargando ? 0.75 : 1,
+            cursor: cargando ? 'not-allowed' : 'pointer',
+          }}
+          onMouseEnter={(e) => {
+            if (!cargando) e.currentTarget.style.backgroundColor = CARIBE_THEME.amarilloHover;
+          }}
+          onMouseLeave={(e) => {
+            if (!cargando) e.currentTarget.style.backgroundColor = CARIBE_THEME.amarillo;
+          }}
+        >
+          <span>{cargando ? 'Verificando acceso...' : 'Iniciar sesión'}</span>
+          {!cargando && <CaribeIcons.ArrowRight color={CARIBE_THEME.petroleo} />}
+        </button>
+      </form>
+    </CaribeAuthLayout>
   );
 }

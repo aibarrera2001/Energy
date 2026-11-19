@@ -1,349 +1,476 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserSidebar from '../../components/UserSidebar';
+import {
+  CARIBE_THEME,
+  CaribeIcons,
+  caribePrimaryButtonStyle,
+  useCaribeFonts,
+} from '../../components/CaribeSolarUI';
 
-export default function Dashboard() {
+export default function UserDashboard() {
   const navigate = useNavigate();
-  const userId = Number(localStorage.getItem('usuarioId') || localStorage.getItem('idUsuario'));
-  const nombreUsuario = localStorage.getItem('nombreUsuario') || localStorage.getItem('nombre') || 'Usuario';
+  useCaribeFonts();
+
+  /* Lectura segura de sesión evitando 'undefined' o 'null' como texto */
+  const usuario = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('usuario') || '{}');
+    } catch {
+      return {};
+    }
+  })();
+
+  const rawId =
+    localStorage.getItem('usuarioId') ||
+    usuario?.id ||
+    usuario?.idUsuario ||
+    usuario?.usuarioId;
+
+  const usuarioId =
+    rawId !== undefined &&
+    rawId !== null &&
+    String(rawId).trim() !== '' &&
+    String(rawId) !== 'undefined' &&
+    String(rawId) !== 'null'
+      ? String(rawId)
+      : null;
 
   const [propiedades, setPropiedades] = useState([]);
-  const [casaSeleccionada, setCasaSeleccionada] = useState('');
+  const [paneles, setPaneles] = useState([]);
   const [citas, setCitas] = useState([]);
-  const [recomendacionOptima, setRecomendacionOptima] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    cargarDatosIniciales();
-  }, []);
+    let activo = true;
 
-  useEffect(() => {
-    if (casaSeleccionada) {
-      cargarRecomendacionCasa(casaSeleccionada);
-    }
-  }, [casaSeleccionada]);
+    const cargarResumen = async () => {
+      setCargando(true);
+      try {
+        const promesas = [
+          usuarioId
+            ? fetch(`http://localhost:8080/api/propiedades/usuario/${usuarioId}`).catch(() => null)
+            : Promise.resolve(null),
+          fetch('http://localhost:8080/api/paneles').catch(() => null),
+          usuarioId
+            ? fetch(`http://localhost:8080/api/citas/usuario/${usuarioId}`).catch(() => null)
+            : Promise.resolve(null),
+        ];
 
-  const cargarDatosIniciales = async () => {
-    if (!userId) {
-      setLoading(false);
-      return;
-    }
+        const [resProp, resPaneles, resCitas] = await Promise.all(promesas);
 
-    try {
-      const [resCasas, resCitas] = await Promise.all([
-        fetch(`/api/casas/usuario/${userId}`),
-        fetch(`/api/citas/usuario/${userId}`)
-      ]);
+        if (!activo) return;
 
-      if (resCasas.ok) {
-        const dataCasas = await resCasas.json();
-        const listaCasas = Array.isArray(dataCasas) ? dataCasas : [];
-        setPropiedades(listaCasas);
-        if (listaCasas.length !== 0) {
-          setCasaSeleccionada(String(listaCasas[0].idCasa));
+        if (resProp && resProp.ok) {
+          const dataProp = await resProp.json().catch(() => []);
+          setPropiedades(Array.isArray(dataProp) ? dataProp : []);
         }
+
+        if (resPaneles && resPaneles.ok) {
+          const dataPaneles = await resPaneles.json().catch(() => []);
+          setPaneles(Array.isArray(dataPaneles) ? dataPaneles : []);
+        }
+
+        if (resCitas && resCitas.ok) {
+          const dataCitas = await resCitas.json().catch(() => []);
+          setCitas(Array.isArray(dataCitas) ? dataCitas : []);
+        }
+      } finally {
+        if (activo) setCargando(false);
       }
+    };
 
-      if (resCitas.ok) {
-        const dataCitas = await resCitas.json();
-        setCitas(Array.isArray(dataCitas) ? dataCitas : []);
-      }
-    } catch (err) {
-      console.error('Error cargando dashboard:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    cargarResumen();
 
-  const cargarRecomendacionCasa = async (idCasa) => {
-    try {
-      const resRec = await fetch(`/api/paneles/recomendar/${idCasa}`);
-      if (resRec.ok) {
-        const dataRec = await resRec.json();
-        const listaRec = Array.isArray(dataRec) ? dataRec : [];
-        const optima = listaRec.find((r) => r.recomendado) || listaRec[0] || null;
-        setRecomendacionOptima(optima);
-      } else {
-        setRecomendacionOptima(null);
-      }
-    } catch (err) {
-      console.error('Error cargando recomendación:', err);
-      setRecomendacionOptima(null);
-    }
-  };
+    return () => {
+      activo = false;
+    };
+  }, [usuarioId]);
 
-  const propiedadActual = propiedades.find((p) => String(p.idCasa) === String(casaSeleccionada));
-  const consumoMensual = propiedadActual ? Number(propiedadActual.consumoMensual || 0) : 0;
-  const generacionEstimada = recomendacionOptima ? Number(recomendacionOptima.generacionMensualKwh || 0) : 0;
-
-  // Tarifa promedio residencial (~$850 COP/kWh)
-  const ahorroMensualEstimado = Math.round(Math.min(consumoMensual, generacionEstimada) * 850);
-  const ahorroAnualEstimado = ahorroMensualEstimado * 12;
-  const citasActivas = citas.filter((c) => (c.estado || '').toUpperCase() !== 'CANCELADA');
+  const accesosRapidos = [
+    {
+      etiqueta: 'Inmuebles',
+      titulo: 'Mis propiedades',
+      descripcion: 'Consulta tus inmuebles registrados o agrega una nueva vivienda o local.',
+      accion: 'Ver propiedades',
+      ruta: '/propiedades',
+      icon: <CaribeIcons.Building size={20} color={CARIBE_THEME.turquesa} />,
+    },
+    {
+      etiqueta: 'Tecnología',
+      titulo: 'Catálogo de paneles',
+      descripcion: 'Explora módulos fotovoltaicos disponibles, eficiencia y potencia.',
+      accion: 'Explorar paneles',
+      ruta: '/paneles',
+      icon: <CaribeIcons.GridSolar size={20} color={CARIBE_THEME.turquesa} />,
+    },
+    {
+      etiqueta: 'Análisis',
+      titulo: 'Reportes solares',
+      descripcion: 'Revisa estimaciones de generación y desempeño en el Caribe.',
+      accion: 'Ver reportes',
+      ruta: '/reportes',
+      icon: <CaribeIcons.ArrowUpRight size={20} color={CARIBE_THEME.turquesa} />,
+    },
+    {
+      etiqueta: 'Operación',
+      titulo: 'Citas y soporte',
+      descripcion: 'Agenda mantenimiento preventivo o revisión técnica con empresas.',
+      accion: 'Gestionar citas',
+      ruta: '/citas',
+      icon: <CaribeIcons.Compass size={20} color={CARIBE_THEME.turquesa} />,
+    },
+  ];
 
   return (
-    <div style={{ backgroundColor: '#0F172A', minHeight: '100vh', color: '#F8FAFC', fontFamily: "'Inter', sans-serif" }}>
+    <div
+      style={{
+        display: 'flex',
+        minHeight: '100vh',
+        width: '100%',
+        backgroundColor: CARIBE_THEME.marfil,
+        color: CARIBE_THEME.petroleo,
+        fontFamily: "'DM Sans', system-ui, -apple-system, sans-serif",
+      }}
+    >
       <UserSidebar />
 
-      <main style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto', boxSizing: 'border-box' }}>
-        {/* Encabezado idéntico a Paneles y Citas */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.75rem' }}>
-          <div>
-            <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#FFFFFF', margin: '0 0 0.25rem 0' }}>
-              📊 Panel de Control — {nombreUsuario}
-            </h1>
-            <p style={{ color: '#94A3B8', margin: 0, fontSize: '0.95rem' }}>
-              Resumen energético, ahorro proyectado y estado de tus instalaciones solares.
-            </p>
+      <main style={{ flex: 1, padding: '2.25rem 2.5rem', overflowY: 'auto', textAlign: 'left' }}>
+        <div style={{ maxWidth: '1060px', margin: '0 auto' }}>
+          {/* Cabecera */}
+          <header
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-end',
+              flexWrap: 'wrap',
+              gap: '1rem',
+              paddingBottom: '1.5rem',
+              borderBottom: `1px solid ${CARIBE_THEME.borde}`,
+              marginBottom: '2rem',
+            }}
+          >
+            <div>
+              <span
+                style={{
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  color: CARIBE_THEME.turquesa,
+                }}
+              >
+                Panel de Propietario · Región Caribe
+              </span>
+              <h1
+                style={{
+                  fontFamily: "'Sora', sans-serif",
+                  fontSize: 'clamp(1.65rem, 2.8vw, 2.15rem)',
+                  fontWeight: 700,
+                  color: CARIBE_THEME.petroleo,
+                  margin: '0.3rem 0 0 0',
+                  letterSpacing: '-0.02em',
+                }}
+              >
+                Hola, {usuario?.nombre || 'Propietario'}
+              </h1>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => navigate('/registrar-casa')}
+              style={{
+                ...caribePrimaryButtonStyle,
+                width: 'auto',
+                padding: '0.75rem 1.2rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                fontSize: '0.9rem',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = CARIBE_THEME.amarilloHover)}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = CARIBE_THEME.amarillo)}
+            >
+              <span>Registrar propiedad</span>
+              <CaribeIcons.ArrowRight color={CARIBE_THEME.petroleo} />
+            </button>
+          </header>
+
+          {/* Indicadores principales */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
+              gap: '1.25rem',
+              marginBottom: '2.25rem',
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: CARIBE_THEME.blanco,
+                border: `1px solid ${CARIBE_THEME.borde}`,
+                borderRadius: '16px',
+                padding: '1.5rem',
+              }}
+            >
+              <span
+                style={{
+                  fontSize: '0.76rem',
+                  fontWeight: 700,
+                  color: CARIBE_THEME.turquesa,
+                  textTransform: 'uppercase',
+                }}
+              >
+                Propiedades registradas
+              </span>
+              <strong
+                style={{
+                  display: 'block',
+                  fontFamily: "'Sora', sans-serif",
+                  fontSize: '1.85rem',
+                  margin: '0.4rem 0 0.2rem 0',
+                }}
+              >
+                {cargando ? '...' : propiedades.length}
+              </strong>
+              <span style={{ fontSize: '0.84rem', color: CARIBE_THEME.pizarra }}>
+                Inmuebles asociados a tu cuenta
+              </span>
+            </div>
+
+            <div
+              style={{
+                backgroundColor: CARIBE_THEME.blanco,
+                border: `1px solid ${CARIBE_THEME.borde}`,
+                borderRadius: '16px',
+                padding: '1.5rem',
+              }}
+            >
+              <span
+                style={{
+                  fontSize: '0.76rem',
+                  fontWeight: 700,
+                  color: CARIBE_THEME.turquesa,
+                  textTransform: 'uppercase',
+                }}
+              >
+                Catálogo solar
+              </span>
+              <strong
+                style={{
+                  display: 'block',
+                  fontFamily: "'Sora', sans-serif",
+                  fontSize: '1.85rem',
+                  margin: '0.4rem 0 0.2rem 0',
+                }}
+              >
+                {cargando ? '...' : `${paneles.length} paneles`}
+              </strong>
+              <span style={{ fontSize: '0.84rem', color: CARIBE_THEME.pizarra }}>
+                Módulos disponibles para consulta
+              </span>
+            </div>
+
+            <div
+              style={{
+                backgroundColor: CARIBE_THEME.blanco,
+                border: `1px solid ${CARIBE_THEME.borde}`,
+                borderRadius: '16px',
+                padding: '1.5rem',
+              }}
+            >
+              <span
+                style={{
+                  fontSize: '0.76rem',
+                  fontWeight: 700,
+                  color: CARIBE_THEME.turquesa,
+                  textTransform: 'uppercase',
+                }}
+              >
+                Citas técnicas
+              </span>
+              <strong
+                style={{
+                  display: 'block',
+                  fontFamily: "'Sora', sans-serif",
+                  fontSize: '1.85rem',
+                  margin: '0.4rem 0 0.2rem 0',
+                }}
+              >
+                {cargando ? '...' : citas.length}
+              </strong>
+              <span style={{ fontSize: '0.84rem', color: CARIBE_THEME.pizarra }}>
+                Revisiones y mantenimiento
+              </span>
+            </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          {/* Destacado Asistente IA Solar */}
+          <section
+            style={{
+              backgroundColor: CARIBE_THEME.petroleo,
+              color: CARIBE_THEME.marfil,
+              borderRadius: '16px',
+              padding: '1.75rem 2rem',
+              marginBottom: '2.25rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '1.5rem',
+            }}
+          >
+            <div style={{ maxWidth: '58ch' }}>
+              <span
+                style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  color: CARIBE_THEME.amarillo,
+                }}
+              >
+                Asistente técnico · Energiapp IA
+              </span>
+              <h2
+                style={{
+                  fontFamily: "'Sora', sans-serif",
+                  fontSize: '1.3rem',
+                  margin: '0.4rem 0 0.5rem 0',
+                }}
+              >
+                Resuelve dudas sobre dimensionamiento y paneles solares
+              </h2>
+              <p
+                style={{
+                  color: 'rgba(247, 244, 235, 0.78)',
+                  fontSize: '0.94rem',
+                  lineHeight: 1.55,
+                  margin: 0,
+                }}
+              >
+                Consulta recomendaciones adaptadas al clima y radiación del Caribe colombiano antes de tomar decisiones sobre tu instalación.
+              </p>
+            </div>
+
             <button
-              onClick={() => navigate('/propiedades')}
+              type="button"
+              onClick={() => navigate('/asistente-ia')}
               style={{
-                backgroundColor: '#1E293B',
-                color: '#FFFFFF',
-                fontWeight: 600,
-                border: '1px solid #334155',
-                padding: '0.65rem 1.1rem',
-                borderRadius: '0.5rem',
-                cursor: 'pointer',
-                fontSize: '0.9rem'
+                ...caribePrimaryButtonStyle,
+                width: 'auto',
+                padding: '0.85rem 1.35rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = CARIBE_THEME.amarilloHover)}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = CARIBE_THEME.amarillo)}
+            >
+              <span>Abrir Asistente IA</span>
+              <CaribeIcons.ArrowRight color={CARIBE_THEME.petroleo} />
+            </button>
+          </section>
+
+          {/* Cuadrícula de módulos de usuario */}
+          <section>
+            <h2
+              style={{
+                fontFamily: "'Sora', sans-serif",
+                fontSize: '1.15rem',
+                marginBottom: '1rem',
               }}
             >
-              + Nueva Propiedad
-            </button>
-            <button
-              onClick={() => navigate('/citas')}
+              Módulos de tu cuenta
+            </h2>
+
+            <div
               style={{
-                backgroundColor: '#10B981',
-                color: '#0F172A',
-                fontWeight: 700,
-                border: 'none',
-                padding: '0.65rem 1.2rem',
-                borderRadius: '0.5rem',
-                cursor: 'pointer',
-                fontSize: '0.9rem'
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(235px, 1fr))',
+                gap: '1.25rem',
               }}
             >
-              📅 Agendar Cita
-            </button>
-          </div>
+              {accesosRapidos.map((item) => (
+                <article
+                  key={item.ruta}
+                  onClick={() => navigate(item.ruta)}
+                  style={{
+                    backgroundColor: CARIBE_THEME.blanco,
+                    border: `1px solid ${CARIBE_THEME.borde}`,
+                    borderRadius: '16px',
+                    padding: '1.5rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    transition: 'border-color 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.borderColor = CARIBE_THEME.turquesa)}
+                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = CARIBE_THEME.borde)}
+                >
+                  <div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginBottom: '1rem',
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.06em',
+                          color: CARIBE_THEME.turquesa,
+                        }}
+                      >
+                        {item.etiqueta}
+                      </span>
+                      {item.icon}
+                    </div>
+
+                    <h3
+                      style={{
+                        fontFamily: "'Sora', sans-serif",
+                        fontSize: '1.1rem',
+                        margin: '0 0 0.45rem 0',
+                      }}
+                    >
+                      {item.titulo}
+                    </h3>
+
+                    <p
+                      style={{
+                        fontSize: '0.9rem',
+                        color: CARIBE_THEME.pizarra,
+                        lineHeight: 1.55,
+                        margin: '0 0 1.25rem 0',
+                      }}
+                    >
+                      {item.descripcion}
+                    </p>
+                  </div>
+
+                  <span
+                    style={{
+                      fontSize: '0.86rem',
+                      fontWeight: 700,
+                      color: CARIBE_THEME.petroleo,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                    }}
+                  >
+                    {item.accion} →
+                  </span>
+                </article>
+              ))}
+            </div>
+          </section>
         </div>
-
-        {loading ? (
-          <p style={{ color: '#94A3B8' }}>Cargando métricas de EnergiApp...</p>
-        ) : (
-          <>
-            {/* Barra selectora de propiedad (igual que en Paneles.jsx) */}
-            {propiedades.length !== 0 && (
-              <div style={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '0.85rem', padding: '1.25rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                <div style={{ minWidth: '280px' }}>
-                  <label style={{ display: 'block', fontSize: '0.82rem', color: '#94A3B8', fontWeight: 600, marginBottom: '0.35rem' }}>
-                    Visualizando métricas de:
-                  </label>
-                  <select
-                    value={casaSeleccionada}
-                    onChange={(e) => setCasaSeleccionada(e.target.value)}
-                    style={{ width: '100%', padding: '0.65rem 0.85rem', backgroundColor: '#0F172A', border: '1px solid #334155', borderRadius: '0.5rem', color: '#FFFFFF', fontSize: '0.9rem' }}
-                  >
-                    {propiedades.map((p) => (
-                      <option key={p.idCasa} value={p.idCasa}>
-                        {p.tipoPropiedad} - {p.direccion || 'GPS'} ({p.ciudad})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {propiedadActual && (
-                  <div style={{ display: 'flex', gap: '1.75rem', flexWrap: 'wrap' }}>
-                    <div>
-                      <span style={{ fontSize: '0.78rem', color: '#94A3B8', display: 'block' }}>Método de cálculo</span>
-                      <strong style={{ fontSize: '0.95rem', color: '#10B981' }}>{propiedadActual.metodoCalculo || 'Factura Directa'}</strong>
-                    </div>
-                    <div>
-                      <span style={{ fontSize: '0.78rem', color: '#94A3B8', display: 'block' }}>Ubicación</span>
-                      <strong style={{ fontSize: '0.95rem', color: '#FFFFFF' }}>{propiedadActual.ciudad}</strong>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* 4 Tarjetas KPI */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
-              <div style={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '0.85rem', padding: '1.35rem' }}>
-                <span style={{ fontSize: '0.8rem', color: '#94A3B8', fontWeight: 600, display: 'block' }}>
-                  CONSUMO MENSUAL ACTUAL
-                </span>
-                <strong style={{ fontSize: '1.75rem', color: '#F59E0B', display: 'block', margin: '0.4rem 0' }}>
-                  {consumoMensual.toFixed(1)} kWh
-                </strong>
-                <span style={{ fontSize: '0.8rem', color: '#94A3B8' }}>
-                  {propiedades.length} {propiedades.length === 1 ? 'propiedad activa' : 'propiedades activas'}
-                </span>
-              </div>
-
-              <div style={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '0.85rem', padding: '1.35rem' }}>
-                <span style={{ fontSize: '0.8rem', color: '#94A3B8', fontWeight: 600, display: 'block' }}>
-                  GENERACIÓN SOLAR ESTIMADA
-                </span>
-                <strong style={{ fontSize: '1.75rem', color: '#10B981', display: 'block', margin: '0.4rem 0' }}>
-                  {generacionEstimada.toFixed(1)} kWh
-                </strong>
-                <span style={{ fontSize: '0.8rem', color: '#94A3B8' }}>
-                  {recomendacionOptima
-                    ? `Cobertura del ${recomendacionOptima.porcentajeCobertura}%`
-                    : 'Sin sistema calculado'}
-                </span>
-              </div>
-
-              <div style={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '0.85rem', padding: '1.35rem' }}>
-                <span style={{ fontSize: '0.8rem', color: '#94A3B8', fontWeight: 600, display: 'block' }}>
-                  AHORRO PROYECTADO / MES
-                </span>
-                <strong style={{ fontSize: '1.75rem', color: '#818CF8', display: 'block', margin: '0.4rem 0' }}>
-                  ${ahorroMensualEstimado.toLocaleString('es-CO')}
-                </strong>
-                <span style={{ fontSize: '0.8rem', color: '#94A3B8' }}>
-                  ~${ahorroAnualEstimado.toLocaleString('es-CO')} COP / año
-                </span>
-              </div>
-
-              <div style={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '0.85rem', padding: '1.35rem' }}>
-                <span style={{ fontSize: '0.8rem', color: '#94A3B8', fontWeight: 600, display: 'block' }}>
-                  CITAS TÉCNICAS ACTIVAS
-                </span>
-                <strong style={{ fontSize: '1.75rem', color: '#FFFFFF', display: 'block', margin: '0.4rem 0' }}>
-                  {citasActivas.length}
-                </strong>
-                <span style={{ fontSize: '0.8rem', color: '#10B981' }}>
-                  {citasActivas.length !== 0 ? `Próxima: ${citasActivas[0].fecha}` : 'Sin visitas pendientes'}
-                </span>
-              </div>
-            </div>
-
-            {/* Sección inferior de 2 columnas */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.25rem' }}>
-              {/* Tarjeta Kit Solar Recomendado */}
-              <div style={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '0.85rem', padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>
-                      🔋 Sistema Solar Recomendado
-                    </h2>
-                    <span style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10B981', fontSize: '0.72rem', fontWeight: 700, padding: '0.25rem 0.65rem', borderRadius: '999px' }}>
-                      ÓPTIMO
-                    </span>
-                  </div>
-
-                  {recomendacionOptima ? (
-                    <div>
-                      <p style={{ fontSize: '1.05rem', fontWeight: 700, color: '#FFFFFF', margin: '0 0 0.85rem 0' }}>
-                        {recomendacionOptima.nombrePanel}
-                      </p>
-                      <div style={{ backgroundColor: '#0F172A', borderRadius: '0.6rem', padding: '1rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
-                        <div>
-                          <span style={{ fontSize: '0.75rem', color: '#94A3B8', display: 'block' }}>Paneles sugeridos</span>
-                          <strong style={{ fontSize: '1.1rem', color: '#FFFFFF' }}>{recomendacionOptima.cantidadPaneles} unidades</strong>
-                        </div>
-                        <div>
-                          <span style={{ fontSize: '0.75rem', color: '#94A3B8', display: 'block' }}>Potencia total</span>
-                          <strong style={{ fontSize: '1.1rem', color: '#818CF8' }}>{recomendacionOptima.potenciaTotalKw} kWp</strong>
-                        </div>
-                        <div>
-                          <span style={{ fontSize: '0.75rem', color: '#94A3B8', display: 'block' }}>Inversión estimada</span>
-                          <strong style={{ fontSize: '1.1rem', color: '#10B981' }}>
-                            ${Number(recomendacionOptima.inversionEstimada).toLocaleString('es-CO')}
-                          </strong>
-                        </div>
-                        <div>
-                          <span style={{ fontSize: '0.75rem', color: '#94A3B8', display: 'block' }}>Retorno estimado</span>
-                          <strong style={{ fontSize: '1.1rem', color: '#F59E0B' }}>
-                            {ahorroAnualEstimado !== 0
-                              ? `${(Number(recomendacionOptima.inversionEstimada) / ahorroAnualEstimado).toFixed(1)} años`
-                              : 'N/A'}
-                          </strong>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <p style={{ color: '#94A3B8', fontSize: '0.9rem', margin: 0 }}>
-                      Registra una propiedad para ver el dimensionamiento fotovoltaico recomendado.
-                    </p>
-                  )}
-                </div>
-
-                <div style={{ marginTop: '1.25rem', display: 'flex', justifyContent: 'flex-end' }}>
-                  <button
-                    onClick={() => navigate('/paneles')}
-                    style={{ backgroundColor: '#10B981', color: '#0F172A', fontWeight: 700, border: 'none', padding: '0.6rem 1.15rem', borderRadius: '0.5rem', cursor: 'pointer', fontSize: '0.88rem' }}
-                  >
-                    Comparar todos los kits →
-                  </button>
-                </div>
-              </div>
-
-              {/* Tarjeta Próximas Citas */}
-              <div style={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '0.85rem', padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>
-                      📅 Próximas Visitas Técnicas
-                    </h2>
-                    <span style={{ fontSize: '0.8rem', color: '#94A3B8' }}>
-                      {citasActivas.length} agendadas
-                    </span>
-                  </div>
-
-                  {citasActivas.length === 0 ? (
-                    <p style={{ color: '#94A3B8', fontSize: '0.9rem', margin: 0 }}>
-                      No tienes citas técnicas programadas en este momento.
-                    </p>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                      {citasActivas.slice(0, 3).map((cita) => (
-                        <div
-                          key={cita.idCita}
-                          style={{
-                            backgroundColor: '#0F172A',
-                            borderRadius: '0.6rem',
-                            padding: '0.85rem 1rem',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            gap: '0.75rem'
-                          }}
-                        >
-                          <div>
-                            <strong style={{ fontSize: '0.92rem', color: '#FFFFFF', display: 'block' }}>
-                              {cita.tipoServicio}
-                            </strong>
-                            <span style={{ fontSize: '0.8rem', color: '#94A3B8' }}>
-                              📆 {cita.fecha} • ⏰ {String(cita.hora).slice(0, 5)}
-                            </span>
-                          </div>
-                          <span style={{ backgroundColor: 'rgba(245, 158, 11, 0.15)', color: '#F59E0B', fontSize: '0.72rem', fontWeight: 700, padding: '0.22rem 0.6rem', borderRadius: '999px' }}>
-                            {cita.estado || 'PENDIENTE'}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div style={{ marginTop: '1.25rem', display: 'flex', justifyContent: 'flex-end' }}>
-                  <button
-                    onClick={() => navigate('/citas')}
-                    style={{ backgroundColor: '#0F172A', color: '#FFFFFF', fontWeight: 600, border: '1px solid #334155', padding: '0.6rem 1.15rem', borderRadius: '0.5rem', cursor: 'pointer', fontSize: '0.88rem' }}
-                  >
-                    Ver todas las citas →
-                  </button>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
       </main>
     </div>
   );

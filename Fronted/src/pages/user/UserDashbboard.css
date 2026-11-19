@@ -1,195 +1,172 @@
-/* Reset global para evitar colisiones */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+:root {
+  --sidebar-width: 260px;
 }
 
-body, html {
-  background-color: #0F172A !important; /* Fondo oscuro elegante */
-  color: #F8FAFC !important;
-  min-height: 100vh;
-}
-
-/* Layout Principal */
 .dashboard-container {
   display: flex;
+  flex-direction: row;
   min-height: 100vh;
-  background-color: #0F172A;
+  width: 100%;
+  background-color: #F7F4EB;
+  color: #092F35;
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
 }
 
-/* Sidebar Lateral */
-.sidebar-container {
-  width: 250px;
-  background-color: #1E293B;
-  border-right: 1px solid #334155;
-  display: flex;
-  flex-direction: column;
-  padding: 1.5rem 1rem;
-  position: fixed;
-  height: 100vh;
-  top: 0;
-  left: 0;
-  z-index: 10;
+/* El margen izquierdo se sincroniza con el movimiento del UserSidebar */
+.dashboard-main-content {
+  margin-left: var(--sidebar-width, 260px);
+  width: calc(100% - var(--sidebar-width, 260px));
+  flex: 1;
+  padding: 2.25rem 2.5rem;
+  min-height: 100vh;
+  background-color: #F7F4EB;
+  color: #092F35;
+  text-align: left;
+  transition: margin-left 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+              width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
 }
 
-.sidebar-brand {
+/* Cabecera limpia estilo Caribe Solar */
+.dashboard-header-card {
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(9, 47, 53, 0.12);
+  border-radius: 0;
+  padding: 0 0 1.5rem 0;
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 1rem;
   margin-bottom: 2rem;
 }
 
-.sidebar-brand h2 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #FFFFFF !important;
-}
-
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  flex: 1;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  color: #94A3B8 !important;
-  text-decoration: none;
-  font-weight: 500;
-  border-radius: 0.5rem;
-  transition: all 0.2s ease;
-}
-
-.nav-item:hover {
-  background-color: #334155;
-  color: #FFFFFF !important;
-}
-
-.nav-item.active {
-  background-color: #10B981;
-  color: #FFFFFF !important;
-  font-weight: 600;
-}
-
-.sidebar-status {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background-color: #0F172A;
-  border-radius: 0.5rem;
-  font-size: 0.85rem;
-  color: #94A3B8 !important;
-}
-
-.status-indicator.online {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: #10B981;
-}
-
-/* Área de Contenido Principal */
-.dashboard-main-content {
-  margin-left: 250px;
-  flex: 1;
-  padding: 2rem;
-  width: calc(100% - 250px);
-}
-
-.dashboard-header-card {
-  background-color: #1E293B;
-  border: 1px solid #334155;
-  border-radius: 0.75rem;
-  padding: 1.5rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
 .header-badge {
-  background-color: rgba(16, 185, 129, 0.15);
-  color: #10B981 !important;
-  font-size: 0.75rem;
+  background-color: transparent;
+  color: #1C8077;
+  font-size: 0.78rem;
   font-weight: 700;
-  padding: 0.25rem 0.6rem;
-  border-radius: 1rem;
+  padding: 0;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .dashboard-header-card h1 {
-  font-size: 1.75rem;
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: clamp(1.65rem, 2.8vw, 2.15rem);
   font-weight: 700;
-  color: #FFFFFF !important;
-  margin: 0.35rem 0 0.15rem 0;
+  color: #092F35;
+  margin: 0.3rem 0 0.25rem 0;
+  letter-spacing: -0.02em;
 }
 
 .user-welcome {
-  color: #94A3B8 !important;
+  color: #586F73;
   font-size: 0.95rem;
 }
 
 .header-actions {
   display: flex;
   gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
-/* Tarjetas de Métricas */
+/* Tarjetas blancas con borde sutil */
 .panel-card {
-  background-color: #1E293B !important;
-  border: 1px solid #334155 !important;
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  background-color: #FFFFFF;
+  border: 1px solid rgba(9, 47, 53, 0.12);
+  border-radius: 16px;
+  padding: 1.65rem;
+  color: #092F35;
+  transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
-/* Forzar color de texto visible en todas las tarjetas */
+.panel-card:hover {
+  border-color: rgba(28, 128, 119, 0.45);
+}
+
 .panel-card span {
-  color: #94A3B8 !important;
+  color: #586F73;
 }
 
 .panel-card p {
-  color: #FFFFFF !important;
+  color: #092F35;
 }
 
+.panel-card h2,
 .panel-card h3 {
-  color: #FFFFFF !important;
+  font-family: 'Sora', system-ui, sans-serif;
+  color: #092F35;
 }
 
-/* Botones */
-.btn-secondary {
-  background-color: #334155;
+/* Formularios dentro de las vistas */
+.dashboard-main-content input,
+.dashboard-main-content select,
+.dashboard-main-content textarea {
+  background-color: #FFFFFF;
+  color: #092F35;
+  border: 1px solid rgba(9, 47, 53, 0.2);
+  border-radius: 12px;
+  padding: 0.75rem 0.95rem;
+  font-family: inherit;
+  font-size: 0.94rem;
+}
+
+.dashboard-main-content input:focus,
+.dashboard-main-content select:focus,
+.dashboard-main-content textarea:focus {
+  outline: none;
+  border-color: #1C8077;
+}
+
+.dashboard-main-content label {
+  color: #092F35;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 0.35rem;
+  display: block;
+}
+
+/* Botones Caribe Solar */
+.btn-accent-green {
+  background-color: #FFBF3F;
+  color: #092F35;
   border: none;
-  color: #FFFFFF !important;
-  padding: 0.6rem 1.2rem;
-  border-radius: 0.5rem;
+  padding: 0.78rem 1.25rem;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 0.15s ease;
+}
+
+.btn-accent-green:hover {
+  background-color: #F2AE24;
+}
+
+.btn-secondary {
+  background-color: #FFFFFF;
+  border: 1px solid rgba(9, 47, 53, 0.2);
+  color: #092F35;
+  padding: 0.75rem 1.2rem;
+  border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
+  font-family: inherit;
+}
+
+.btn-secondary:hover {
+  background-color: rgba(9, 47, 53, 0.05);
 }
 
 .btn-danger {
-  background-color: rgba(239, 68, 68, 0.2);
-  border: 1px solid #EF4444;
-  color: #F87171 !important;
-  padding: 0.6rem 1.2rem;
-  border-radius: 0.5rem;
+  background-color: rgba(185, 45, 45, 0.08);
+  border: 1px solid rgba(185, 45, 45, 0.28);
+  color: #8E1F1F;
+  padding: 0.7rem 1.15rem;
+  border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
-}
-
-.btn-accent-green {
-  background-color: #10B981;
-  color: #FFFFFF !important;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  cursor: pointer;
+  font-family: inherit;
 }
