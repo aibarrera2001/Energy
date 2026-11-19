@@ -1,146 +1,186 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  CARIBE_THEME,
+  CaribeAuthLayout,
+  LogoEnergiapp,
+  CaribeIcons,
+  caribeInputStyle,
+  caribeLabelStyle,
+  caribePrimaryButtonStyle,
+} from '../../../components/CaribeSolarUI';
 
 export default function AdminLogin() {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     correo: '',
-    contrasena: ''
+    contrasena: '',
   });
+  const [error, setError] = useState('');
   const [cargando, setCargando] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     setCargando(true);
 
     const payload = {
       correo: formData.correo.trim(),
-      contrasena: formData.contrasena
+      contrasena: formData.contrasena,
     };
 
     try {
-      // Se especifica la URL completa apuntando al backend Java
-      const res = await fetch('http://localhost:8080/api/admin/login', {
+      const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        
-        // Almacenamiento de variables de sesión en localStorage
-        localStorage.setItem('idEmpresa', data.idEmpresa || 1);
-        localStorage.setItem('adminNombre', data.nombreAdmin || 'Administrador');
-        localStorage.setItem('nombreEmpresa', data.nombreEmpresa || 'Empresa Solar');
-        localStorage.setItem('adminSession', JSON.stringify(data));
-        
-        alert(`¡Bienvenido/a, ${data.nombreAdmin || 'Administrador'}!`);
-        navigate('/admin/dashboard');
-      } else {
-        const errorText = await res.text();
-        alert(`Error: ${errorText || 'Credenciales inválidas.'}`);
+      if (!res.ok) {
+        const errorText = await res.text().catch(() => '');
+        throw new Error(errorText || 'Credenciales administrativas inválidas. Verifica tus datos.');
       }
+
+      const data = await res.json();
+
+      localStorage.setItem('idEmpresa', String(data.idEmpresa || 1));
+      localStorage.setItem('adminNombre', data.nombreAdmin || 'Administrador');
+      localStorage.setItem('nombreEmpresa', data.nombreEmpresa || 'Empresa Solar');
+      localStorage.setItem('adminSession', JSON.stringify(data));
+      localStorage.setItem('rol', 'ADMIN');
+
+      navigate('/admin/dashboard');
     } catch (err) {
-      console.error("Error de autenticación:", err);
-      alert('Error de conexión con el servidor backend.');
+      console.error('Error de autenticación admin:', err);
+      setError(err.message || 'No se pudo conectar con el servidor backend.');
     } finally {
       setCargando(false);
     }
   };
 
   return (
-    <div style={{ backgroundColor: '#F8FAF8', color: '#123B4F', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', fontFamily: 'Inter, sans-serif' }}>
-      <div style={{ maxWidth: '420px', width: '100%', backgroundColor: '#FFFFFF', border: '1px solid #DCE6E0', borderRadius: '0.5rem', padding: '2.5rem 2rem', boxShadow: '0 16px 35px rgba(18, 59, 79, 0.08)' }}>
-        
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <span style={{ fontSize: '3rem' }}>⚡</span>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#123B4F', margin: '0.5rem 0' }}>Acceso Administrativo</h1>
-          <p style={{ color: '#6B7280', fontSize: '0.9rem', margin: 0 }}>Ingresa a la consola de gestión de EnergiApp</p>
-        </div>
-
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <div>
-            <label style={{ fontSize: '0.85rem', color: '#6B7280', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Correo Electrónico *</label>
-            <input
-              type="email"
-              name="correo"
-              value={formData.correo}
-              onChange={handleChange}
-              required
-              placeholder="admin@solarcaribe.com"
-              style={inputStyle}
-            />
-          </div>
-
-          <div>
-            <label style={{ fontSize: '0.85rem', color: '#6B7280', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Contraseña *</label>
-            <input
-              type="password"
-              name="contrasena"
-              value={formData.contrasena}
-              onChange={handleChange}
-              required
-              placeholder="••••••••"
-              style={inputStyle}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={cargando}
-            style={{
-              marginTop: '0.5rem',
-              padding: '0.85rem',
-              backgroundColor: '#2E7D5B',
-              color: '#FFFFFF',
-              border: 'none',
-              borderRadius: '0.375rem',
-              fontWeight: 700,
-              fontSize: '1rem',
-              cursor: cargando ? 'not-allowed' : 'pointer',
-              opacity: cargando ? 0.7 : 1
-            }}
-          >
-            {cargando ? 'Verificando...' : 'Iniciar Sesión'}
-          </button>
-        </form>
-
-        <div style={{ textAlign: 'center', marginTop: '2rem', borderTop: '1px solid #DCE6E0', paddingTop: '1.5rem' }}>
-          <p style={{ fontSize: '0.85rem', color: '#6B7280', margin: '0 0 0.5rem 0' }}>
-            ¿Nueva empresa?{' '}
-            <span
-              onClick={() => navigate('/admin-registro')}
-              style={{ color: '#2E7D5B', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}
-            >
-              Registrar Empresa
-            </span>
-          </p>
-          <button
-            onClick={() => navigate('/')}
-            style={{ background: 'none', border: 'none', color: '#6B7280', fontSize: '0.8rem', cursor: 'pointer', marginTop: '0.5rem' }}
-          >
-            ← Volver a la selección de portal
-          </button>
-        </div>
-
+    <CaribeAuthLayout
+      badge="Consola de Empresas · Región Caribe"
+      titulo="Acceso Administrativo"
+      subtitulo="Gestiona el catálogo fotovoltaico, solicitudes técnicas, clientes y reportes operativos de tu empresa."
+      footerLinkText="¿Tu empresa aún no está registrada en Energiapp?"
+      footerActionText="Registrar empresa instaladora →"
+      onFooterAction={() => navigate('/admin-registro')}
+    >
+      {/* Identificador de marca */}
+      <div
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.55rem',
+          padding: '0.45rem 0.75rem',
+          backgroundColor: CARIBE_THEME.marfil,
+          border: `1px solid ${CARIBE_THEME.borde}`,
+          borderRadius: '10px',
+          marginBottom: '1.35rem',
+        }}
+      >
+        <LogoEnergiapp size={22} />
+        <span
+          style={{
+            fontFamily: "'Sora', sans-serif",
+            fontWeight: 700,
+            fontSize: '0.95rem',
+            letterSpacing: '-0.02em',
+            color: CARIBE_THEME.petroleo,
+          }}
+        >
+          energiapp <span style={{ color: CARIBE_THEME.turquesa, fontWeight: 600 }}>· Admin</span>
+        </span>
       </div>
-    </div>
+
+      {error && (
+        <div
+          role="alert"
+          style={{
+            backgroundColor: 'rgba(185, 45, 45, 0.08)',
+            border: '1px solid rgba(185, 45, 45, 0.28)',
+            color: '#8E1F1F',
+            padding: '0.8rem 1rem',
+            borderRadius: '12px',
+            fontSize: '0.88rem',
+            lineHeight: 1.5,
+            marginBottom: '1.25rem',
+          }}
+        >
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
+        <div>
+          <label htmlFor="correo-admin" style={caribeLabelStyle}>
+            Correo corporativo
+          </label>
+          <input
+            id="correo-admin"
+            type="email"
+            name="correo"
+            required
+            autoComplete="email"
+            placeholder="admin@solarcaribe.com"
+            value={formData.correo}
+            onChange={handleChange}
+            style={caribeInputStyle}
+            onFocus={(e) => (e.target.style.borderColor = CARIBE_THEME.turquesa)}
+            onBlur={(e) => (e.target.style.borderColor = 'rgba(9, 47, 53, 0.2)')}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="contrasena-admin" style={caribeLabelStyle}>
+            Contraseña
+          </label>
+          <input
+            id="contrasena-admin"
+            type="password"
+            name="contrasena"
+            required
+            autoComplete="current-password"
+            placeholder="••••••••"
+            value={formData.contrasena}
+            onChange={handleChange}
+            style={caribeInputStyle}
+            onFocus={(e) => (e.target.style.borderColor = CARIBE_THEME.turquesa)}
+            onBlur={(e) => (e.target.style.borderColor = 'rgba(9, 47, 53, 0.2)')}
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={cargando}
+          style={{
+            ...caribePrimaryButtonStyle,
+            marginTop: '0.35rem',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            opacity: cargando ? 0.75 : 1,
+            cursor: cargando ? 'not-allowed' : 'pointer',
+          }}
+          onMouseEnter={(e) => {
+            if (!cargando) e.currentTarget.style.backgroundColor = CARIBE_THEME.amarilloHover;
+          }}
+          onMouseLeave={(e) => {
+            if (!cargando) e.currentTarget.style.backgroundColor = CARIBE_THEME.amarillo;
+          }}
+        >
+          <span>{cargando ? 'Verificando credenciales...' : 'Ingresar a consola'}</span>
+          {!cargando && <CaribeIcons.ArrowRight color={CARIBE_THEME.petroleo} />}
+        </button>
+      </form>
+    </CaribeAuthLayout>
   );
 }
-
-const inputStyle = {
-  width: '100%',
-  padding: '0.75rem',
-  backgroundColor: '#FFFFFF',
-  border: '1px solid #DCE6E0',
-  borderRadius: '0.375rem',
-  color: '#123B4F',
-  fontSize: '0.95rem',
-  boxSizing: 'border-box',
-  outline: 'none'
-};
