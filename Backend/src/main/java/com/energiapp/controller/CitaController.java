@@ -15,7 +15,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/citas")
-@CrossOrigin(origins = "*")
 public class CitaController {
 
     private final CitaDAO citaDAO;
