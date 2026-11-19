@@ -21,13 +21,33 @@ public class UsuarioDAO {
     }
 
     public boolean registrarUsuario(UsuarioDTO usuario) throws SQLException {
-        String sql = "INSERT INTO usuarios (nombre, correo, contrasena, rol) VALUES (?, ?, ?, ?)";
+        String[] partes = usuario.getNombre() != null ? usuario.getNombre().trim().split("\\s+", 2) : new String[]{""};
+        String primerNombre = partes[0];
+        String apellido = partes.length > 1 ? partes[1] : "-";
+
+        String sql = "INSERT INTO usuarios (nombre, apellido, correo, contrasena, rol) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, usuario.getNombre());
-            ps.setString(2, usuario.getCorreo());
-            ps.setString(3, usuario.getContrasena());
-            ps.setString(4, usuario.getRol() != null ? usuario.getRol() : "USUARIO");
+            ps.setString(1, primerNombre);
+            ps.setString(2, apellido);
+            ps.setString(3, usuario.getCorreo());
+            ps.setString(4, usuario.getContrasena());
+            ps.setString(5, usuario.getRol() != null ? usuario.getRol() : "USER");
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    public boolean registrarUsuario(String nombre, String apellido, String correo, String telefono, String ciudad, String contrasena, String rol) throws SQLException {
+        String sql = "INSERT INTO usuarios (nombre, apellido, correo, telefono, contrasena, ciudad, rol) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, nombre);
+            ps.setString(2, apellido);
+            ps.setString(3, correo);
+            ps.setString(4, telefono);
+            ps.setString(5, contrasena);
+            ps.setString(6, ciudad);
+            ps.setString(7, rol != null ? rol : "USER");
             return ps.executeUpdate() > 0;
         }
     }

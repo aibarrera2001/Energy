@@ -10,6 +10,8 @@ import {
   caribePrimaryButtonStyle,
 } from '../../../components/CaribeSolarUI';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 export default function AdminLogin() {
   const navigate = useNavigate();
 
@@ -36,7 +38,7 @@ export default function AdminLogin() {
     };
 
     try {
-      const res = await fetch('/api/admin/login', {
+      const res = await fetch(`${API_URL}/api/admin/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

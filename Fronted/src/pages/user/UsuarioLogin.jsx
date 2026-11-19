@@ -10,6 +10,8 @@ import {
   caribePrimaryButtonStyle,
 } from '../../components/CaribeSolarUI';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 export default function UsuarioLogin() {
   const navigate = useNavigate();
 
@@ -24,7 +26,7 @@ export default function UsuarioLogin() {
     setCargando(true);
 
     try {
-      const response = await fetch('/api/usuarios/login', {
+      const response = await fetch(`${API_URL}/api/usuarios/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

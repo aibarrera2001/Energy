@@ -10,6 +10,8 @@ import {
   caribePrimaryButtonStyle,
 } from '../../components/CaribeSolarUI';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 export default function UsuarioRegistro() {
   const navigate = useNavigate();
 
@@ -49,7 +51,7 @@ export default function UsuarioRegistro() {
     setCargando(true);
 
     try {
-      const response = await fetch('/api/usuarios/registro', {
+      const response = await fetch(`${API_URL}/api/usuarios/registro`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

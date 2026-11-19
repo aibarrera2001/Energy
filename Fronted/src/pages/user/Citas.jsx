@@ -9,6 +9,8 @@ import {
   useCaribeFonts,
 } from '../../components/CaribeSolarUI';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 export default function Citas() {
   useCaribeFonts();
 
@@ -42,8 +44,8 @@ export default function Citas() {
     }
     try {
       const [resCitas, resCasas] = await Promise.all([
-        fetch(`/api/citas/usuario/${userId}`),
-        fetch(`/api/casas/usuario/${userId}`),
+        fetch(`${API_URL}/api/citas/usuario/${userId}`),
+        fetch(`${API_URL}/api/casas/usuario/${userId}`),
       ]);
 
       if (resCitas && resCitas.ok) {
@@ -86,7 +88,7 @@ export default function Citas() {
         notas: nuevaCita.notas || null,
       };
 
-      const res = await fetch('/api/citas', {
+      const res = await fetch(`${API_URL}/api/citas`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

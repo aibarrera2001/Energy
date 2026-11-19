@@ -8,6 +8,8 @@ import {
   useCaribeFonts,
 } from '../../components/CaribeSolarUI';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 export default function UserDashboard() {
   const navigate = useNavigate();
   useCaribeFonts();
@@ -49,8 +51,8 @@ export default function UserDashboard() {
       setCargando(true);
       try {
         const [resProp, resCitas] = await Promise.all([
-          usuarioId ? fetch(`/api/casas/usuario/${usuarioId}`).catch(() => null) : Promise.resolve(null),
-          usuarioId ? fetch(`/api/citas/usuario/${usuarioId}`).catch(() => null) : Promise.resolve(null),
+          usuarioId ? fetch(`${API_URL}/api/casas/usuario/${usuarioId}`).catch(() => null) : Promise.resolve(null),
+          usuarioId ? fetch(`${API_URL}/api/citas/usuario/${usuarioId}`).catch(() => null) : Promise.resolve(null),
         ]);
 
         if (!activo) return;
@@ -68,7 +70,7 @@ export default function UserDashboard() {
         }
 
         if (listaCasas.length > 0 && listaCasas[0].idCasa) {
-          const resPaneles = await fetch(`/api/paneles/recomendar/${listaCasas[0].idCasa}`).catch(() => null);
+          const resPaneles = await fetch(`${API_URL}/api/paneles/recomendar/${listaCasas[0].idCasa}`).catch(() => null);
           if (activo && resPaneles && resPaneles.ok) {
             const dataPaneles = await resPaneles.json().catch(() => []);
             setPaneles(Array.isArray(dataPaneles) ? dataPaneles : []);

@@ -7,6 +7,8 @@ import {
   useCaribeFonts,
 } from '../../components/CaribeSolarUI';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 export default function AsistenteIA() {
   useCaribeFonts();
 
@@ -51,7 +53,7 @@ export default function AsistenteIA() {
     setCargando(true);
 
     try {
-      const res = await fetch('/api/asistente/consulta', {
+      const res = await fetch(`${API_URL}/api/asistente/consulta`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

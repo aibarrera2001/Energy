@@ -10,6 +10,8 @@ import {
   useCaribeFonts,
 } from '../../components/CaribeSolarUI';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 export default function RegistroCasa() {
   const navigate = useNavigate();
   useCaribeFonts();
@@ -41,7 +43,7 @@ export default function RegistroCasa() {
   useEffect(() => {
     if (formData.esCasaNueva && catalogoArticulos.length === 0) {
       setCargandoCatalogo(true);
-      fetch('/api/casas/catalogo-articulos')
+      fetch(`${API_URL}/api/casas/catalogo-articulos`)
         .then((res) => (res && res.ok ? res.json() : []))
         .then((data) => {
           if (Array.isArray(data)) setCatalogoArticulos(data);
@@ -197,7 +199,7 @@ export default function RegistroCasa() {
     };
 
     try {
-      const res = await fetch('/api/casas', {
+      const res = await fetch(`${API_URL}/api/casas`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

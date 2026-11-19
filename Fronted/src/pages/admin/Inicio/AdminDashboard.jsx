@@ -9,6 +9,8 @@ import {
   useCaribeFonts,
 } from '../../../components/CaribeSolarUI';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 export default function AdminDashboard() {
   useCaribeFonts();
   const [tabActiva, setTabActiva] = useState('resumen'); // 'resumen', 'catalogo', 'finanzas', 'factura'
@@ -60,7 +62,7 @@ export default function AdminDashboard() {
 
   // --- CONSULTA DINÁMICA A POSTGRESQL ---
   const cargarCatalogo = () => {
-    fetch(`/api/admin/empresa/${idEmpresa}/catalogo/paneles`)
+    fetch(`${API_URL}/api/admin/empresa/${idEmpresa}/catalogo/paneles`)
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
         if (Array.isArray(data)) setCatalogo(data);
@@ -69,7 +71,7 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    fetch(`/api/admin/empresa/${idEmpresa}/citas`)
+    fetch(`${API_URL}/api/admin/empresa/${idEmpresa}/citas`)
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
         if (Array.isArray(data)) {
@@ -85,7 +87,7 @@ export default function AdminDashboard() {
       })
       .catch(() => setCitas([]));
 
-    fetch(`/api/admin/empresa/${idEmpresa}/clientes-casas`)
+    fetch(`${API_URL}/api/admin/empresa/${idEmpresa}/clientes-casas`)
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
         if (Array.isArray(data)) {
@@ -107,7 +109,7 @@ export default function AdminDashboard() {
   const handleAgregarPanel = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`/api/admin/empresa/${idEmpresa}/catalogo/panel`, {
+      const res = await fetch(`${API_URL}/api/admin/empresa/${idEmpresa}/catalogo/panel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(nuevoPanel),
@@ -137,7 +139,7 @@ export default function AdminDashboard() {
   const handleEliminarPanel = async (idPanel) => {
     if (!window.confirm('¿Deseas eliminar este artículo del catálogo?')) return;
     try {
-      const res = await fetch(`/api/admin/empresa/${idEmpresa}/catalogo/panel/${idPanel}`, {
+      const res = await fetch(`${API_URL}/api/admin/empresa/${idEmpresa}/catalogo/panel/${idPanel}`, {
         method: 'DELETE',
       });
       if (res.ok) {
@@ -154,7 +156,7 @@ export default function AdminDashboard() {
 
   const handleCambiarEstadoCita = async (idCita, nuevoEstado) => {
     try {
-      const res = await fetch(`/api/admin/empresa/${idEmpresa}/cita/${idCita}/estado`, {
+      const res = await fetch(`${API_URL}/api/admin/empresa/${idEmpresa}/cita/${idCita}/estado`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ estado: nuevoEstado }),
@@ -186,7 +188,7 @@ export default function AdminDashboard() {
 
   const handleBuscarFinanzas = async () => {
     try {
-      const res = await fetch(`/api/admin/empresa/${idEmpresa}/informe-financiero/${anioFiltro}`);
+      const res = await fetch(`${API_URL}/api/admin/empresa/${idEmpresa}/informe-financiero/${anioFiltro}`);
       if (res.ok) {
         const data = await res.json();
         setReporteFinanciero(Array.isArray(data) ? data : []);
@@ -199,7 +201,7 @@ export default function AdminDashboard() {
   const handleGenerarFactura = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/admin/factura', {
+      const res = await fetch(`${API_URL}/api/admin/factura`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...facturaData, empresaId: Number(idEmpresa) }),

@@ -10,6 +10,8 @@ import {
   useCaribeFonts,
 } from '../../../components/CaribeSolarUI';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 export default function AdminRegistro() {
   const navigate = useNavigate();
   useCaribeFonts();
@@ -45,7 +47,7 @@ export default function AdminRegistro() {
     let mounted = true;
 
     if (modo === 'UNIR') {
-      fetch('/api/admin/empresas')
+      fetch(`${API_URL}/api/admin/empresas`)
         .then((res) => {
           if (!res.ok) throw new Error('Servidor no disponible');
           return res.json();
@@ -142,7 +144,7 @@ export default function AdminRegistro() {
     };
 
     try {
-      const res = await fetch('/api/admin/registro', {
+      const res = await fetch(`${API_URL}/api/admin/registro`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

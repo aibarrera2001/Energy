@@ -10,6 +10,8 @@ import {
   useCaribeFonts,
 } from '../../components/CaribeSolarUI';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 export default function Reportes() {
   const navigate = useNavigate();
   useCaribeFonts();
@@ -42,8 +44,8 @@ export default function Reportes() {
     }
     try {
       const [resCasas, resCitas] = await Promise.all([
-        fetch(`/api/casas/usuario/${userId}`),
-        fetch(`/api/citas/usuario/${userId}`),
+        fetch(`${API_URL}/api/casas/usuario/${userId}`),
+        fetch(`${API_URL}/api/citas/usuario/${userId}`),
       ]);
 
       if (resCasas && resCasas.ok) {
@@ -68,7 +70,7 @@ export default function Reportes() {
 
   const cargarRecomendaciones = async (idCasa) => {
     try {
-      const res = await fetch(`/api/paneles/recomendar/${idCasa}`);
+      const res = await fetch(`${API_URL}/api/paneles/recomendar/${idCasa}`);
       if (res && res.ok) {
         const data = await res.json();
         setRecomendaciones(Array.isArray(data) ? data : []);
