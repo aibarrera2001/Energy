@@ -23,7 +23,7 @@ public class PanelDAO {
     }
 
     public Map<String, Object> obtenerDatosCasa(int idCasa) throws SQLException {
-        String sql = "SELECT id_casa, ciudad, consumo_mensual, area_disponible_m2 FROM casas WHERE id_casa = ?";
+        String sql = "SELECT id_casa, ciudad, latitud, longitud, consumo_mensual, area_disponible_m2 FROM casas WHERE id_casa = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, idCasa);
@@ -32,6 +32,8 @@ public class PanelDAO {
                     var casa = new HashMap<String, Object>();
                     casa.put("idCasa", rs.getInt("id_casa"));
                     casa.put("ciudad", rs.getString("ciudad"));
+                    casa.put("latitud", rs.getObject("latitud") != null ? rs.getDouble("latitud") : 0.0);
+                    casa.put("longitud", rs.getObject("longitud") != null ? rs.getDouble("longitud") : 0.0);
                     casa.put("consumoMensual", rs.getDouble("consumo_mensual"));
                     casa.put("areaDisponible", rs.getDouble("area_disponible_m2"));
                     return casa;

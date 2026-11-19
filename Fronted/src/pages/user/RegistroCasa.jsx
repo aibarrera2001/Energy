@@ -35,6 +35,9 @@ export default function RegistroCasa() {
   const [cargandoCatalogo, setCargandoCatalogo] = useState(false);
   const [enviando, setEnviando] = useState(false);
 
+  const [buscandoUbicacion, setBuscandoUbicacion] = useState(false);
+  const [estadoUbicacion, setEstadoUbicacion] = useState({ tipo: '', texto: '' });
+
   useEffect(() => {
     if (formData.esCasaNueva && catalogoArticulos.length === 0) {
       setCargandoCatalogo(true);
@@ -48,12 +51,95 @@ export default function RegistroCasa() {
     }
   }, [formData.esCasaNueva, catalogoArticulos.length]);
 
+  // Consulta gratuita a OpenStreetMap Nominatim (sin API Key)
+  const obtenerCoordenadasNominatim = async (direccionTexto, ciudadTexto) => {
+    const consulta = direccionTexto?.trim()
+      ? `${direccionTexto.trim()}, ${ciudadTexto}, Colombia`
+      : `${ciudadTexto}, Colombia`;
+
+    setBuscandoUbicacion(true);
+    setEstadoUbicacion({ tipo: '', texto: '' });
+
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+        consulta
+      )}&countrycodes=co&limit=1`;
+
+      const res = await fetch(url, {
+        headers: {
+          Accept: 'application/json',
+          'Accept-Language': 'es',
+        },
+      });
+
+      if (!res.ok) throw new Error('Error al consultar OpenStreetMap');
+
+      const resultados = await res.json();
+
+      if (Array.isArray(resultados) && resultados.length > 0) {
+        const { lat, lon, display_name } = resultados[0];
+        setFormData((prev) => ({
+          ...prev,
+          latitud: Number(Number(lat).toFixed(6)),
+          longitud: Number(Number(lon).toFixed(6)),
+        }));
+        setEstadoUbicacion({
+          tipo: 'ok',
+          texto: `Ubicación actualizada: ${display_name.split(',').slice(0, 3).join(',')}`,
+        });
+      } else if (direccionTexto?.trim()) {
+        // Si no halla la dirección exacta, centra al menos en la ciudad elegida
+        const urlCiudad = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          `${ciudadTexto}, Colombia`
+        )}&countrycodes=co&limit=1`;
+        const resCiudad = await fetch(urlCiudad, {
+          headers: { Accept: 'application/json', 'Accept-Language': 'es' },
+        });
+        const dataCiudad = resCiudad.ok ? await resCiudad.json() : [];
+
+        if (Array.isArray(dataCiudad) && dataCiudad.length > 0) {
+          setFormData((prev) => ({
+            ...prev,
+            latitud: Number(Number(dataCiudad[0].lat).toFixed(6)),
+            longitud: Number(Number(dataCiudad[0].lon).toFixed(6)),
+          }));
+          setEstadoUbicacion({
+            tipo: 'aviso',
+            texto: `No se halló la calle exacta; se asignaron las coordenadas centrales de ${ciudadTexto}.`,
+          });
+        } else {
+          setEstadoUbicacion({
+            tipo: 'error',
+            texto: 'No se encontraron coordenadas para esa ubicación.',
+          });
+        }
+      } else {
+        setEstadoUbicacion({
+          tipo: 'error',
+          texto: 'No se encontraron coordenadas para esa ciudad.',
+        });
+      }
+    } catch (err) {
+      console.error('Error Nominatim:', err);
+      setEstadoUbicacion({
+        tipo: 'error',
+        texto: 'No se pudo conectar con el servicio de mapas.',
+      });
+    } finally {
+      setBuscandoUbicacion(false);
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
+
+    if (name === 'ciudad') {
+      obtenerCoordenadasNominatim(formData.direccion, value);
+    }
   };
 
   const handleCantidadChange = (idArticulo, nuevaCantidad) => {
@@ -227,6 +313,10 @@ export default function RegistroCasa() {
                     <option value="Montería">Montería</option>
                     <option value="Sincelejo">Sincelejo</option>
                     <option value="Riohacha">Riohacha</option>
+                    <option value="Aguachica">Aguachica</option>
+                    <option value="Maicao">Maicao</option>
+                    <option value="Magangué">Magangué</option>
+                    <option value="Ciénaga">Ciénaga</option>
                   </select>
                 </div>
 
@@ -234,15 +324,60 @@ export default function RegistroCasa() {
                   <label style={caribeLabelStyle}>
                     Dirección {formData.tipoPropiedad !== 'FINCA' ? '*' : '(Opcional para Finca)'}
                   </label>
-                  <input
-                    type="text"
-                    name="direccion"
-                    value={formData.direccion}
-                    onChange={handleChange}
-                    required={formData.tipoPropiedad !== 'FINCA'}
-                    placeholder="Ej: Calle 16 # 9-45, Barrio Novalito"
-                    style={caribeInputStyle}
-                  />
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input
+                      type="text"
+                      name="direccion"
+                      value={formData.direccion}
+                      onChange={handleChange}
+                      onBlur={() => {
+                        if (formData.direccion.trim()) {
+                          obtenerCoordenadasNominatim(formData.direccion, formData.ciudad);
+                        }
+                      }}
+                      required={formData.tipoPropiedad !== 'FINCA'}
+                      placeholder="Ej: Calle 16 # 9-45, Barrio Novalito"
+                      style={caribeInputStyle}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => obtenerCoordenadasNominatim(formData.direccion, formData.ciudad)}
+                      disabled={buscandoUbicacion}
+                      style={{
+                        backgroundColor: CARIBE_THEME.turquesa,
+                        color: CARIBE_THEME.blanco,
+                        border: 'none',
+                        borderRadius: '12px',
+                        padding: '0 1.1rem',
+                        fontWeight: 700,
+                        fontSize: '0.85rem',
+                        cursor: buscandoUbicacion ? 'not-allowed' : 'pointer',
+                        whiteSpace: 'nowrap',
+                        opacity: buscandoUbicacion ? 0.7 : 1,
+                        fontFamily: 'inherit',
+                      }}
+                    >
+                      {buscandoUbicacion ? 'Buscando...' : 'Ubicar'}
+                    </button>
+                  </div>
+                  {estadoUbicacion.texto && (
+                    <span
+                      style={{
+                        display: 'block',
+                        marginTop: '0.35rem',
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        color:
+                          estadoUbicacion.tipo === 'error'
+                            ? '#8E1F1F'
+                            : estadoUbicacion.tipo === 'aviso'
+                            ? '#9A6700'
+                            : CARIBE_THEME.turquesa,
+                      }}
+                    >
+                      {estadoUbicacion.texto}
+                    </span>
+                  )}
                 </div>
               </div>
 

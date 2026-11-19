@@ -10,6 +10,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 
 @Component
 public class OpenMeteoApiClient {
@@ -37,22 +38,41 @@ public class OpenMeteoApiClient {
 
     public double obtenerRadiacionDiariaKwh(double latitud, double longitud) throws Exception {
         String url = String.format(
-            "https://api.open-meteo.com/v1/forecast?latitude=%.6f&longitude=%.6f&daily=shortwave_radiation_sum&timezone=auto",
+            Locale.US,
+            "https://api.open-meteo.com/v1/forecast?latitude=%.6f&longitude=%.6f&daily=shortwave_radiation_sum&timezone=America%%2FBogota",
             latitud, longitud
         );
 
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Accept", "application/json")
+                .GET()
+                .build();
 
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         JSONObject json = new JSONObject(response.body());
+
+        if (response.statusCode() != 200 || !json.has("daily")) {
+            String motivo = json.optString("reason", response.body());
+            throw new IllegalStateException("Open-Meteo HTTP " + response.statusCode() + ": " + motivo);
+        }
+
         JSONObject daily = json.getJSONObject("daily");
         JSONArray radiationArray = daily.getJSONArray("shortwave_radiation_sum");
 
         double sumaMj = 0;
-        int count = radiationArray.length();
-        for (int i = 0; i < count; i++) {
-            sumaMj += radiationArray.getDouble(i);
+        int validos = 0;
+        for (int i = 0; i < radiationArray.length(); i++) {
+            if (!radiationArray.isNull(i)) {
+                sumaMj += radiationArray.getDouble(i);
+                validos++;
+            }
         }
-        return (sumaMj / count) / 3.6;
+
+        if (validos == 0) {
+            throw new IllegalStateException("Open-Meteo no devolvió valores numéricos de radiación.");
+        }
+
+        return (sumaMj / validos) / 3.6;
     }
 }
