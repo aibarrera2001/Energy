@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/chat")
-@CrossOrigin(origins = "http://localhost:5173") // Habilita CORS para React/Vite
+@CrossOrigin(originPatterns = "*")
 public class ChatbotController {
 
     private final ChatbotService chatbotService;

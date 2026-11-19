@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/casas")
+@CrossOrigin(originPatterns = "*")
 public class CasaController {
 
     private final CasaService casaService;

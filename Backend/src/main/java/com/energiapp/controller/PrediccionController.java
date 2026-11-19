@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/predicciones")
-@CrossOrigin(origins = "http://localhost:5173") // Habilita CORS para React/Vite
+@CrossOrigin(originPatterns = "*")
 public class PrediccionController {
 
     private final PrediccionService prediccionService;
