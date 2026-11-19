@@ -3,7 +3,7 @@ package com.energiapp.service;
 import com.energiapp.dao.CasaDAO;
 import com.energiapp.dto.ArticuloCatalogoDTO;
 import com.energiapp.dto.CasaDTO;
-import com.energiapp.dto.ItemCuestionarioDTO;
+
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
