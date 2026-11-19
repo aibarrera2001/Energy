@@ -24,7 +24,7 @@ export default function UsuarioLogin() {
     setCargando(true);
 
     try {
-      const response = await fetch('http://localhost:8080/api/usuarios/login', {
+      const response = await fetch('/api/usuarios/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -39,11 +39,16 @@ export default function UsuarioLogin() {
         throw new Error(data?.mensaje || data?.error || 'Credenciales incorrectas. Verifica tu correo y contraseña.');
       }
 
-      // Guardar sesión del usuario en localStorage
       localStorage.setItem('usuario', JSON.stringify(data));
-      if (data?.id) localStorage.setItem('usuarioId', data.id);
+      const idDetectado = data?.idUsuario || data?.id || data?.usuarioId;
+      if (idDetectado) {
+        localStorage.setItem('usuarioId', String(idDetectado));
+        localStorage.setItem('idUsuario', String(idDetectado));
+      }
+      if (data?.nombre) localStorage.setItem('nombreUsuario', data.nombre);
       if (data?.rol) localStorage.setItem('rol', data.rol);
-    navigate('/user/dashboard');
+
+      navigate('/user/dashboard');
     } catch (err) {
       setError(err.message || 'No se pudo conectar con el servidor.');
     } finally {
@@ -60,7 +65,6 @@ export default function UsuarioLogin() {
       footerActionText="Crear cuenta de propietario →"
       onFooterAction={() => navigate('/user/registro')}
     >
-      {/* Identificador visual de marca dentro de la tarjeta */}
       <div
         style={{
           display: 'inline-flex',

@@ -23,6 +23,7 @@ export default function UserDashboard() {
 
   const rawId =
     localStorage.getItem('usuarioId') ||
+    localStorage.getItem('idUsuario') ||
     usuario?.id ||
     usuario?.idUsuario ||
     usuario?.usuarioId;
@@ -47,33 +48,33 @@ export default function UserDashboard() {
     const cargarResumen = async () => {
       setCargando(true);
       try {
-        const promesas = [
-          usuarioId
-            ? fetch(`http://localhost:8080/api/propiedades/usuario/${usuarioId}`).catch(() => null)
-            : Promise.resolve(null),
-          fetch('http://localhost:8080/api/paneles').catch(() => null),
-          usuarioId
-            ? fetch(`http://localhost:8080/api/citas/usuario/${usuarioId}`).catch(() => null)
-            : Promise.resolve(null),
-        ];
-
-        const [resProp, resPaneles, resCitas] = await Promise.all(promesas);
+        const [resProp, resCitas] = await Promise.all([
+          usuarioId ? fetch(`/api/casas/usuario/${usuarioId}`).catch(() => null) : Promise.resolve(null),
+          usuarioId ? fetch(`/api/citas/usuario/${usuarioId}`).catch(() => null) : Promise.resolve(null),
+        ]);
 
         if (!activo) return;
 
+        let listaCasas = [];
         if (resProp && resProp.ok) {
           const dataProp = await resProp.json().catch(() => []);
-          setPropiedades(Array.isArray(dataProp) ? dataProp : []);
-        }
-
-        if (resPaneles && resPaneles.ok) {
-          const dataPaneles = await resPaneles.json().catch(() => []);
-          setPaneles(Array.isArray(dataPaneles) ? dataPaneles : []);
+          listaCasas = Array.isArray(dataProp) ? dataProp : [];
+          setPropiedades(listaCasas);
         }
 
         if (resCitas && resCitas.ok) {
           const dataCitas = await resCitas.json().catch(() => []);
           setCitas(Array.isArray(dataCitas) ? dataCitas : []);
+        }
+
+        if (listaCasas.length > 0 && listaCasas[0].idCasa) {
+          const resPaneles = await fetch(`/api/paneles/recomendar/${listaCasas[0].idCasa}`).catch(() => null);
+          if (activo && resPaneles && resPaneles.ok) {
+            const dataPaneles = await resPaneles.json().catch(() => []);
+            setPaneles(Array.isArray(dataPaneles) ? dataPaneles : []);
+          }
+        } else {
+          setPaneles([]);
         }
       } finally {
         if (activo) setCargando(false);
@@ -135,7 +136,17 @@ export default function UserDashboard() {
     >
       <UserSidebar />
 
-      <main style={{ flex: 1, padding: '2.25rem 2.5rem', overflowY: 'auto', textAlign: 'left' }}>
+      <main
+        style={{
+          flex: 1,
+          marginLeft: 'var(--sidebar-width, 260px)',
+          width: 'calc(100% - var(--sidebar-width, 260px))',
+          padding: '2.25rem 2.5rem',
+          overflowY: 'auto',
+          textAlign: 'left',
+          transition: 'margin-left 0.28s cubic-bezier(0.4, 0, 0.2, 1), width 0.28s cubic-bezier(0.4, 0, 0.2, 1)',
+        }}
+      >
         <div style={{ maxWidth: '1060px', margin: '0 auto' }}>
           {/* Cabecera */}
           <header
@@ -172,7 +183,7 @@ export default function UserDashboard() {
                   letterSpacing: '-0.02em',
                 }}
               >
-                Hola, {usuario?.nombre || 'Propietario'}
+                Hola, {usuario?.nombre || localStorage.getItem('nombreUsuario') || 'Propietario'}
               </h1>
             </div>
 

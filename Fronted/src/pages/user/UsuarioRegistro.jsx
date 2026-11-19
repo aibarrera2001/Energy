@@ -49,7 +49,7 @@ export default function UsuarioRegistro() {
     setCargando(true);
 
     try {
-      const response = await fetch('http://localhost:8080/api/usuarios/registro', {
+      const response = await fetch('/api/usuarios/registro', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -90,7 +90,6 @@ export default function UsuarioRegistro() {
       footerActionText="Iniciar sesión →"
       onFooterAction={() => navigate('/usuario-login')}
     >
-      {/* Identificador de marca */}
       <div
         style={{
           display: 'inline-flex',

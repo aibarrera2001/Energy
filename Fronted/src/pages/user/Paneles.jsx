@@ -39,9 +39,7 @@ export default function Paneles() {
       return;
     }
     try {
-      const res = await fetch(`http://localhost:8080/api/casas/usuario/${userId}`).catch(() =>
-        fetch(`/api/casas/usuario/${userId}`)
-      );
+      const res = await fetch(`/api/casas/usuario/${userId}`);
       if (res && res.ok) {
         const data = await res.json();
         const lista = Array.isArray(data) ? data : [];
@@ -60,9 +58,7 @@ export default function Paneles() {
   const obtenerRecomendaciones = async (idCasa) => {
     try {
       setCalculando(true);
-      const res = await fetch(`http://localhost:8080/api/paneles/recomendar/${idCasa}`).catch(() =>
-        fetch(`/api/paneles/recomendar/${idCasa}`)
-      );
+      const res = await fetch(`/api/paneles/recomendar/${idCasa}`);
       if (res && res.ok) {
         const data = await res.json();
         setRecomendaciones(Array.isArray(data) ? data : []);
@@ -104,7 +100,6 @@ export default function Paneles() {
         }}
       >
         <div style={{ maxWidth: '1060px', margin: '0 auto' }}>
-          {/* Cabecera */}
           <header
             style={{
               paddingBottom: '1.5rem',
@@ -182,7 +177,6 @@ export default function Paneles() {
             </div>
           ) : (
             <div>
-              {/* Selector de propiedad */}
               <div
                 style={{
                   backgroundColor: CARIBE_THEME.blanco,
@@ -234,7 +228,6 @@ export default function Paneles() {
                 )}
               </div>
 
-              {/* Tarjetas de recomendaciones */}
               {calculando ? (
                 <p style={{ color: CARIBE_THEME.pizarra }}>Calculando configuración óptima...</p>
               ) : recomendaciones.length === 0 ? (

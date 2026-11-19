@@ -42,8 +42,8 @@ export default function Reportes() {
     }
     try {
       const [resCasas, resCitas] = await Promise.all([
-        fetch(`http://localhost:8080/api/casas/usuario/${userId}`).catch(() => fetch(`/api/casas/usuario/${userId}`)),
-        fetch(`http://localhost:8080/api/citas/usuario/${userId}`).catch(() => fetch(`/api/citas/usuario/${userId}`)),
+        fetch(`/api/casas/usuario/${userId}`),
+        fetch(`/api/citas/usuario/${userId}`),
       ]);
 
       if (resCasas && resCasas.ok) {
@@ -68,9 +68,7 @@ export default function Reportes() {
 
   const cargarRecomendaciones = async (idCasa) => {
     try {
-      const res = await fetch(`http://localhost:8080/api/paneles/recomendar/${idCasa}`).catch(() =>
-        fetch(`/api/paneles/recomendar/${idCasa}`)
-      );
+      const res = await fetch(`/api/paneles/recomendar/${idCasa}`);
       if (res && res.ok) {
         const data = await res.json();
         setRecomendaciones(Array.isArray(data) ? data : []);
@@ -173,7 +171,6 @@ export default function Reportes() {
         }}
       >
         <div style={{ maxWidth: '1060px', margin: '0 auto' }}>
-          {/* Encabezado */}
           <header
             style={{
               display: 'flex',
@@ -292,7 +289,6 @@ export default function Reportes() {
             </div>
           ) : (
             <>
-              {/* Barra de filtros */}
               <div
                 style={{
                   backgroundColor: CARIBE_THEME.blanco,
@@ -340,7 +336,6 @@ export default function Reportes() {
                 )}
               </div>
 
-              {/* Tarjetas resumen */}
               <div
                 style={{
                   display: 'grid',
@@ -390,7 +385,6 @@ export default function Reportes() {
                 </div>
               </div>
 
-              {/* Tabla clara de desglose mensual */}
               <div
                 style={{
                   backgroundColor: CARIBE_THEME.blanco,

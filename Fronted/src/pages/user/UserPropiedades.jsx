@@ -28,9 +28,7 @@ export default function UserPropiedades() {
       return;
     }
     try {
-      const res = await fetch(`http://localhost:8080/api/casas/usuario/${userId}`).catch(() =>
-        fetch(`/api/casas/usuario/${userId}`)
-      );
+      const res = await fetch(`/api/casas/usuario/${userId}`);
       if (res && res.ok) {
         const data = await res.json();
         setPropiedades(Array.isArray(data) ? data : []);
@@ -67,7 +65,6 @@ export default function UserPropiedades() {
         }}
       >
         <div style={{ maxWidth: '1060px', margin: '0 auto' }}>
-          {/* Cabecera */}
           <header
             style={{
               display: 'flex',
@@ -127,7 +124,6 @@ export default function UserPropiedades() {
             </button>
           </header>
 
-          {/* Contenido */}
           {loading ? (
             <p style={{ color: CARIBE_THEME.pizarra }}>Cargando tus propiedades...</p>
           ) : propiedades.length === 0 ? (

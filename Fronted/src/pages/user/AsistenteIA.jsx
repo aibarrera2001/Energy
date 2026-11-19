@@ -51,25 +51,16 @@ export default function AsistenteIA() {
     setCargando(true);
 
     try {
-      const res = await fetch('http://localhost:8080/api/asistente/consulta', {
+      const res = await fetch('/api/asistente/consulta', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           usuarioId: userId,
           prompt: promptEnviar,
         }),
-      }).catch(() =>
-        fetch('/api/asistente/consulta', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            usuarioId: userId,
-            prompt: promptEnviar,
-          }),
-        })
-      );
+      });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         throw new Error(data.respuesta || 'No se pudo obtener respuesta del asistente.');
       }

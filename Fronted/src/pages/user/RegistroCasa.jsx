@@ -38,8 +38,7 @@ export default function RegistroCasa() {
   useEffect(() => {
     if (formData.esCasaNueva && catalogoArticulos.length === 0) {
       setCargandoCatalogo(true);
-      fetch('http://localhost:8080/api/casas/catalogo-articulos')
-        .catch(() => fetch('/api/casas/catalogo-articulos'))
+      fetch('/api/casas/catalogo-articulos')
         .then((res) => (res && res.ok ? res.json() : []))
         .then((data) => {
           if (Array.isArray(data)) setCatalogoArticulos(data);
@@ -112,17 +111,11 @@ export default function RegistroCasa() {
     };
 
     try {
-      const res = await fetch('http://localhost:8080/api/casas', {
+      const res = await fetch('/api/casas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-      }).catch(() =>
-        fetch('/api/casas', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        })
-      );
+      });
 
       if (res && res.ok) {
         const casaGuardada = await res.json();
@@ -169,7 +162,6 @@ export default function RegistroCasa() {
         }}
       >
         <div style={{ maxWidth: '880px', margin: '0 auto' }}>
-          {/* Cabecera */}
           <header
             style={{
               paddingBottom: '1.5rem',
@@ -205,7 +197,6 @@ export default function RegistroCasa() {
             </p>
           </header>
 
-          {/* Tarjeta principal del formulario */}
           <div
             style={{
               backgroundColor: CARIBE_THEME.blanco,
@@ -215,7 +206,6 @@ export default function RegistroCasa() {
             }}
           >
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              {/* Datos básicos */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
                 <div>
                   <label style={caribeLabelStyle}>Tipo de Propiedad *</label>
@@ -256,7 +246,6 @@ export default function RegistroCasa() {
                 </div>
               </div>
 
-              {/* Coordenadas y áreas */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '1rem' }}>
                 <div>
                   <label style={caribeLabelStyle}>Latitud {formData.tipoPropiedad === 'FINCA' ? '*' : ''}</label>
@@ -292,7 +281,6 @@ export default function RegistroCasa() {
                 </div>
               </div>
 
-              {/* Interruptor casa nueva vs recibo */}
               <div
                 style={{
                   backgroundColor: CARIBE_THEME.marfil,
@@ -465,7 +453,6 @@ export default function RegistroCasa() {
                 )}
               </div>
 
-              {/* Botones de acción */}
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.85rem', marginTop: '0.25rem' }}>
                 <button
                   type="button"

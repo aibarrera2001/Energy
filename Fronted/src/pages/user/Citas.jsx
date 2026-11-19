@@ -42,8 +42,8 @@ export default function Citas() {
     }
     try {
       const [resCitas, resCasas] = await Promise.all([
-        fetch(`http://localhost:8080/api/citas/usuario/${userId}`).catch(() => fetch(`/api/citas/usuario/${userId}`)),
-        fetch(`http://localhost:8080/api/casas/usuario/${userId}`).catch(() => fetch(`/api/casas/usuario/${userId}`)),
+        fetch(`/api/citas/usuario/${userId}`),
+        fetch(`/api/casas/usuario/${userId}`),
       ]);
 
       if (resCitas && resCitas.ok) {
@@ -86,19 +86,13 @@ export default function Citas() {
         notas: nuevaCita.notas || null,
       };
 
-      const res = await fetch('http://localhost:8080/api/citas', {
+      const res = await fetch('/api/citas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-      }).catch(() =>
-        fetch('/api/citas', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        })
-      );
+      });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         throw new Error(data.error || 'No se pudo agendar la cita');
       }
@@ -161,7 +155,6 @@ export default function Citas() {
         }}
       >
         <div style={{ maxWidth: '1060px', margin: '0 auto' }}>
-          {/* Cabecera */}
           <header
             style={{
               display: 'flex',
@@ -327,7 +320,6 @@ export default function Citas() {
             </div>
           )}
 
-          {/* Modal para agendar cita */}
           {showModal && (
             <div
               style={{
