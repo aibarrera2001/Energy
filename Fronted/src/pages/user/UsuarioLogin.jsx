@@ -63,7 +63,7 @@ export default function UsuarioLogin() {
       subtitulo="Consulta el estado de tu sistema fotovoltaico, estimaciones y solicitudes de soporte técnico."
       footerLinkText="¿Aún no tienes una cuenta registrada?"
       footerActionText="Crear cuenta de propietario →"
-      onFooterAction={() => navigate('/user/registro')}
+      onFooterAction={() => navigate('/usuario-registro')}
     >
       <div
         style={{
