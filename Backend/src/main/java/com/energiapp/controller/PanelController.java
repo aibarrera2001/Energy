@@ -11,7 +11,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/paneles")
-@CrossOrigin(origins = "*")
+
 public class PanelController {
 
     private final PanelService panelService;
