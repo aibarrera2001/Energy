@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserSidebar from '../../components/UserSidebar';
 import {
@@ -10,6 +10,40 @@ import {
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
+// Normaliza nomenclatura vial colombiana (ej: "cra 18e #35-17 San Martin" -> "Carrera 18E")
+function parsearDireccionColombia(rawDireccion) {
+  let texto = (rawDireccion || '').trim();
+  if (!texto) return { via: '', barrio: '', limpia: '' };
+
+  // Expandir abreviaturas comunes
+  texto = texto
+    .replace(/\b(cra|cr|kr|k)\b\.?/gi, 'Carrera')
+    .replace(/\b(cll|cl)\b\.?/gi, 'Calle')
+    .replace(/\b(dg|diag)\b\.?/gi, 'Diagonal')
+    .replace(/\b(tv|transv|tr)\b\.?/gi, 'Transversal')
+    .replace(/\b(av|avda)\b\.?/gi, 'Avenida')
+    .replace(/\b(mz)\b\.?/gi, 'Manzana');
+
+  // Extraer vía principal antes del "#" o "No." (ej: "Carrera 18E")
+  const matchVia = texto.match(
+    /((?:Carrera|Calle|Diagonal|Transversal|Avenida)\s*\d+[a-zA-Z]?(?:\s*(?:Norte|Sur|Este|Oeste))?)/i
+  );
+  const via = matchVia ? matchVia[1].trim() : '';
+
+  // Extraer posible barrio después del número de placa (#35-17 San Martin)
+  const sinPlaca = texto
+    .replace(/#\s*\d+[a-zA-Z]?\s*[-–]\s*\d+[a-zA-Z]?/g, '')
+    .replace(/\b(?:No\.?|Nro\.?)\s*\d+[a-zA-Z]?\s*[-–]\s*\d+[a-zA-Z]?/gi, '')
+    .trim();
+
+  let barrio = sinPlaca;
+  if (via) {
+    barrio = sinPlaca.replace(new RegExp(via, 'i'), '').replace(/^[,.\-\s]+/, '').trim();
+  }
+
+  return { via, barrio, limpia: sinPlaca };
+}
+
 export default function UserPropiedades() {
   const navigate = useNavigate();
   useCaribeFonts();
@@ -20,10 +54,12 @@ export default function UserPropiedades() {
   const [propiedades, setPropiedades] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Estados para el formulario de registro (con o sin consumo mensual)
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [catalogo, setCatalogo] = useState([]);
   const [cargandoCatalogo, setCargandoCatalogo] = useState(false);
+  const [buscandoGeo, setBuscandoGeo] = useState(false);
+  const [estadoGeo, setEstadoGeo] = useState('');
+  const [resultadosGeo, setResultadosGeo] = useState([]);
   const [guardando, setGuardando] = useState(false);
   const [errorForm, setErrorForm] = useState('');
 
@@ -31,20 +67,103 @@ export default function UserPropiedades() {
     tipoPropiedad: 'CASA',
     direccion: '',
     ciudad: 'Valledupar',
-    latitud: 10.4631,
-    longitud: -73.2532,
+    latitud: '',
+    longitud: '',
     areaM2: '',
     esCasaNueva: false,
     consumoMensual: '',
   });
 
-  // Mapa { [idArticulo]: cantidad }
   const [cantidadesArticulos, setCantidadesArticulos] = useState({});
+
+  // Referencias para el mapa interactivo Leaflet (cargado dinámicamente sin dependencias extra)
+  const mapContainerRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+  const markerRef = useRef(null);
+  const [leafletListo, setLeafletListo] = useState(false);
 
   useEffect(() => {
     obtenerPropiedades();
     obtenerCatalogo();
+    cargarLeaflet();
   }, []);
+
+  const cargarLeaflet = () => {
+    if (window.L) {
+      setLeafletListo(true);
+      return;
+    }
+    if (!document.getElementById('leaflet-css')) {
+      const link = document.createElement('link');
+      link.id = 'leaflet-css';
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(link);
+    }
+    if (!document.getElementById('leaflet-js')) {
+      const script = document.createElement('script');
+      script.id = 'leaflet-js';
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.onload = () => setLeafletListo(true);
+      document.body.appendChild(script);
+    }
+  };
+
+  // Inicializar o actualizar mapa cuando haya coordenadas y formulario abierto
+  useEffect(() => {
+    if (!mostrarFormulario || !leafletListo || !mapContainerRef.current) return;
+
+    const lat = Number(form.latitud) || 10.46314;
+    const lon = Number(form.longitud) || -73.25322;
+    const zoom = form.latitud && form.longitud ? 17 : 13;
+
+    if (!mapInstanceRef.current) {
+      const map = window.L.map(mapContainerRef.current).setView([lat, lon], zoom);
+      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap',
+        maxZoom: 19,
+      }).addTo(map);
+
+      const marker = window.L.marker([lat, lon], { draggable: true }).addTo(map);
+      marker.on('dragend', () => {
+        const pos = marker.getLatLng();
+        setForm((prev) => ({
+          ...prev,
+          latitud: Number(pos.lat.toFixed(6)),
+          longitud: Number(pos.lng.toFixed(6)),
+        }));
+        setEstadoGeo('Ubicación exacta ajustada manualmente sobre el mapa.');
+      });
+
+      map.on('click', (e) => {
+        const { lat: clickLat, lng: clickLng } = e.latlng;
+        marker.setLatLng([clickLat, clickLng]);
+        setForm((prev) => ({
+          ...prev,
+          latitud: Number(clickLat.toFixed(6)),
+          longitud: Number(clickLng.toFixed(6)),
+        }));
+        setEstadoGeo('Ubicación exacta seleccionada en el mapa.');
+      });
+
+      mapInstanceRef.current = map;
+      markerRef.current = marker;
+    } else if (form.latitud && form.longitud) {
+      mapInstanceRef.current.setView([lat, lon], 17);
+      markerRef.current?.setLatLng([lat, lon]);
+    }
+
+    return () => {};
+  }, [mostrarFormulario, leafletListo, form.latitud, form.longitud]);
+
+  // Limpiar instancia del mapa al cerrar el formulario
+  useEffect(() => {
+    if (!mostrarFormulario && mapInstanceRef.current) {
+      mapInstanceRef.current.remove();
+      mapInstanceRef.current = null;
+      markerRef.current = null;
+    }
+  }, [mostrarFormulario]);
 
   const obtenerPropiedades = async () => {
     if (!userId) {
@@ -79,6 +198,113 @@ export default function UserPropiedades() {
     }
   };
 
+  // Búsqueda inteligente por vía exacta + barrio + ciudad en Colombia
+  const buscarCoordenadasPorDireccion = async () => {
+    setErrorForm('');
+    setEstadoGeo('');
+    setResultadosGeo([]);
+
+    const ciudad = form.ciudad.trim();
+    if (!ciudad && !form.direccion.trim()) {
+      setErrorForm('Escribe al menos la ciudad y la dirección para buscar.');
+      return;
+    }
+
+    const { via, barrio, limpia } = parsearDireccionColombia(form.direccion);
+
+    // Construir lista de consultas de más específica a más general
+    const consultas = [];
+    if (via && barrio && ciudad) consultas.push(`${via}, ${barrio}, ${ciudad}, Colombia`);
+    if (via && ciudad) consultas.push(`${via}, ${ciudad}, Colombia`);
+    if (barrio && ciudad) consultas.push(`${barrio}, ${ciudad}, Colombia`);
+    if (limpia && ciudad) consultas.push(`${limpia}, ${ciudad}, Colombia`);
+    if (ciudad) consultas.push(`${ciudad}, Colombia`);
+
+    const unicas = [...new Set(consultas)];
+
+    setBuscandoGeo(true);
+    try {
+      let encontrados = [];
+      let nivel = 'exacta';
+
+      for (let i = 0; i < unicas.length; i++) {
+        const q = unicas[i];
+        const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&countrycodes=co&q=${encodeURIComponent(q)}`;
+        const res = await fetch(url, { headers: { 'Accept-Language': 'es' } });
+        const data = await res.json();
+
+        if (Array.isArray(data) && data.length > 0) {
+          // Evitar resultados genéricos de "administrative / boundary" si estamos buscando calle o barrio
+          const especificos = data.filter(
+            (item) => item.class !== 'boundary' && item.type !== 'administrative'
+          );
+          if (especificos.length > 0) {
+            encontrados = especificos;
+            nivel = i <= 1 ? 'vía' : 'barrio';
+            break;
+          } else if (i === unicas.length - 1) {
+            encontrados = data;
+            nivel = 'ciudad';
+          }
+        }
+      }
+
+      if (encontrados.length > 0) {
+        const primero = encontrados[0];
+        const lat = Number(parseFloat(primero.lat).toFixed(6));
+        const lon = Number(parseFloat(primero.lon).toFixed(6));
+
+        setForm((prev) => ({ ...prev, latitud: lat, longitud: lon }));
+        setResultadosGeo(encontrados);
+
+        if (nivel === 'vía') {
+          setEstadoGeo(`Vía encontrada (${via}): ${primero.display_name}. Puedes arrastrar el pin en el mapa al techo exacto.`);
+        } else if (nivel === 'barrio') {
+          setEstadoGeo(`Sector/barrio encontrado (${barrio}): ${primero.display_name}. Haz clic en el mapa sobre la casa exacta.`);
+        } else {
+          setEstadoGeo(`Ubicado en ${ciudad}. Haz clic en el mapa para señalar la dirección exacta.`);
+        }
+      } else {
+        setErrorForm('No se encontró la dirección. Haz clic directamente en el mapa o usa tu GPS.');
+      }
+    } catch (err) {
+      setErrorForm('Error consultando el servicio de geolocalización.');
+    } finally {
+      setBuscandoGeo(false);
+    }
+  };
+
+  const seleccionarResultadoGeo = (item) => {
+    const lat = Number(parseFloat(item.lat).toFixed(6));
+    const lon = Number(parseFloat(item.lon).toFixed(6));
+    setForm((prev) => ({ ...prev, latitud: lat, longitud: lon }));
+    setEstadoGeo(`Seleccionado: ${item.display_name}`);
+  };
+
+  const usarUbicacionGPS = () => {
+    setErrorForm('');
+    setEstadoGeo('');
+    if (!navigator.geolocation) {
+      setErrorForm('Tu navegador no soporta geolocalización GPS.');
+      return;
+    }
+    setBuscandoGeo(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = Number(pos.coords.latitude.toFixed(6));
+        const lon = Number(pos.coords.longitude.toFixed(6));
+        setForm((prev) => ({ ...prev, latitud: lat, longitud: lon }));
+        setEstadoGeo('Coordenadas exactas obtenidas desde el GPS.');
+        setBuscandoGeo(false);
+      },
+      () => {
+        setErrorForm('No se pudo obtener el permiso de ubicación GPS.');
+        setBuscandoGeo(false);
+      },
+      { enableHighAccuracy: true }
+    );
+  };
+
   const cambiarCantidad = (idArticulo, delta) => {
     setCantidadesArticulos((prev) => {
       const actual = prev[idArticulo] || 0;
@@ -87,7 +313,6 @@ export default function UserPropiedades() {
     });
   };
 
-  // Cálculo previo en vivo para mostrar al usuario antes de guardar
   const consumoEstimadoCuestionario = catalogo.reduce((acc, art) => {
     const cant = cantidadesArticulos[art.idArticulo] || 0;
     return acc + cant * Number(art.consumoKwhMes || 0);
@@ -102,10 +327,14 @@ export default function UserPropiedades() {
       return;
     }
 
+    if (!form.latitud || !form.longitud) {
+      setErrorForm('Busca la ubicación de la propiedad o haz clic en el mapa para fijar sus coordenadas.');
+      return;
+    }
+
     const tipo = form.tipoPropiedad.toUpperCase();
     const areaNum = form.areaM2 ? Number(form.areaM2) : null;
 
-    // Construir lista de ItemCuestionarioDTO esperada por CasaDTO
     const articulosCuestionario = Object.entries(cantidadesArticulos)
       .filter(([, cantidad]) => cantidad > 0)
       .map(([idArticulo, cantidad]) => ({
@@ -128,8 +357,8 @@ export default function UserPropiedades() {
       tipoPropiedad: tipo,
       direccion: form.direccion.trim(),
       ciudad: form.ciudad.trim(),
-      latitud: Number(form.latitud) || 0,
-      longitud: Number(form.longitud) || 0,
+      latitud: Number(form.latitud),
+      longitud: Number(form.longitud),
       areaTerrazaTechoM2: tipo === 'CASA' || tipo === 'APARTAMENTO' ? areaNum : null,
       areaBalconM2: tipo === 'EDIFICIO' ? areaNum : null,
       areaDisponibleM2: tipo === 'FINCA' ? areaNum : null,
@@ -151,17 +380,18 @@ export default function UserPropiedades() {
         throw new Error(msg || 'Error al registrar la propiedad');
       }
 
-      // Reiniciar y recargar propiedades
       setForm({
         tipoPropiedad: 'CASA',
         direccion: '',
         ciudad: 'Valledupar',
-        latitud: 10.4631,
-        longitud: -73.2532,
+        latitud: '',
+        longitud: '',
         areaM2: '',
         esCasaNueva: false,
         consumoMensual: '',
       });
+      setEstadoGeo('');
+      setResultadosGeo([]);
       setCantidadesArticulos({});
       setMostrarFormulario(false);
       await obtenerPropiedades();
@@ -172,7 +402,6 @@ export default function UserPropiedades() {
     }
   };
 
-  // Agrupar catálogo por categoría para mejor visualización
   const catalogoPorCategoria = catalogo.reduce((acc, item) => {
     const cat = item.categoria || 'General';
     if (!acc[cat]) acc[cat] = [];
@@ -279,7 +508,6 @@ export default function UserPropiedades() {
             </button>
           </header>
 
-          {/* FORMULARIO DE REGISTRO (CON RECIBO O CASA NUEVA SIN CONSUMO MENSUAL) */}
           {mostrarFormulario && (
             <form
               onSubmit={handleRegistrarPropiedad}
@@ -322,7 +550,7 @@ export default function UserPropiedades() {
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
                   gap: '1rem',
-                  marginBottom: '1.25rem',
+                  marginBottom: '1rem',
                 }}
               >
                 <div>
@@ -357,14 +585,20 @@ export default function UserPropiedades() {
 
                 <div>
                   <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '0.35rem' }}>
-                    {form.tipoPropiedad === 'FINCA' ? 'Dirección / Vereda (opcional)' : 'Dirección'}
+                    {form.tipoPropiedad === 'FINCA' ? 'Dirección / Vereda (opcional)' : 'Dirección y Barrio'}
                   </label>
                   <input
                     type="text"
                     required={form.tipoPropiedad !== 'FINCA'}
                     value={form.direccion}
                     onChange={(e) => setForm({ ...form, direccion: e.target.value })}
-                    placeholder="Ej: Calle 20 # 18d-41"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        buscarCoordenadasPorDireccion();
+                      }
+                    }}
+                    placeholder="Ej: Cra 18e #35-17 San Martin"
                     style={inputStyle}
                   />
                 </div>
@@ -379,24 +613,114 @@ export default function UserPropiedades() {
                     min="1"
                     value={form.areaM2}
                     onChange={(e) => setForm({ ...form, areaM2: e.target.value })}
-                    placeholder="Ej: 45"
+                    placeholder="Ej: 80"
                     style={inputStyle}
                   />
                 </div>
               </div>
 
-              {form.tipoPropiedad === 'FINCA' && (
+              {/* BLOQUE DE GEOLOCALIZACIÓN EXACTA + MAPA INTERACTIVO */}
+              <div
+                style={{
+                  padding: '1rem',
+                  borderRadius: '12px',
+                  border: `1px dashed ${CARIBE_THEME.turquesa}`,
+                  backgroundColor: '#F4FBF9',
+                  marginBottom: '1.25rem',
+                }}
+              >
                 <div
                   style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: '1rem',
-                    marginBottom: '1.25rem',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '0.75rem',
+                    marginBottom: '0.75rem',
                   }}
                 >
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '0.35rem' }}>
-                      Latitud GPS
+                    <strong style={{ fontSize: '0.88rem', color: CARIBE_THEME.petroleo }}>
+                      Geolocalización solar (para radiación Open-Meteo)
+                    </strong>
+                    <p style={{ margin: '0.15rem 0 0 0', fontSize: '0.78rem', color: CARIBE_THEME.pizarra }}>
+                      Busca la dirección o haz clic/arrastra el marcador en el mapa hasta el techo exacto.
+                    </p>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      disabled={buscandoGeo}
+                      onClick={buscarCoordenadasPorDireccion}
+                      style={{
+                        padding: '0.55rem 0.95rem',
+                        borderRadius: '8px',
+                        border: 'none',
+                        backgroundColor: CARIBE_THEME.turquesa,
+                        color: '#FFFFFF',
+                        fontWeight: 700,
+                        fontSize: '0.82rem',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {buscandoGeo ? 'Buscando...' : 'Buscar ubicación'}
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={buscandoGeo}
+                      onClick={usarUbicacionGPS}
+                      style={{
+                        padding: '0.55rem 0.9rem',
+                        borderRadius: '8px',
+                        border: `1px solid ${CARIBE_THEME.borde}`,
+                        backgroundColor: CARIBE_THEME.blanco,
+                        color: CARIBE_THEME.petroleo,
+                        fontWeight: 600,
+                        fontSize: '0.82rem',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Usar mi GPS
+                    </button>
+                  </div>
+                </div>
+
+                {/* Lista de coincidencias encontradas si hay más de una */}
+                {resultadosGeo.length > 1 && (
+                  <div style={{ marginBottom: '0.75rem' }}>
+                    <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.3rem', color: CARIBE_THEME.pizarra }}>
+                      Coincidencias encontradas (selecciona la más cercana):
+                    </span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                      {resultadosGeo.map((item) => (
+                        <button
+                          key={item.place_id}
+                          type="button"
+                          onClick={() => seleccionarResultadoGeo(item)}
+                          style={{
+                            textAlign: 'left',
+                            padding: '0.45rem 0.7rem',
+                            borderRadius: '8px',
+                            border: `1px solid ${CARIBE_THEME.borde}`,
+                            backgroundColor: CARIBE_THEME.blanco,
+                            fontSize: '0.78rem',
+                            color: CARIBE_THEME.petroleo,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          📍 {item.display_name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '0.75rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                      Latitud
                     </label>
                     <input
                       type="number"
@@ -404,12 +728,13 @@ export default function UserPropiedades() {
                       required
                       value={form.latitud}
                       onChange={(e) => setForm({ ...form, latitud: e.target.value })}
+                      placeholder="Ej: 10.45892"
                       style={inputStyle}
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '0.35rem' }}>
-                      Longitud GPS
+                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                      Longitud
                     </label>
                     <input
                       type="number"
@@ -417,11 +742,31 @@ export default function UserPropiedades() {
                       required
                       value={form.longitud}
                       onChange={(e) => setForm({ ...form, longitud: e.target.value })}
+                      placeholder="Ej: -73.26145"
                       style={inputStyle}
                     />
                   </div>
                 </div>
-              )}
+
+                {/* Mapa interactivo para ajustar el pin al metro */}
+                <div
+                  ref={mapContainerRef}
+                  style={{
+                    width: '100%',
+                    height: '230px',
+                    borderRadius: '10px',
+                    border: `1px solid ${CARIBE_THEME.borde}`,
+                    overflow: 'hidden',
+                    backgroundColor: '#E5E7EB',
+                  }}
+                />
+
+                {estadoGeo && (
+                  <p style={{ margin: '0.6rem 0 0 0', fontSize: '0.8rem', color: '#065F46', fontWeight: 600 }}>
+                    ✓ {estadoGeo}
+                  </p>
+                )}
+              </div>
 
               {/* SELECTOR DE MODO DE CONSUMO */}
               <div
